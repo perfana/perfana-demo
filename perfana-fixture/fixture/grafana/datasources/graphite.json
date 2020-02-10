@@ -1,0 +1,19 @@
+{
+  "id": 2,
+  "orgId": 1,
+  "name": "Graphite",
+  "type": "graphite",
+  "typeLogoUrl": "public/app/plugins/datasource/graphite/img/graphite_logo.png",
+  "access": "proxy",
+  "url": "http://graphite",
+  "password": "",
+  "user": "",
+  "database": "",
+  "basicAuth": false,
+  "isDefault": false,
+  "jsonData": {
+    "graphiteVersion": "0.9",
+    "keepCookies": []
+  },
+  "readOnly": false
+}

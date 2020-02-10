@@ -1,0 +1,10 @@
+{
+  "_id": "qg4GMvNfeTqmuzWW4",
+  "grafana": "demo",
+  "dashboardName": "Node exporter",
+  "dashboardUid": "node-exporter",
+  "setHardcodedValueForVariables": [{
+    "name": "service",
+    "values": ["$service"]
+  }]
+}

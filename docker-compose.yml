@@ -1,0 +1,206 @@
+version: '3.7'
+services:
+
+  ######################################################################################################################
+  perfana:
+    image: perfana/perfana:2.0.0-beta
+    init: true
+    depends_on:
+      - grafana
+      - influxdb
+      - perfana-grafana
+      - perfana-fixture
+      - mongo1
+      - mongo2
+      - mongo3
+    environment:
+      ROOT_URL: "http://localhost:4000"
+      MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/perfana?replicaSet=rs0"
+      MONGO_OPSLOG_URL: "mongo1:27017,mongo2:27017,mongo3:27017/local?authSource=perfana&replicaSet=rs0"
+      METEOR_SETTINGS: '{"autoCreateApplications": true,"snapshotExpires": "7776000","prometheusRetention": "86400","influxDbRetention": "86400","perfanaHost":"http://localhost:3000","influxDbHost": "influxdb","public": {"perfanaHost":"http://localhost:4000","OIDCButtonText": "OIDC Login"}}'
+    expose:
+      - 4000
+    ports:
+      - "4000:3000"
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  perfana-grafana:
+    image: perfana/perfana-grafana:2.0.0-beta
+    depends_on:
+      - grafana
+      - influxdb
+    environment:
+      MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/perfana?replicaSet=rs0"
+      SYNC_INTERVAL: 30000
+    ports:
+      - "3001:3000"
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  perfana-fixture:
+    image: perfana/perfana-fixture:2.0.0-beta
+    depends_on:
+      - grafana
+      - influxdb
+      - mongo1
+      - mongo2
+      - mongo3
+  
+    environment:
+      MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/perfana?replicaSet=rs0"
+    ports:
+      - "3002:3000"
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  perfana-snapshot:
+    image: perfana/perfana-snapshot:2.0.0-beta
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    environment:
+      MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/perfana?replicaSet=rs0"
+    # init: true
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  perfana-check:
+    image: perfana/perfana-check:2.0.0-beta
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    environment:
+      MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/perfana?replicaSet=rs0"
+      SPRING_PROFILES_ACTIVE: "dev"
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  jenkins:
+    image: perfana/perfana-jenkins:2.0.0-beta
+    expose:
+    - 8090
+    ports:
+    - "8090:8080"
+    networks:
+      - perfana
+    depends_on:
+    - influxdb
+  ######################################################################################################################
+  influxdb:
+    image: influxdb:1.7.6 
+    ports:
+    - "8086:8086"
+    - "2003:2003"
+    environment:
+      INFLUXDB_GRAPHITE_ENABLED: "true"
+    volumes:
+    - "./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro"
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  afterburner:
+    image: perfana/perfana-afterburner:2.0.0-beta
+    ports:
+     - "8080:8080"
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  telegraf:
+    volumes:
+    - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
+    image: telegraf
+    networks:
+       - perfana
+
+  ######################################################################################################################
+  grafana:
+    image: grafana/grafana:6.2.5
+    ports:
+      - "3000:3000"
+    environment:
+        GF_AUTH_ANONYMOUS_ENABLED: "true"
+        GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+        GF_SECURITY_ADMIN_USER: "perfana"
+        GF_SECURITY_ADMIN_PASSWORD: "perfana"
+        GF_SECURITY_ALLOW_EMBEDDING: "true"
+    networks:
+      - perfana
+  ######################################################################################################################
+  prometheus:
+    image: prom/prometheus
+    user:  root
+    volumes:
+      - ./prometheus-config:/prometheus
+      - ./data:/data
+    command:
+      - '--config.file=/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/data'
+    ports:
+      - 9090:9090
+    depends_on:
+      - alertmanager
+    networks:
+      - perfana
+ 
+  ######################################################################################################################
+  alertmanager:
+    image: prom/alertmanager
+    user:  root
+    volumes:
+      - ./prometheus-config:/prometheus
+      - ./data:/data
+    command:
+      - '--config.file=/prometheus/alertmanager.yml'
+      - '--storage.path=/data'
+    ports:
+      - 9093:9093
+    networks:
+      - perfana
+  
+  
+  ######################################################################################################################
+  mongo1:
+    hostname: mongo1
+    image: mongo:4.2-bionic
+    expose:
+    - 27011
+    ports:
+      - 27011:27017
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+    networks:
+     - perfana
+  mongo2:
+    hostname: mongo2
+    image: mongo:4.2-bionic
+    expose:
+    - 27012
+    ports:
+    - 27012:27017
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+    networks:
+     - perfana
+  mongo3:
+    hostname: mongo3
+    image: mongo:4.2-bionic
+    expose:
+    - 27013
+    ports:
+    - 27013:27017
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+    networks:
+      - perfana
+
+#######################################################################################################################
+networks:
+  perfana:
+    driver: bridge

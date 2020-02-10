@@ -1,0 +1,25 @@
+{
+  "_id": "perfana",
+  "createdAt": "2019-08-17T12:10:58.571Z",
+  "services": {
+    "password": {
+      "bcrypt": "$2b$10$dFLQjF/akregjsH3vrYiAeY5tN03FJbcvA382ZLkeqKus8yHNpjsK"
+    },
+    "resume": {
+      "loginTokens": [{
+        "when": "2019-08-17T12:10:58.690Z",
+        "hashedToken": "5DXqXVKc24FwPWwvjZdGqATSuGLzucqHDsj+vQbaXrA="
+      }]
+    }
+  },
+  "emails": [{
+    "address": "perfana@perfana.io",
+    "verified": false
+  }],
+  "profile": {
+    "name": "Perfana"
+  },
+  "roles": ["admin"],
+  "status": "online",
+  "statusConnection": "online"
+}

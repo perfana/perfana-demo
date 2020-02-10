@@ -1,0 +1,15 @@
+global: {}
+
+receivers:
+- name: default-receiver
+  webhook_configs:
+  - url: 'http://perfana:3000/prometheus-alerts'
+    send_resolved: false
+
+
+route:
+  receiver: default-receiver
+  group_by: ['alertname']
+  group_wait: 1s
+  group_interval: 1s
+  repeat_interval: 3h

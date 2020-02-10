@@ -1,0 +1,6 @@
+{
+  "_id": "6rtKDSebubKAiuk5L",
+  "grafana": "demo",
+  "dashboardName": "Gatling InfluxDb",
+  "dashboardUid": "template-gatling-influx"
+}
