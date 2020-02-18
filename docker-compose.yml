@@ -3,7 +3,7 @@ services:
 
   ######################################################################################################################
   perfana:
-    image: perfana/perfana:2.0.1-beta
+    image: perfana/perfana:2.0.2-beta
     init: true
     depends_on:
       - grafana
