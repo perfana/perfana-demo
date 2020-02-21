@@ -108,7 +108,10 @@ services:
 
   ######################################################################################################################
   afterburner:
-    image: perfana/perfana-afterburner:2.0.0-beta
+    image: perfana/perfana-afterburner:2.1.0-beta
+    environment:
+      "management.metrics.tags.system_under_test": "Afterburner"
+      "management.metrics.tags.test_environment": "acc"
     ports:
      - "8080:8080"
     networks:
