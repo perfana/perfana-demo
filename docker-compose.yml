@@ -3,7 +3,7 @@ services:
 
   ######################################################################################################################
   perfana:
-    image: perfana/perfana:2.0.4-beta
+    image: perfana/perfana:2.0.6-beta
     init: true
     depends_on:
       - grafana
@@ -17,7 +17,7 @@ services:
       ROOT_URL: "http://localhost:4000"
       MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/perfana?replicaSet=rs0"
       MONGO_OPSLOG_URL: "mongo1:27017,mongo2:27017,mongo3:27017/local?authSource=perfana&replicaSet=rs0"
-      METEOR_SETTINGS: '{"autoCreateApplications": true,"snapshotExpires": "7776000","prometheusRetention": "86400","influxDbRetention": "86400","perfanaHost":"http://localhost:3000","influxDbHost": "influxdb","public": {"perfanaHost":"http://localhost:4000","OIDCButtonText": "OIDC Login"}}'
+      METEOR_SETTINGS: '{"autoCreateApplications": true,"snapshotExpires": "7776000","prometheusRetention": "86400","influxDbRetention": "86400","perfanaHost":"http://localhost:3000","influxDbHost": "influxdb","organisation": {"name": "Perfana", "description": "Perfana demo organisation"}, "public": {"perfanaHost":"http://localhost:4000","OIDCButtonText": "OIDC Login"}}'
     expose:
       - 4000
     ports:
@@ -41,7 +41,7 @@ services:
 
   ######################################################################################################################
   perfana-fixture:
-    image: perfana/perfana-fixture:2.0.0-beta
+    image: perfana/perfana-fixture:2.0.1-beta
     depends_on:
       - grafana
       - influxdb
