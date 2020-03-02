@@ -3,7 +3,7 @@ services:
 
   ######################################################################################################################
   perfana:
-    image: perfana/perfana:2.0.6-beta
+    image: perfana/perfana:2.1.1-beta
     init: true
     depends_on:
       - grafana
@@ -27,7 +27,7 @@ services:
 
   ######################################################################################################################
   perfana-grafana:
-    image: perfana/perfana-grafana:2.0.0-beta
+    image: perfana/perfana-grafana:2.0.1-beta
     depends_on:
       - grafana
       - influxdb
@@ -41,7 +41,7 @@ services:
 
   ######################################################################################################################
   perfana-fixture:
-    image: perfana/perfana-fixture:2.0.1-beta
+    image: perfana/perfana-fixture:2.0.3-beta
     depends_on:
       - grafana
       - influxdb
@@ -58,7 +58,7 @@ services:
 
   ######################################################################################################################
   perfana-snapshot:
-    image: perfana/perfana-snapshot:2.0.0-beta
+    image: perfana/perfana-snapshot:2.0.1-beta
     depends_on:
       - mongo1
       - mongo2
@@ -84,7 +84,7 @@ services:
 
   ######################################################################################################################
   jenkins:
-    image: perfana/perfana-jenkins:2.0.0-beta
+    image: perfana/perfana-jenkins:2.1.0-beta
     expose:
     - 8090
     ports:
@@ -112,8 +112,19 @@ services:
     environment:
       "management.metrics.tags.system_under_test": "Afterburner"
       "management.metrics.tags.test_environment": "acc"
+      "afterburner.remote.call.base_url": "http://wiremock:8080"
+      "afterburner.remote.call.httpclient.socket.timeout.millis": "10000" 
+      "JAVA_OPTS" : "-Xmx1024m"
     ports:
      - "8080:8080"
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  wiremock:
+    image: perfana/perfana-wiremock:2.0.0-beta
+    ports:
+     - "8060:8080"
     networks:
       - perfana
 
