@@ -81,7 +81,7 @@ services:
 
   ######################################################################################################################
   jenkins:
-    image: perfana/perfana-jenkins:2.1.0-beta
+    image: perfana/perfana-jenkins:2.1.1-beta
     expose:
     - 8090
     ports:
