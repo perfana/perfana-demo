@@ -3,7 +3,7 @@ services:
 
   ######################################################################################################################
   perfana:
-    image: perfana/perfana:2.2.2-beta
+    image: perfana/perfana:2.2.3-beta
     init: true
     depends_on:
       - influxdb
@@ -68,7 +68,7 @@ services:
 
   ######################################################################################################################
   perfana-check:
-    image: perfana/perfana-check:2.0.1-beta
+    image: registry.gitlab.com/perfana/perfana-check:0.10-SNAPSHOT
     depends_on:
       - mongo1
       - mongo2
@@ -135,7 +135,7 @@ services:
 
   ######################################################################################################################
   grafana:
-    image: grafana/grafana:6.2.5
+    image: grafana/grafana:6.5.3
     ports:
       - "3000:3000"
     environment:
