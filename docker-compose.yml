@@ -68,7 +68,7 @@ services:
 
   ######################################################################################################################
   perfana-check:
-    image: registry.gitlab.com/perfana/perfana-check:0.10-SNAPSHOT
+    image: perfana/perfana-check:2.1.0-beta
     depends_on:
       - mongo1
       - mongo2
