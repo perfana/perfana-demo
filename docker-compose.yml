@@ -3,7 +3,7 @@ services:
 
   ######################################################################################################################
   perfana:
-    image: perfana/perfana:2.2.4-beta
+    image: perfana/perfana:2.2.5-beta
     init: true
     depends_on:
       - influxdb
@@ -38,7 +38,7 @@ services:
 
   ######################################################################################################################
   perfana-fixture:
-    image: perfana/perfana-fixture:2.1.0-beta
+    image: perfana/perfana-fixture:2.2.0-beta
     depends_on:
       - grafana
       - influxdb
@@ -68,7 +68,7 @@ services:
 
   ######################################################################################################################
   perfana-check:
-    image: perfana/perfana-check:2.1.0-beta
+    image: perfana/perfana-check:2.2.0-beta
     depends_on:
       - mongo1
       - mongo2
