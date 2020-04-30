@@ -19,12 +19,12 @@ groups:
       description: 'GC Pause > 50 ms detected'
       summary: 'GC Pause > 50 ms detected'
   - alert: HighHeapUsage
-    expr: round(100 * avg by(system_under_test, test_environment) (jvm_memory_used_bytes{area="heap"})  /  avg by(system_under_test, test_environment) (jvm_memory_max_bytes{area="heap"})) > 80
+    expr: round(100 * avg by(system_under_test, test_environment) (jvm_memory_used_bytes{area="heap"})  /  avg by(system_under_test, test_environment) (jvm_memory_max_bytes{area="heap"})) > 50
     for: 0s
     labels:
       severity: warning
     annotations:
-      description: '80% of Maximum heap used'
-      summary: '80% of Maximum heap used'
+      description: '50% of Maximum heap used'
+      summary: '50% of Maximum heap used'
 
 
