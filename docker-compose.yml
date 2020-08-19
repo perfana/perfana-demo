@@ -1,30 +1,46 @@
 version: '3.7'
 services:
 
-  ######################################################################################################################
+######################################################################################################################
   perfana:
-    image: perfana/perfana:2.2.6-beta
+    image: perfana/perfana:2.3.4-beta
     init: true
     depends_on:
       - influxdb
+      - perfana-grafana
+      - perfana-fixture
       - mongo1
       - mongo2
       - mongo3
-    environment:
-      ROOT_URL: "http://localhost:4000"
-      MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/perfana?replicaSet=rs0"
-      MONGO_OPLOG_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/local?authSource=perfana&replicaSet=rs0"
-      METEOR_SETTINGS: '{"autoCreateApplications": true,"snapshotExpires": "7776000","prometheusRetention": "86400","influxDbRetention": "86400","perfanaHost":"http://localhost:4000","influxDbHost": "influxdb","organisation": {"name": "Perfana", "description": "Perfana demo organisation"}, "public": {"perfanaHost":"http://localhost:4000","OIDCButtonText": "OIDC Login"}}'
     expose:
       - 4000
     ports:
       - "4000:3000"
     networks:
-      - perfana
-
+      - perfana                                     
+    environment:
+      ROOT_URL: "http://localhost:4000"                   
+      MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/perfana?replicaSet=rs0"
+      MONGO_OPLOG_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/local?authSource=perfana&replicaSet=rs0"
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      METEOR_SETTINGS: '{
+        "autoCreateApplications": true,
+        "adminEmail":"admin@perfana.io",
+        "adminPassword":"perfana",
+        "prometheusRetention": "86400",
+        "influxDbRetention": "86400",
+        "snapshotExpires": "7776000",
+        "perfanaHost": "http://localhost:4000",
+        "influxDbHost": "influxdb",
+        "public": {
+            "jaegerHost": "http://localhost:16686",
+            "perfanaHost":"http://localhost:4000"
+        }
+       }'
+    
   ######################################################################################################################
   perfana-grafana:
-    image: perfana/perfana-grafana:2.1.0-beta
+    image: perfana/perfana-grafana:2.3.0-beta
     depends_on:
       - grafana
       - influxdb
@@ -36,9 +52,9 @@ services:
     networks:
       - perfana
 
-  ######################################################################################################################
+        ######################################################################################################################
   perfana-fixture:
-    image: perfana/perfana-fixture:2.2.0-beta
+    image: perfana/perfana-fixture:2.3.0-demo
     depends_on:
       - grafana
       - influxdb
@@ -55,7 +71,7 @@ services:
 
   ######################################################################################################################
   perfana-snapshot:
-    image: perfana/perfana-snapshot:2.1.0-beta
+    image: perfana/perfana-snapshot:2.3.0-beta
     depends_on:
       - mongo1
       - mongo2
@@ -68,7 +84,7 @@ services:
 
   ######################################################################################################################
   perfana-check:
-    image: perfana/perfana-check:2.2.0-beta
+    image: perfana/perfana-check:2.3.0-beta
     depends_on:
       - mongo1
       - mongo2
@@ -81,7 +97,8 @@ services:
 
   ######################################################################################################################
   jenkins:
-    image: perfana/perfana-jenkins:2.1.1-beta
+    # image: perfana/perfana-jenkins:2.3.0-beta
+    image: registry.gitlab.com/perfana/perfana-test-env/jenkins:lts-20200819
     expose:
     - 8090
     ports:
@@ -89,7 +106,8 @@ services:
     networks:
       - perfana
     depends_on:
-    - influxdb
+      - influxdb  
+       
   ######################################################################################################################
   influxdb:
     image: influxdb:1.7.6 
@@ -102,22 +120,119 @@ services:
     - "./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro"
     networks:
       - perfana
-
+ 
   ######################################################################################################################
-  afterburner:
-    image: perfana/perfana-afterburner:2.1.0-beta
+  jaeger:
+    image: jaegertracing/all-in-one:1.17
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+      - "9411:9411"
+    networks:
+      - perfana
     environment:
-      "management.metrics.tags.system_under_test": "Afterburner"
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411  
+      
+  ######################################################################################################################
+  optimus-prime-fe:
+    image: perfana/perfana-afterburner:2.2.3-beta
+    environment:
+      "spring.application.name": "optimus-prime-fe"                               
+      # "afterburner.async_max_pool_size": "20"
+      # "afterburner.async_core_pool_size": "20"
+      # "afterburner.async_queue_size": "-1"                                                                     
+      "afterburner.name": "optimus-prime-fe"
+      "management.metrics.tags.system_under_test": "OptimusPrime"
       "management.metrics.tags.test_environment": "acc"
-      "afterburner.remote.call.base_url": "http://wiremock:8080"
+      "management.metrics.tags.service": "optimus-prime-fe"
+      "afterburner.remote.call.base_url": "http://optimus-prime-be:8080"
       "afterburner.remote.call.httpclient.socket.timeout.millis": "10000" 
       "JAVA_OPTS" : "-Xmx1024m"
-    ports:
-     - "8080:8080"
+      "spring.zipkin.base-url": "http://jaeger:9411/"
+      "spring.sleuth.sampler.probability": "0.1"
+      "spring.sleuth.keys.http.headers": "perfana-test-run-id,perfana-request-name"
+      "spring.sleuth.propagation.tag.enabled": "true"
+      "spring.sleuth.propagation.tag.whitelisted-keys": "perfana-test-run-id,perfana-request-name"
+      "spring.sleuth.propagation-keys": "perfana-test-run-id,perfana-request-name"
+      "spring.sleuth.baggage-keys": "perfana-test-run-id,perfana-request-name"
     networks:
       - perfana
 
   ######################################################################################################################
+  optimus-prime-be:
+    image: perfana/perfana-afterburner:2.2.3-beta
+    environment:
+      "spring.application.name": "optimus-prime-be"
+      "afterburner.name": "optimus-prime-be"
+      "management.metrics.tags.system_under_test": "OptimusPrime"
+      "management.metrics.tags.test_environment": "acc"
+      "management.metrics.tags.service": "optimus-prime-be"
+      "afterburner.remote.call.base_url": "http://wiremock:8080"
+      "afterburner.remote.call.httpclient.socket.timeout.millis": "10000" 
+      "JAVA_OPTS" : "-Xmx1024m"
+      "spring.zipkin.base-url": "http://jaeger:9411/"
+      "spring.sleuth.sampler.probability": "0.1"
+      "spring.sleuth.keys.http.headers": "perfana-test-run-id,perfana-request-name"
+      "spring.sleuth.propagation.tag.enabled": "true"
+      "spring.sleuth.propagation.tag.whitelisted-keys": "perfana-test-run-id,perfana-request-name"
+      "spring.sleuth.propagation-keys": "perfana-test-run-id,perfana-request-name"
+      "spring.sleuth.baggage-keys": "perfana-test-run-id,perfana-request-name"
+    networks:
+      - perfana
+        
+  ######################################################################################################################
+  # mega-tron-fe:
+  #   image: perfana/perfana-afterburner:2.2.3-beta
+  #   environment:
+  #     "spring.application.name": "mega-tron-fe"
+  #     "afterburner.async_max_pool_size": "20"
+  #     "afterburner.async_core_pool_size": "20"
+  #     "afterburner.async_queue_size": "-1"
+  #     "afterburner.name": "mega-tron-fe"
+  #     "management.metrics.tags.system_under_test": "MegaTron"
+  #     "management.metrics.tags.test_environment": "acc"
+  #     "management.metrics.tags.service": "mega-tron-fe"
+  #     "afterburner.remote.call.httpclient.socket.timeout.millis": "10000" 
+  #     "JAVA_OPTS" : "-Xmx1024m"
+  #     "spring.zipkin.base-url": "http://jaeger:9411/"
+  #     "spring.sleuth.sampler.probability": "0.1"
+  #     "spring.sleuth.keys.http.headers": "perfana-test-run-id,perfana-request-name"
+  #     "spring.sleuth.propagation.tag.enabled": "true"
+  #     "spring.sleuth.propagation.tag.whitelisted-keys": "perfana-test-run-id,perfana-request-name"
+  #     "spring.sleuth.propagation-keys": "perfana-test-run-id,perfana-request-name"
+  #     "spring.sleuth.baggage-keys": "perfana-test-run-id,perfana-request-name"
+  #   networks:
+  #     - perfana
+
+######################################################################################################################
+  # star-scream-fe:
+  #   image: perfana/perfana-afterburner:2.2.3-beta
+  #   environment:
+  #     "spring.application.name": "star-scream-fe"
+  #     "afterburner.async_max_pool_size": "20"
+  #     "afterburner.async_core_pool_size": "20"
+  #     "afterburner.async_queue_size": "-1"
+  #     "afterburner.name": "star-scream-fe"
+  #     "management.metrics.tags.system_under_test": "StarScream"
+  #     "management.metrics.tags.test_environment": "acc"
+  #     "management.metrics.tags.service": "star-scream-fe"
+  #     "afterburner.remote.call.httpclient.socket.timeout.millis": "10000" 
+  #     "JAVA_OPTS" : "-Xmx1024m"
+  #     "spring.zipkin.base-url": "http://jaeger:9411/"
+  #     "spring.sleuth.sampler.probability": "0.1"
+  #     "spring.sleuth.keys.http.headers": "perfana-test-run-id,perfana-request-name"
+  #     "spring.sleuth.propagation.tag.enabled": "true"
+  #     "spring.sleuth.propagation.tag.whitelisted-keys": "perfana-test-run-id,perfana-request-name"
+  #     "spring.sleuth.propagation-keys": "perfana-test-run-id,perfana-request-name"
+  #     "spring.sleuth.baggage-keys": "perfana-test-run-id,perfana-request-name"
+  #   networks:
+  #     - perfana
+######################################################################################################################
   wiremock:
     image: perfana/perfana-wiremock:2.0.0-beta
     ports:
@@ -135,7 +250,7 @@ services:
 
   ######################################################################################################################
   grafana:
-    image: grafana/grafana:6.5.3
+    image: grafana/grafana:7.0.4
     ports:
       - "3000:3000"
     environment:
@@ -179,10 +294,14 @@ services:
       - perfana
   
   
-  ######################################################################################################################
+######################################################################################################################
+  ## To get it working on Windows using Docker for Windows and Hyper-V VM:
+  ##  https://stackoverflow.com/questions/47998855/connect-to-mongodb-replica-set-running-inside-docker-with-java-windows
+  ## Probably also makes it work on Mac.
+
   mongo1:
     hostname: mongo1
-    image: mongo:4.2-bionic
+    image: mongo:4.4-rc
     expose:
     - 27011
     ports:
@@ -192,7 +311,7 @@ services:
      - perfana
   mongo2:
     hostname: mongo2
-    image: mongo:4.2-bionic
+    image: mongo:4.4-rc
     expose:
     - 27012
     ports:
@@ -202,7 +321,7 @@ services:
      - perfana
   mongo3:
     hostname: mongo3
-    image: mongo:4.2-bionic
+    image: mongo:4.4-rc
     expose:
     - 27013
     ports:
@@ -210,8 +329,12 @@ services:
     entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
     networks:
       - perfana
-
-#######################################################################################################################
+        
+#######################################################################################################################    
 networks:
   perfana:
     driver: bridge
+
+#######################################################################################################################
+volumes:
+  grafana-storage:

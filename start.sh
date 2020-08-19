@@ -20,7 +20,7 @@ docker-compose up -d mongo{1,2,3}
 
 echo "Configuring Mongo replica-set..."
 sleep 1
-$DOCKER_CMD run -ti --rm -v $CONFIG_FILE:/init-mongo.js --net perfana-demo_perfana mongo:4.2-bionic /usr/bin/mongo --host mongo1 /init-mongo.js
+$DOCKER_CMD run -ti --rm -v $CONFIG_FILE:/init-mongo.js --net perfana-demo_perfana mongo:4.4-rc /usr/bin/mongo --host mongo1 /init-mongo.js
 
 echo "Sleeping for ${PAUSE} secs to give Mongo a chance to start the replicaset..."
 sleep ${PAUSE}
