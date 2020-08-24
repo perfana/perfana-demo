@@ -97,8 +97,7 @@ services:
 
   ######################################################################################################################
   jenkins:
-    # image: perfana/perfana-jenkins:2.3.0-beta
-    image: registry.gitlab.com/perfana/perfana-test-env/jenkins:lts-20200819
+    image: perfana/perfana-jenkins:2.3.0-beta
     expose:
     - 8090
     ports:
