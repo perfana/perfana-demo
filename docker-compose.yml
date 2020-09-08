@@ -54,7 +54,7 @@ services:
 
         ######################################################################################################################
   perfana-fixture:
-    image: perfana/perfana-fixture:2.3.0-demo
+    image: perfana/perfana-fixture:2.3.1-demo
     depends_on:
       - grafana
       - influxdb
