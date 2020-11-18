@@ -3,7 +3,7 @@ services:
 
 ######################################################################################################################
   perfana:
-    image: perfana/perfana:2.4.3-beta
+    image: perfana/perfana-fe:2.10.15
     init: true
     depends_on:
       - influxdb
@@ -35,12 +35,29 @@ services:
         "public": {
             "jaegerHost": "http://localhost:16686",
             "perfanaHost":"http://localhost:4000"
-        }
+        },
+        "allowedFrameSrc": [                         
+         "http://localhost:3000",  
+         "http://localhost:16686"  
+        ],
+        "grafanaInstances": [
+              {
+                "label": "Demo",
+                "clientUrl": "http://localhost:3000",
+                "serverUrl": "http://grafana:3000",
+                "orgId": "1",
+                "apiKey": "__api_key_to_replace__",
+                "snapshotInstance": true,
+                "trendsInstance": true,
+                "username": "perfana",
+                "password": "perfana"
+              }
+        ]
        }'
     
   ######################################################################################################################
   perfana-grafana:
-    image: perfana/perfana-grafana:2.4.1-beta
+    image: perfana/perfana-grafana:2.5.1
     depends_on:
       - grafana
       - influxdb
@@ -54,7 +71,7 @@ services:
 
         ######################################################################################################################
   perfana-fixture:
-    image: perfana/perfana-fixture:2.3.1-demo
+    image: perfana/perfana-fixture:2.4.0-demo
     depends_on:
       - grafana
       - influxdb
@@ -71,7 +88,7 @@ services:
 
   ######################################################################################################################
   perfana-snapshot:
-    image: perfana/perfana-snapshot:2.3.0-beta
+    image: perfana/perfana-snapshot:2.3.9
     depends_on:
       - mongo1
       - mongo2
@@ -84,7 +101,7 @@ services:
 
   ######################################################################################################################
   perfana-check:
-    image: perfana/perfana-check:2.3.0-beta
+    image: perfana/perfana-check:2.3.8
     depends_on:
       - mongo1
       - mongo2
@@ -337,3 +354,8 @@ networks:
 #######################################################################################################################
 volumes:
   grafana-storage:
+  jenkins-storage:
+  mongo1-storage:
+  mongo2-storage:
+  mongo3-storage:
+ 
