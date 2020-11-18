@@ -1,2 +1,2 @@
-docker-compose stop
-docker-compose rm -f 
+source common.sh
+docker-compose down -v
