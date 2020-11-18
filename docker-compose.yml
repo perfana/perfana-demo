@@ -7,8 +7,6 @@ services:
     init: true
     depends_on:
       - influxdb
-      - perfana-grafana
-      - perfana-fixture
       - mongo1
       - mongo2
       - mongo3
@@ -20,8 +18,8 @@ services:
       - perfana                                     
     environment:
       ROOT_URL: "http://localhost:4000"                   
-      MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/perfana?replicaSet=rs0"
-      MONGO_OPLOG_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/local?authSource=perfana&replicaSet=rs0"
+      MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
+      MONGO_OPLOG_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/local?authSource=perfana&replicaSet=rs0"
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
       METEOR_SETTINGS: '{
         "autoCreateApplications": true,
@@ -31,6 +29,7 @@ services:
         "influxDbRetention": "86400",
         "snapshotExpires": "7776000",
         "perfanaHost": "http://localhost:4000",
+        "perfanaCheckHost": "http://perfana-check:9191",
         "influxDbHost": "influxdb",
         "public": {
             "jaegerHost": "http://localhost:16686",
@@ -46,7 +45,7 @@ services:
                 "clientUrl": "http://localhost:3000",
                 "serverUrl": "http://grafana:3000",
                 "orgId": "1",
-                "apiKey": "__api_key_to_replace__",
+                "apiKey": "eyJrIjoieTZNalRIdk5GNFVCTkFUUVJCVXk2Y1VISWxwTGYyRkkiLCJuIjoiUGVyZmFuYSIsImlkIjoxfQ==",
                 "snapshotInstance": true,
                 "trendsInstance": true,
                 "username": "perfana",
@@ -62,7 +61,7 @@ services:
       - grafana
       - influxdb
     environment:
-      MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/perfana?replicaSet=rs0"
+      MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SYNC_INTERVAL: 30000
     ports:
       - "3001:3000"
@@ -72,15 +71,8 @@ services:
         ######################################################################################################################
   perfana-fixture:
     image: perfana/perfana-fixture:2.4.0-demo
-    depends_on:
-      - grafana
-      - influxdb
-      - mongo1
-      - mongo2
-      - mongo3
-  
     environment:
-      MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/perfana?replicaSet=rs0"
+      MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
     ports:
       - "3002:3000"
     networks:
@@ -94,7 +86,7 @@ services:
       - mongo2
       - mongo3
     environment:
-      MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/perfana?replicaSet=rs0"
+      MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
     # init: true
     networks:
       - perfana
@@ -102,12 +94,16 @@ services:
   ######################################################################################################################
   perfana-check:
     image: perfana/perfana-check:2.3.8
+    expose:
+    - 9191
+    ports:
+    - "9191:9191"
     depends_on:
       - mongo1
       - mongo2
       - mongo3
     environment:
-      MONGO_URL: "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/perfana?replicaSet=rs0"
+      MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SPRING_PROFILES_ACTIVE: "dev"
     networks:
       - perfana
@@ -116,9 +112,9 @@ services:
   jenkins:
     image: perfana/perfana-jenkins:2.3.0-beta
     expose:
-    - 8090
+    - 8080
     ports:
-    - "8090:8080"
+    - "8080:8080"
     networks:
       - perfana
     depends_on:
@@ -260,6 +256,7 @@ services:
   telegraf:
     volumes:
     - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
+    - /var/run/docker.sock:/var/run/docker.sock
     image: telegraf
     networks:
        - perfana
@@ -321,8 +318,10 @@ services:
     expose:
     - 27011
     ports:
-      - 27011:27017
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+      - 27011:27011
+    volumes:
+      - mongo1-storage:/data/db
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--port", "27011", "--replSet", "rs0" ]
     networks:
      - perfana
   mongo2:
@@ -331,8 +330,10 @@ services:
     expose:
     - 27012
     ports:
-    - 27012:27017
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+    - 27012:27012
+    volumes:
+      - mongo2-storage:/data/db
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--port", "27012", "--replSet", "rs0" ]
     networks:
      - perfana
   mongo3:
@@ -341,8 +342,10 @@ services:
     expose:
     - 27013
     ports:
-    - 27013:27017
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+    - 27013:27013
+    volumes:
+      - mongo3-storage:/data/db
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--port", "27013", "--replSet", "rs0" ]
     networks:
       - perfana
         

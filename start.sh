@@ -7,7 +7,7 @@ docker-compose --compatibility up -d --remove-orphans mongo{1,2,3}
 
 echo "Configuring Mongo replica-set ..."
 sleep 1
-$DOCKER_CMD run -ti --rm -v $CONFIG_FILE:/init-mongo.js --net perfana-blog_perfana mongo:4.4-rc /usr/bin/mongo --host mongo1 --port 27011 /init-mongo.js
+$DOCKER_CMD run -ti --rm -v $CONFIG_FILE:/init-mongo.js --net perfana-demo_perfana mongo:4.4-rc /usr/bin/mongo --host mongo1 --port 27011 /init-mongo.js
 
 echo "Bringing up databases that need a little bit more time to start up..."
 docker-compose --compatibility up -d influxdb
