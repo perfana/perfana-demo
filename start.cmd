@@ -1,7 +1,7 @@
 @ECHO OFF
 
 echo Starting Mongo cluster...
-docker-compose up -d mongo1 mongo2 mongo3
+docker-compose  --compatibility up -d mongo1 mongo2 mongo3
 
 echo Sleeping for 5 secs to give Mongo a chance to start...
 PING localhost -n 6 >NUL
@@ -13,6 +13,6 @@ echo Sleeping for 15 secs to give Mongo a chance to start the replicaset...
 PING localhost -n 16 >NUL
 
 echo Bringing up the rest of the Perfana test environment...
-docker-compose up -d
+docker-compose --compatibility up -d
 
 echo Done!
