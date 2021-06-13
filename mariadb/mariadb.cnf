@@ -1,0 +1,6 @@
+[mariadb]
+
+log_output=TABLE
+slow_query_log=1
+long_query_time=0.1
+log_queries_not_using_indexes=ON

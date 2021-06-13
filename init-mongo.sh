@@ -9,4 +9,4 @@ if [ "$(expr substr $(uname -s) 1 6)" == "Cygwin" ]; then
     DOCKER_CMD="winpty docker"
 fi
 
-$DOCKER_CMD run -ti --rm --net perfana-demo_perfana -v $CONFIG_FILE:/init-mongo.js mongo:4.0-xenial /usr/bin/mongo --host mongo1 init-mongo.js
+$DOCKER_CMD run -ti --rm --net perfana-blog_perfana -v $CONFIG_FILE:/init-mongo.js mongo:4.0-xenial /usr/bin/mongo --host mongo1 init-mongo.js
