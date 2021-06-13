@@ -45,7 +45,7 @@ services:
                 "clientUrl": "http://localhost:3000",
                 "serverUrl": "http://grafana:3000",
                 "orgId": "1",
-                "apiKey": "eyJrIjoiTXNnMklVUFZXQmNQUEw5ZnU3TXlPT0Y1S3duME1SNFIiLCJuIjoiUGVyZmFuYSIsImlkIjoxfQ==",
+                "apiKey": "apiKey",
                 "snapshotInstance": true,
                 "trendsInstance": true,
                 "username": "perfana",
@@ -67,7 +67,7 @@ services:
 
   ######################################################################################################################
   perfana-fixture:
-    image: perfana/perfana-fixture:blog
+    image: perfana/perfana-fixture:demo
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
     volumes:
