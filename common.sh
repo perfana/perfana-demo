@@ -1,13 +1,52 @@
 #!/usr/bin/env bash
 
-DOCKER_HOST_IP=$(docker network inspect perfana-demo_perfana -f '{{range .IPAM.Config}}{{.Gateway}}{{end}}')
-DOCKER_CMD="docker"
-CONFIG_FILE=$(pwd)/init-mongo.js
+export MONGO_VERSION="4.4"
 
-# https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux
-if [ "$(uname)" != "Darwin" ] && [ "$(expr substr $(uname -s) 1 6)" == "CYGWIN" ]; then
-    CONFIG_FILE=`cygpath.exe -m $(pwd)/init-mongo.js`
-    DOCKER_CMD="winpty docker"
+export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-$(basename $(pwd))}
+
+# use current directory as basename for the network, this only works when common.sh is in same dir as 
+# the docker-compose.yml file and is executed from that directory
+PERFANA_NETWORK=${COMPOSE_PROJECT_NAME}_perfana
+if [[ "$(docker network ls)" =~ $PERFANA_NETWORK ]]; then
+   DOCKER_HOST_IP=$(docker network inspect $PERFANA_NETWORK -f '{{range .IPAM.Config}}{{.Gateway}}{{end}}')
+else 
+   echo "WARN: network '$PERFANA_NETWORK' does not exist"
+   DOCKER_HOST_IP=""
 fi
 
-export CONFIG_FILE DOCKER_CMD DOCKER_HOST_IP
+# https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux#answer-33828925
+# use as: current_os="$(check-os)"
+check-os () { 
+    case "$OSTYPE" in
+      linux*)   echo "linux" ;;
+      darwin*)  echo "mac" ;; 
+      win*)     echo "windows" ;;
+      msys*)    echo "git-bash" ;;
+      cygwin*)  echo "cygwin" ;;
+      *)        echo "unknown" ;;
+    esac
+}
+
+current_os="$(check-os)"
+if [ $current_os != "mac" ] && [ $current_os == "cygwin" ]; then
+    CONFIG_FILE=`cygpath.exe -m $(pwd)/init-mongo.js`
+    DOCKER_CMD="winpty docker"
+else
+    DOCKER_CMD="docker"
+    CONFIG_FILE=$(pwd)/init-mongo.js
+fi
+
+export PERFANA_NETWORK CONFIG_FILE DOCKER_CMD DOCKER_HOST_IP
+
+confirm() {
+    # call with a prompt string or use a default
+    read -r -p "${1:-Are you sure? [y/N]} " response
+    case "$response" in
+        [yY][eE][sS]|[yY]) 
+            true
+            ;;
+        *)
+            false
+            ;;
+    esac
+}
