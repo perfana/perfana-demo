@@ -92,7 +92,7 @@ services:
 
   ######################################################################################################################
   perfana-check:
-    image: perfana/perfana-check:2.4.1
+    image: perfana/perfana-check:2.4.2
     expose:
     - 9191
     ports:
