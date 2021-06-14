@@ -3,7 +3,7 @@ services:
 
 ######################################################################################################################
   perfana:
-    image: perfana/perfana-fe:2.38.2
+    image: perfana/perfana-fe:2.39.0
     init: true
     depends_on:
       # - influxdb
