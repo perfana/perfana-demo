@@ -3,7 +3,7 @@ services:
 
 ######################################################################################################################
   perfana:
-    image: perfana/perfana-fe:2.39.0
+    image: perfana/perfana-fe:2.40.2
     init: true
     depends_on:
       # - influxdb
@@ -56,7 +56,7 @@ services:
     
   ######################################################################################################################
   perfana-grafana:
-    image: perfana/perfana-grafana:2.8.0
+    image: perfana/perfana-grafana:2.9.0
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SYNC_INTERVAL: 30000
