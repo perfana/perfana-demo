@@ -3,7 +3,7 @@ services:
 
 ######################################################################################################################
   perfana:
-    image: perfana/perfana-fe:2.40.2
+    image: perfana/perfana-fe:2.42.1
     init: true
     depends_on:
       # - influxdb
@@ -79,7 +79,7 @@ services:
 
   ######################################################################################################################
   perfana-snapshot:
-    image: perfana/perfana-snapshot:2.12.0
+    image: perfana/perfana-snapshot:2.12.9
     depends_on:
       - mongo1
       - mongo2
@@ -92,7 +92,7 @@ services:
 
   ######################################################################################################################
   perfana-check:
-    image: perfana/perfana-check:2.4.2
+    image: perfana/perfana-check:2.4.3
     expose:
     - 9191
     ports:
@@ -241,7 +241,7 @@ services:
 
   ######################################################################################################################
   grafana:
-    image: grafana/grafana:8.0.0
+    image: grafana/grafana:8.0.6
     ports:
       - "3000:3000"
     environment:
