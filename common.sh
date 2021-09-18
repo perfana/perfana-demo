@@ -37,6 +37,7 @@ else
 fi
 
 export PERFANA_NETWORK CONFIG_FILE DOCKER_CMD DOCKER_HOST_IP
+export GRAFANA_CREDS=perfana:perfana
 
 confirm() {
     # call with a prompt string or use a default
