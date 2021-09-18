@@ -27,7 +27,7 @@ while [[ $# -gt 0 ]]; do
     ;;
   esac
 done
-set -- "${POSITIONAL[@]}" # restore positional parameters
+set -- "${POSITIONAL[@]-default}" # restore positional parameters
 
 SLEEP_TIME=${SLEEP_TIME:-15}
 echo "using sleep time of $SLEEP_TIME seconds, use -s or --sleep option to change"
