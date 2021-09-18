@@ -3,22 +3,17 @@ services:
 
 ######################################################################################################################
   perfana:
-    image: perfana/perfana-fe:2.40.2
+    image: perfana/perfana-fe:2.45.2
     init: true
-    depends_on:
-      # - influxdb
-      - mongo1
-      - mongo2
-      - mongo3
     expose:
       - 4000
     ports:
       - "4000:3000"
     networks:
-      - perfana                                     
+      - perfana
     environment:
       PORT: 3000
-      ROOT_URL: "http://localhost:4000"                   
+      ROOT_URL: "http://localhost:4000"
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       MONGO_OPLOG_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/local?authSource=perfana&replicaSet=rs0"
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
@@ -35,9 +30,9 @@ services:
             "jaegerUrl": "http://localhost:16686",
             "perfanaUrl": "http://localhost:4000"
         },
-        "allowedFrameSrc": [                         
-         "http://localhost:3000",  
-         "http://localhost:16686"  
+        "allowedFrameSrc": [
+         "http://localhost:3000",
+         "http://localhost:16686"
         ],
         "grafanaInstances": [
               {
@@ -45,7 +40,7 @@ services:
                 "clientUrl": "http://localhost:3000",
                 "serverUrl": "http://grafana:3000",
                 "orgId": "1",
-                "apiKey": "apiKey",
+                "apiKey": "eyJrIjoialdLM3VHNlhFZ2FHYldzekxkRmlNZndsa2Y2MW04TkYiLCJuIjoiUGVyZmFuYSIsImlkIjoxfQ==",
                 "snapshotInstance": true,
                 "trendsInstance": true,
                 "username": "perfana",
@@ -53,10 +48,10 @@ services:
               }
         ]
        }'
-    
+
   ######################################################################################################################
   perfana-grafana:
-    image: perfana/perfana-grafana:2.9.0
+    image: perfana/perfana-grafana:2.10.0
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SYNC_INTERVAL: 30000
@@ -79,20 +74,21 @@ services:
 
   ######################################################################################################################
   perfana-snapshot:
-    image: perfana/perfana-snapshot:2.12.0
+    image: perfana/perfana-snapshot:2.13.2
     depends_on:
       - mongo1
       - mongo2
       - mongo3
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
+      DEBUG_WORKER_POOL: "true"
     # init: true
     networks:
       - perfana
 
   ######################################################################################################################
   perfana-check:
-    image: perfana/perfana-check:2.4.2
+    image: perfana/perfana-check:2.4.4
     expose:
     - 9191
     ports:
@@ -109,7 +105,7 @@ services:
 
   ######################################################################################################################
   jenkins:
-    image: perfana/perfana-jenkins:2.3.1-blog
+    image: perfana/perfana-jenkins:lts-20210917
     expose:
     - 8080
     ports:
@@ -119,12 +115,12 @@ services:
     networks:
       - perfana
     # depends_on:
-    #   - influxdb  
-       
+    #   - influxdb
+
   ######################################################################################################################
   influxdb:
-    image: influxdb:1.7.6 
-    ports:  
+    image: influxdb:1.7.6
+    ports:
     - "8086:8086"
     - "2003:2003"
     environment:
@@ -150,22 +146,22 @@ services:
     networks:
       - perfana
     environment:
-      COLLECTOR_ZIPKIN_HOST_PORT: 9411  
-      
+      COLLECTOR_ZIPKIN_HOST_PORT: 9411
+
   ######################################################################################################################
   optimus-prime-fe:
     image: stokpop/afterburner-jdk:2.0.0
     ports:
       - "8090:8080"
     environment:
-      "spring.application.name": "optimus-prime-fe"  
+      "spring.application.name": "optimus-prime-fe"
       "spring.profiles.active": "logstash"
       "afterburner.name": "optimus-prime-fe"
       "management.metrics.tags.system_under_test": "OptimusPrime"
       "management.metrics.tags.test_environment": "acc"
       "management.metrics.tags.service": "optimus-prime-fe"
       "afterburner.remote.call.base_url": "http://optimus-prime-be:8080"
-      "afterburner.remote.call.httpclient.socket.timeout.millis": "10000" 
+      "afterburner.remote.call.httpclient.socket.timeout.millis": "10000"
       "JAVA_OPTS" : "-Xmx312m"
       "spring.zipkin.enabled": "true"
       "spring.zipkin.base-url": "http://jaeger:9411/"
@@ -178,10 +174,10 @@ services:
       "afterburner.mybatis.datasource.url": "jdbc:mariadb://mariadb:3306/employees"
       "afterburner.mybatis.datasource.username": "root"
       "afterburner.mybatis.datasource.password": "perfana"
-      "afterburner.mybatis.datasource.driver-class-name": "org.mariadb.jdbc.Driver" 
+      "afterburner.mybatis.datasource.driver-class-name": "org.mariadb.jdbc.Driver"
     restart: always
     networks:
-      - perfana                                       
+      - perfana
     deploy:
       resources:
         limits:
@@ -199,7 +195,7 @@ services:
       "management.metrics.tags.test_environment": "acc"
       "management.metrics.tags.service": "optimus-prime-be"
       "afterburner.remote.call.base_url": "http://wiremock:8080"
-      "afterburner.remote.call.httpclient.socket.timeout.millis": "10000" 
+      "afterburner.remote.call.httpclient.socket.timeout.millis": "10000"
       "JAVA_OPTS" : "-Xmx312m"
       "spring.zipkin.enabled": "true"
       "spring.zipkin.base-url": "http://jaeger:9411/"
@@ -221,7 +217,7 @@ services:
         limits:
           cpus: '2'
           memory: 512M
-    
+
   ######################################################################################################################
   wiremock:
     image: perfana/perfana-wiremock:2.0.0-beta
@@ -241,7 +237,7 @@ services:
 
   ######################################################################################################################
   grafana:
-    image: grafana/grafana:8.0.0
+    image: grafana/grafana:8.0.6
     ports:
       - "3000:3000"
     environment:
@@ -250,6 +246,7 @@ services:
         GF_SECURITY_ADMIN_USER: "perfana"
         GF_SECURITY_ADMIN_PASSWORD: "perfana"
         GF_SECURITY_ALLOW_EMBEDDING: "true"
+        GF_INSTALL_PLUGINS: "marcusolsson-json-datasource"
     volumes:
       - grafana-storage:/var/lib/grafana
     networks:
@@ -286,12 +283,12 @@ services:
       - 9093:9093
     networks:
       - perfana
-  
+
   ######################################################################################################################
   mariadb:
     image: mariadb:10.5.5
     volumes:
-      - ./test_db:/db    
+      - ./test_db:/db
     environment:
       MYSQL_ROOT_PASSWORD: perfana
     ports:
@@ -299,7 +296,7 @@ services:
     networks:
       - perfana
     volumes:
-    - ./test_db:/docker-entrypoint-initdb.d  
+    - ./test_db:/docker-entrypoint-initdb.d
     - ./mariadb:/etc/mysql/conf.d
     deploy:
      resources:
@@ -307,8 +304,8 @@ services:
          cpus: '1'
          memory: 512M
 
-  
-  
+
+
 ######################################################################################################################
   mongo1:
     hostname: mongo1
@@ -347,8 +344,8 @@ services:
     networks:
       - perfana
 
-        
-#######################################################################################################################    
+
+#######################################################################################################################
   omnidb:
     image: perfana/perfana-omnidb:1.0.0-blog
     expose:
@@ -362,7 +359,7 @@ services:
     networks:
       - perfana
 
-#######################################################################################################################    
+#######################################################################################################################
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.12.0
     environment:
@@ -385,8 +382,8 @@ services:
       - 9200
     networks:
       - perfana
-    
- #######################################################################################################################    
+
+ #######################################################################################################################
   kibana:
     image: docker.elastic.co/kibana/kibana:7.12.0
     ports:
@@ -398,11 +395,11 @@ services:
       ELASTICSEARCH_USERNAME: elastic
       ELASTICSEARCH_PASSWORD: perfana
       ELASTICSEARCH_URL: http://elasticsearch:9200
-      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'  
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
     networks:
-      - perfana                                       
+      - perfana
 
-#######################################################################################################################    
+#######################################################################################################################
   logstash:
     image: logstash:7.12.0
     ports:
@@ -418,9 +415,9 @@ services:
     networks:
       - perfana
     depends_on:
-      - elasticsearch      
-    
-#######################################################################################################################    
+      - elasticsearch
+
+#######################################################################################################################
 networks:
   perfana:
     driver: bridge
@@ -434,7 +431,7 @@ volumes:
   mongo1-storage:
   mongo2-storage:
   mongo3-storage:
-  omnidb-storage:  
+  omnidb-storage:
   elasticsearch-storage:
 
 
