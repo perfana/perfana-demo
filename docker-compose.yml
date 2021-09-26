@@ -40,7 +40,7 @@ services:
                 "clientUrl": "http://localhost:3000",
                 "serverUrl": "http://grafana:3000",
                 "orgId": "1",
-                "apiKey": "apiKey",
+                "apiKey": "eyJrIjoiSUhydkMxR2w2UTdnNEhaMFVmMHZZM3h2Y210SHQwMTciLCJuIjoiUGVyZmFuYSIsImlkIjoxfQ==",
                 "snapshotInstance": true,
                 "trendsInstance": true,
                 "username": "perfana",
@@ -359,63 +359,6 @@ services:
     networks:
       - perfana
 
-#######################################################################################################################
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.12.0
-    environment:
-      - xpack.security.enabled=true
-      - xpack.security.audit.enabled=true
-      - ELASTIC_PASSWORD=perfana
-      - xpack.monitoring.collection.enabled=true
-      - discovery.type=single-node
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - elasticsearch-storage:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
-    expose:
-      - 9200
-    networks:
-      - perfana
-
- #######################################################################################################################
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.12.0
-    ports:
-      - 5601:5601
-    expose:
-      - 5601
-    environment:
-      XPACK_SECURITY_ENABLED: "true"
-      ELASTICSEARCH_USERNAME: elastic
-      ELASTICSEARCH_PASSWORD: perfana
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
-    networks:
-      - perfana
-
-#######################################################################################################################
-  logstash:
-    image: logstash:7.12.0
-    ports:
-      - "5044:5044"
-      - "9600:9600"
-    environment:
-      ELASTIC_USER: elastic
-      ELASTIC_PASSWORD: perfana
-      ELASTIC_HOSTS: elasticsearch:9200
-      MONITORING_ENABLED: "false"
-    volumes:
-      - ./logstash:/usr/share/logstash/pipeline:ro
-    networks:
-      - perfana
-    depends_on:
-      - elasticsearch
 
 #######################################################################################################################
 networks:

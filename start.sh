@@ -43,10 +43,6 @@ $DOCKER_CMD run --rm -v $CONFIG_FILE:/init-mongo.js --net $PERFANA_NETWORK mongo
 echo "Bringing up databases that need a little bit more time to start up..."
 docker-compose --compatibility up -d mariadb
 docker-compose --compatibility up -d influxdb
-docker-compose --compatibility up -d elasticsearch
-docker-compose --compatibility up -d logstash
-docker-compose --compatibility up -d kibana
-
 
 echo "Sleeping for $SLEEP_TIME secs to give the db containers some time to start up..."
 sleep $SLEEP_TIME
@@ -55,7 +51,7 @@ echo "Starting Grafana ..."
 docker-compose --compatibility up -d grafana
 
 echo "Sleeping for $SLEEP_TIME secs to give Grafana some time to start up..."
-sleep $SLEEP_TIME 
+sleep $SLEEP_TIME
 
 existingPerfanaUserId=$(curl -X GET -H "Content-Type: application/json"  http://$GRAFANA_CREDS@localhost:3000/api/auth/keys 2>/dev/null | jq '.[] | select(.name == "Perfana")' | jq .id)
 
@@ -112,10 +108,6 @@ if [ -z "$existingPerfanaUserId" ];  then
 else
     echo "Existing api keys found in Grafana, skipping fixture data ..."
 fi
-
-echo "Create index pattern in Kibana"
-
-curl -X POST -u elastic:perfana -H "Content-Type: application/json" -H "kbn-xsrf:true"  "http://localhost:5601/api/saved_objects/index-pattern/springboot-logs-pattern" -d '{ "attributes": { "title":"spring-boot-app-logs*", "timeFieldName":"@timestamp"}}'  -w "\n" | jq
 
 
 echo "Done!"
