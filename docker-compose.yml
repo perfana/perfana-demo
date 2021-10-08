@@ -3,7 +3,7 @@ services:
 
 ######################################################################################################################
   perfana:
-    image: perfana/perfana-fe:2.45.4
+    image: perfana/perfana-fe:2.46.0
     init: true
     expose:
       - 4000
