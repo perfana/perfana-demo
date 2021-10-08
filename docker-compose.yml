@@ -3,7 +3,7 @@ services:
 
 ######################################################################################################################
   perfana:
-    image: perfana/perfana-fe:2.46.0
+    image: perfana/perfana-fe:2.46.1
     init: true
     expose:
       - 4000
@@ -228,6 +228,14 @@ services:
       "afterburner.datasource.employee.username": "root"
       "afterburner.datasource.employee.password": "perfana"
       "afterburner.datasource.employee.poolMaximumActiveConnections": "5"
+      "JAVA_TOOL_OPTIONS": "-javaagent:/pyroscope.jar"
+      "PYROSCOPE_APPLICATION_NAME": "optimus-prime-be"
+      "PYROSCOPE_PROFILING_INTERVAL": "10ms"
+      "PYROSCOPE_PROFILER_EVENT": "itimer"
+      "PYROSCOPE_UPLOAD_INTERVAL": "1s"
+      "PYROSCOPE_LOG_LEVEL": "info"
+      "PYROSCOPE_SERVER_ADDRESS": "http://pyroscope:4040"
+      "PYROSCOPE_AUTH_TOKEN": "abc123"
     restart: always
     networks:
       - perfana
