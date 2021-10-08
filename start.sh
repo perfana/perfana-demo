@@ -89,6 +89,7 @@ docker-compose --compatibility up -d omnidb
 docker-compose --compatibility up -d prometheus
 docker-compose --compatibility up -d alertmanager
 docker-compose --compatibility up -d jaeger
+docker-compose --compatibility up -d pyroscope
 echo "Sleeping for $SLEEP_TIME secs to give containers a chance to start up..."
 sleep $SLEEP_TIME
 docker-compose --compatibility up -d optimus-prime-fe
