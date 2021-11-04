@@ -40,7 +40,7 @@ services:
                 "clientUrl": "http://localhost:3000",
                 "serverUrl": "http://grafana:3000",
                 "orgId": "1",
-                "apiKey": "eyJrIjoiQ0c5NmZBOTR4NjY3VHJra3JEMzNneUlCSWJ4ejBGRTciLCJuIjoiUGVyZmFuYSIsImlkIjoxfQ==",
+                "apiKey": "apiKey",
                 "snapshotInstance": true,
                 "trendsInstance": true,
                 "username": "perfana",
