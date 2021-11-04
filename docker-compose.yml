@@ -40,7 +40,7 @@ services:
                 "clientUrl": "http://localhost:3000",
                 "serverUrl": "http://grafana:3000",
                 "orgId": "1",
-                "apiKey": "apiKey",
+                "apiKey": "eyJrIjoiQ0c5NmZBOTR4NjY3VHJra3JEMzNneUlCSWJ4ejBGRTciLCJuIjoiUGVyZmFuYSIsImlkIjoxfQ==",
                 "snapshotInstance": true,
                 "trendsInstance": true,
                 "username": "perfana",
@@ -105,7 +105,7 @@ services:
 
   ######################################################################################################################
   jenkins:
-    image: perfana/perfana-jenkins:lts-20210917
+    image: perfana/perfana-jenkins-blog:latest
     expose:
     - 8080
     ports:
