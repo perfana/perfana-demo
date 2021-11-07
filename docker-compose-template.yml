@@ -228,10 +228,10 @@ services:
 
   ######################################################################################################################
   telegraf:
+    image: telegraf:1.20.1
     volumes:
     - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
     - /var/run/docker.sock:/var/run/docker.sock
-    image: telegraf
     networks:
        - perfana
 
