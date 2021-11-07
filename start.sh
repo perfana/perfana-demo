@@ -26,8 +26,6 @@ set -- "${POSITIONAL[@]-default}" # restore positional parameters
 SLEEP_TIME=${SLEEP_TIME:-15}
 echo "using sleep time of $SLEEP_TIME seconds, use -s or --sleep option to change"
 
-cp docker-compose-template.yml docker-compose.yml
-
 echo "Starting Mongo cluster ..."
 docker-compose --compatibility up -d --remove-orphans mongo{1,2,3}
 
@@ -57,7 +55,7 @@ if [[ $perfanaUser != *"Perfana"* || $perfanaUser != *"Admin"* ]]; then
     echo "Issue creating Grafana API key, no API key returned from create call: abort!"
     exit 123
   fi
-  echo "Replacing apiKey in docker-compose file with: ${API_KEY}"
+  echo "Replacing apiKey in docker-compose file."
   sed "s/\"apiKey\": \".*\"/\"apiKey\": \"$API_KEY\"/g" docker-compose-template.yml > docker-compose.yml
 else
   echo "Grafana API key is already present, no need to create a new one."
