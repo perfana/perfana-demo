@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-MONGO_VERSION="4.4"
+export MONGO_VERSION="4.4"
 
 COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-$(basename $(pwd))}
 
@@ -52,7 +52,7 @@ confirm() {
 }
 
 # make sure there is a copy of docker-compose.yml, for start.sh,stop.sh,clean.sh
-if [ -f docker-compose.yml ]; then
+if [ ! -f docker-compose.yml ]; then
    echo "create copy of docker-compose.yml"
    cp docker-compose-template.yml docker-compose.yml
 fi
