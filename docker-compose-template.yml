@@ -40,7 +40,7 @@ services:
                 "clientUrl": "http://localhost:3000",
                 "serverUrl": "http://grafana:3000",
                 "orgId": "1",
-                "apiKey": "eyJrIjoiQ0c5NmZBOTR4NjY3VHJra3JEMzNneUlCSWJ4ejBGRTciLCJuIjoiUGVyZmFuYSIsImlkIjoxfQ==",
+                "apiKey": "",
                 "snapshotInstance": true,
                 "trendsInstance": true,
                 "username": "perfana",
@@ -82,7 +82,6 @@ services:
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       DEBUG_WORKER_POOL: "true"
-    # init: true
     networks:
       - perfana
 
@@ -150,7 +149,7 @@ services:
 
   ######################################################################################################################
   optimus-prime-fe:
-    image: stokpop/afterburner-jdk:2.0.0
+    image: stokpop/afterburner-jdk:2.1.1
     ports:
       - "8090:8080"
     environment:
@@ -186,7 +185,7 @@ services:
 
   ######################################################################################################################
   optimus-prime-be:
-    image: stokpop/afterburner-jdk:2.0.0
+    image: stokpop/afterburner-jdk:2.1.1
     environment:
       "spring.application.name": "optimus-prime-be"
       "spring.profiles.active": "employee-db,logstash"
@@ -228,10 +227,10 @@ services:
 
   ######################################################################################################################
   telegraf:
+    image: telegraf:1.20.1
     volumes:
     - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
     - /var/run/docker.sock:/var/run/docker.sock
-    image: telegraf
     networks:
        - perfana
 
@@ -309,7 +308,7 @@ services:
 ######################################################################################################################
   mongo1:
     hostname: mongo1
-    image: mongo:4.4-rc
+    image: mongo:$MONGO_VERSION
     expose:
     - 27011
     ports:
@@ -321,7 +320,7 @@ services:
      - perfana
   mongo2:
     hostname: mongo2
-    image: mongo:4.4-rc
+    image: mongo:$MONGO_VERSION
     expose:
     - 27012
     ports:
@@ -333,7 +332,7 @@ services:
      - perfana
   mongo3:
     hostname: mongo3
-    image: mongo:4.4-rc
+    image: mongo:$MONGO_VERSION
     expose:
     - 27013
     ports:
