@@ -2,7 +2,7 @@
 
 export MONGO_VERSION="4.4"
 
-export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-$(basename $(pwd))}
+COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-$(basename $(pwd))}
 
 # use current directory as basename for the network, this only works when common.sh is in same dir as 
 # the docker-compose.yml file and is executed from that directory
@@ -36,8 +36,7 @@ else
     CONFIG_FILE=$(pwd)/init-mongo.js
 fi
 
-export PERFANA_NETWORK CONFIG_FILE DOCKER_CMD DOCKER_HOST_IP
-export GRAFANA_CREDS=perfana:perfana
+GRAFANA_CREDS=perfana:perfana
 
 confirm() {
     # call with a prompt string or use a default
@@ -51,3 +50,10 @@ confirm() {
             ;;
     esac
 }
+
+# make sure there is a copy of docker-compose.yml, for start.sh,stop.sh,clean.sh
+if [ ! -f docker-compose.yml ]; then
+   echo "create copy of docker-compose.yml"
+   cp docker-compose-template.yml docker-compose.yml
+fi
+
