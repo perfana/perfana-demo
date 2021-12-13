@@ -374,6 +374,4 @@ volumes:
   mongo2-storage:
   mongo3-storage:
   omnidb-storage:
-  elasticsearch-storage:
-
 
