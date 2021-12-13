@@ -3,7 +3,7 @@ services:
 
 ######################################################################################################################
   perfana:
-    image: perfana/perfana-fe:2.46.0
+    image: perfana/perfana-fe:2.52.3
     init: true
     expose:
       - 4000
@@ -51,7 +51,7 @@ services:
 
   ######################################################################################################################
   perfana-grafana:
-    image: perfana/perfana-grafana:2.10.0
+    image: perfana/perfana-grafana:2.10.7
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SYNC_INTERVAL: 30000
@@ -74,7 +74,7 @@ services:
 
   ######################################################################################################################
   perfana-snapshot:
-    image: perfana/perfana-snapshot:2.13.2
+    image: perfana/perfana-snapshot:2.13.3
     depends_on:
       - mongo1
       - mongo2
@@ -87,7 +87,7 @@ services:
 
   ######################################################################################################################
   perfana-check:
-    image: perfana/perfana-check:2.4.4
+    image: perfana/perfana-check:2.4.5
     expose:
     - 9191
     ports:
@@ -236,7 +236,7 @@ services:
 
   ######################################################################################################################
   grafana:
-    image: grafana/grafana:8.0.6
+    image: grafana/grafana:8.3.1
     ports:
       - "3000:3000"
     environment:
