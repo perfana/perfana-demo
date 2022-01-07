@@ -219,7 +219,7 @@ services:
 
   ######################################################################################################################
   wiremock:
-    image: perfana/perfana-wiremock:2.0.0-beta
+    image: perfana/perfana-wiremock:2.32.0-alpine
     ports:
      - "8060:8080"
     networks:
