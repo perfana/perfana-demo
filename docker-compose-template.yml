@@ -64,7 +64,7 @@ services:
 
   ######################################################################################################################
   perfana-fixture:
-    image: perfana/perfana-fixture:demo
+    image: perfana/perfana-fixture:2.0.1
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
     volumes:
