@@ -20,8 +20,8 @@ services:
       METEOR_SETTINGS: '{
         "adminEmail":"admin@perfana.io",
         "adminPassword":"perfana",
-        "prometheusRetention": "86400",
-        "influxDbRetention": "86400",
+        "prometheusRetention": "1296000",
+        "influxDbRetention": "2592000",
         "snapshotExpires": "7776000",
         "perfanaUrl": "http://localhost:4000",
         "perfanaCheckUrl": "http://perfana-check:9191",
