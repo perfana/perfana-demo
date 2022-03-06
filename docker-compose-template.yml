@@ -3,7 +3,7 @@ services:
 
 ######################################################################################################################
   perfana:
-    image: perfana/perfana-fe:2.52.7
+    image: perfana/perfana-fe:perfana-2.1.0
     init: true
     expose:
       - 4000
@@ -53,7 +53,7 @@ services:
 
   ######################################################################################################################
   perfana-grafana:
-    image: perfana/perfana-grafana:2.10.8
+    image: perfana/perfana-grafana:perfana-2.1.0
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SYNC_INTERVAL: 30000
@@ -64,7 +64,7 @@ services:
 
   ######################################################################################################################
   perfana-fixture:
-    image: perfana/perfana-fixture:2.0.1
+    image: perfana/perfana-fixture:2.1.0
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
     volumes:
@@ -76,7 +76,7 @@ services:
 
   ######################################################################################################################
   perfana-snapshot:
-    image: perfana/perfana-snapshot:2.13.21
+    image: perfana/perfana-snapshot:perfana-2.1.0
     depends_on:
       - mongo1
       - mongo2
@@ -89,7 +89,7 @@ services:
 
   ######################################################################################################################
   perfana-check:
-    image: perfana/perfana-check:2.4.6
+    image: perfana/perfana-check:perfana-2.1.0
     expose:
     - 9191
     ports:
@@ -248,6 +248,8 @@ services:
         GF_SECURITY_ADMIN_PASSWORD: "perfana"
         GF_SECURITY_ALLOW_EMBEDDING: "true"
         GF_INSTALL_PLUGINS: "marcusolsson-json-datasource"
+        GF_UNIFIED_ALERTING_ENABLED: "false"
+        GF_ALERTING_ENABLED: "true"
     volumes:
       - grafana-storage:/var/lib/grafana
     networks:
