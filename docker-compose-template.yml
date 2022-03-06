@@ -151,7 +151,7 @@ services:
 
   ######################################################################################################################
   optimus-prime-fe:
-    image: stokpop/afterburner-jdk:2.1.1
+    image: stokpop/afterburner-jdk:2.0.0
     ports:
       - "8090:8080"
     environment:
@@ -187,7 +187,7 @@ services:
 
   ######################################################################################################################
   optimus-prime-be:
-    image: stokpop/afterburner-jdk:2.1.1
+    image: stokpop/afterburner-jdk:2.0.0
     environment:
       "spring.application.name": "optimus-prime-be"
       "spring.profiles.active": "employee-db,logstash"
