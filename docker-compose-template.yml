@@ -26,6 +26,8 @@ services:
         "perfanaUrl": "http://localhost:4000",
         "perfanaCheckUrl": "http://perfana-check:9191",
         "influxDbHost": "influxdb",
+        "autoSetBaselineTestRun": true,
+        "autoCompareTestRuns": true,
         "public": {
             "jaegerUrl": "http://localhost:16686",
             "perfanaUrl": "http://localhost:4000"
