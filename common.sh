@@ -51,9 +51,4 @@ confirm() {
     esac
 }
 
-# make sure there is a copy of docker-compose.yml, for start.sh,stop.sh,clean.sh
-if [ ! -f docker-compose.yml ]; then
-   echo "create copy of docker-compose.yml"
-   cp docker-compose-template.yml docker-compose.yml
-fi
 
