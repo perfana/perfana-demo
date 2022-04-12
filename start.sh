@@ -46,20 +46,12 @@ docker-compose --compatibility up -d grafana
 echo "Sleeping for $SLEEP_TIME secs to give Grafana some time to start up..."
 sleep $SLEEP_TIME
 
-perfanaUser=`curl -X GET -H "Content-Type: application/json" "http://$GRAFANA_CREDS@localhost:3000/api/auth/keys" 2>/dev/null`
-echo "perfanaUser: $perfanaUser"
-if [[ $perfanaUser != *"Perfana"* || $perfanaUser != *"Admin"* ]]; then
-  echo "No Perfana user found. Creating new Grafana API key."
-  API_KEY=$(curl -X POST -H "Content-Type: application/json" -d '{"name":"Perfana","role":"Admin"}' http://$GRAFANA_CREDS@localhost:3000/api/auth/keys 2>/dev/null | sed "s/.*key\"\:\"\(.*\)\"}/\1/")
-  if [[ -z "$API_KEY" ]] || [[ "$API_KEY" == "null" ]]; then
-    echo "Issue creating Grafana API key, no API key returned from create call: abort!"
-    exit 123
-  fi
-  echo "Replacing apiKey in docker-compose file."
-  sed "s/\"apiKey\": \".*\"/\"apiKey\": \"$API_KEY\"/g" docker-compose-template.yml > docker-compose.yml
-else
-  echo "Grafana API key is already present, no need to create a new one."
-  API_KEY=""
+API_KEY_EXISTS=false
+
+perfanaKey=`curl -X GET -H "Content-Type: application/json" "http://$GRAFANA_CREDS@localhost:3000/api/auth/keys" 2>/dev/null`
+echo "perfanaKey: $perfanaKey"
+if [[ $perfanaKey == *"Perfana"* ]]; then
+  API_KEY_EXISTS=true
 fi
 
 echo "Starting Perfana ..."
@@ -89,9 +81,9 @@ echo "Sleeping for $SLEEP_TIME secs to give jenkins a chance to start up..."
 sleep $SLEEP_TIME
 
 # if no apiKey was found, assume it is a fresh install and load fixture data
-# NOTE: if no apiKey was found, it has been created and API_KEY should exist and be not emtpy
-if [[ ! -z $API_KEY ]];  then
-    echo "No api keys found Grafana, creating fixture data ..."
+if [[  $API_KEY_EXISTS == false ]]; then
+
+    echo "Creating fixture data ..."
     docker-compose --compatibility up -d perfana-fixture
 else
     echo "Existing api keys found in Grafana, skipping fixture data ..."
