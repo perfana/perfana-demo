@@ -16,7 +16,6 @@ services:
       ROOT_URL: "http://localhost:4000"
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       MONGO_OPLOG_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/local?replicaSet=rs0"
-      NODE_TLS_REJECT_UNAUTHORIZED: "0"
       METEOR_SETTINGS: '{
         "adminEmail":"admin@perfana.io",
         "adminPassword":"perfana",
