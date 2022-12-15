@@ -3,7 +3,7 @@ services:
 
 ######################################################################################################################
   perfana:
-    image: perfana/perfana-fe:perfana-2.3.0
+    image: perfana/perfana-fe:perfana-2.4.2
     init: true
     expose:
       - 4000
@@ -53,10 +53,13 @@ services:
 
   ######################################################################################################################
   perfana-grafana:
-    image: perfana/perfana-grafana:perfana-2.3.0
+    image: perfana/perfana-grafana:perfana-2.4.2
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SYNC_INTERVAL: 30000
+      MYSQL_HOST: mariadb
+      MYSQL_USER: root
+      MYSQL_PASSWORD: perfana
     ports:
       - "3001:3000"
     networks:
@@ -64,7 +67,7 @@ services:
 
   ######################################################################################################################
   perfana-fixture:
-    image: perfana/perfana-fixture:perfana-2.3.0
+    image: perfana/perfana-fixture:perfana-2.3.1
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
     volumes:
@@ -76,7 +79,7 @@ services:
 
   ######################################################################################################################
   perfana-snapshot:
-    image: perfana/perfana-snapshot:perfana-2.3.0
+    image: perfana/perfana-snapshot:perfana-2.4.2
     depends_on:
       - mongo1
       - mongo2
@@ -89,7 +92,7 @@ services:
 
   ######################################################################################################################
   perfana-check:
-    image: perfana/perfana-check:perfana-2.3.0
+    image: perfana/perfana-check:perfana-2.4.2
     expose:
     - 9191
     ports:
@@ -238,7 +241,7 @@ services:
 
   ######################################################################################################################
   grafana:
-    image: grafana/grafana:8.5.3
+    image: grafana/grafana:9.1.7
     ports:
       - "3000:3000"
     environment:
@@ -248,10 +251,10 @@ services:
         GF_SECURITY_ADMIN_PASSWORD: "perfana"
         GF_SECURITY_ALLOW_EMBEDDING: "true"
         GF_INSTALL_PLUGINS: "marcusolsson-json-datasource"
-        GF_UNIFIED_ALERTING_ENABLED: "false"
-        GF_ALERTING_ENABLED: "true"
     volumes:
       - grafana-storage:/var/lib/grafana
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+
     networks:
       - perfana
 
