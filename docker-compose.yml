@@ -181,13 +181,6 @@ services:
       "afterburner.mybatis.datasource.password": "perfana"
       "afterburner.mybatis.datasource.driver-class-name": "org.mariadb.jdbc.Driver"
       "JDK_JAVA_OPTIONS": "-javaagent:/pyroscope.jar"
-      "PYROSCOPE_APPLICATION_NAME": "optimus-prime-fe"
-      "PYROSCOPE_PROFILING_INTERVAL": "13ms"
-      "PYROSCOPE_PROFILER_EVENT": "itimer"
-      "PYROSCOPE_UPLOAD_INTERVAL": "3s"
-      "PYROSCOPE_LOG_LEVEL": "info"
-      "PYROSCOPE_SERVER_ADDRESS": "http://pyroscope:4040"
-      "PYROSCOPE_AUTH_TOKEN": "abc123"
     restart: always
     networks:
       - perfana
@@ -222,14 +215,6 @@ services:
       "afterburner.datasource.employee.username": "root"
       "afterburner.datasource.employee.password": "perfana"
       "afterburner.datasource.employee.poolMaximumActiveConnections": "5"
-      "JDK_JAVA_OPTIONS": "-javaagent:/pyroscope.jar"
-      "PYROSCOPE_APPLICATION_NAME": "optimus-prime-be"
-      "PYROSCOPE_PROFILING_INTERVAL": "13ms"
-      "PYROSCOPE_PROFILER_EVENT": "itimer"
-      "PYROSCOPE_UPLOAD_INTERVAL": "3s"
-      "PYROSCOPE_LOG_LEVEL": "info"
-      "PYROSCOPE_SERVER_ADDRESS": "http://pyroscope:4040"
-      "PYROSCOPE_AUTH_TOKEN": "abc123"
     restart: always
     networks:
       - perfana
@@ -275,15 +260,6 @@ services:
     networks:
       - perfana
 
-  ######################################################################################################################
-  pyroscope:
-    image: "pyroscope/pyroscope:0.18.0"
-    ports:
-      - "4040:4040"
-    command:
-      - "server"
-    networks:
-      - perfana
   ######################################################################################################################
   prometheus:
     image: prom/prometheus
