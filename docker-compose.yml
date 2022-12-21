@@ -3,7 +3,7 @@ services:
 
 ######################################################################################################################
   perfana:
-    image: perfana/perfana-fe:perfana-2.3.0
+    image: perfana/perfana-fe:perfana-2.4.2
     init: true
     expose:
       - 4000
@@ -29,11 +29,13 @@ services:
         "autoCompareTestRuns": true,
         "public": {
             "jaegerUrl": "http://localhost:16686",
+            "pyroscopeUrl": "http://localhost:4040",
             "perfanaUrl": "http://localhost:4000"
         },
         "helmet": {
           "frameSrc": [
            "http://localhost:3000",
+           "http://localhost:4040",
            "http://localhost:16686"
           ]
         },
@@ -53,10 +55,13 @@ services:
 
   ######################################################################################################################
   perfana-grafana:
-    image: perfana/perfana-grafana:perfana-2.3.0
+    image: perfana/perfana-grafana:perfana-2.4.2
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SYNC_INTERVAL: 30000
+      MYSQL_HOST: mariadb
+      MYSQL_USER: root
+      MYSQL_PASSWORD: perfana
     ports:
       - "3001:3000"
     networks:
@@ -64,7 +69,7 @@ services:
 
   ######################################################################################################################
   perfana-fixture:
-    image: perfana/perfana-fixture:perfana-2.3.0
+    image: perfana/perfana-fixture:perfana-2.3.1
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
     volumes:
@@ -76,7 +81,7 @@ services:
 
   ######################################################################################################################
   perfana-snapshot:
-    image: perfana/perfana-snapshot:perfana-2.3.0
+    image: perfana/perfana-snapshot:perfana-2.4.2
     depends_on:
       - mongo1
       - mongo2
@@ -89,7 +94,7 @@ services:
 
   ######################################################################################################################
   perfana-check:
-    image: perfana/perfana-check:perfana-2.3.0
+    image: perfana/perfana-check:perfana-2.4.2
     expose:
     - 9191
     ports:
@@ -99,7 +104,7 @@ services:
       - mongo2
       - mongo3
     environment:
-      MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
+      SPRING_DATA_MONGODB_URI: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SPRING_PROFILES_ACTIVE: "dev"
     networks:
       - perfana
@@ -151,12 +156,11 @@ services:
 
   ######################################################################################################################
   optimus-prime-fe:
-    image: stokpop/afterburner-jdk:2.0.0
+    image: perfana/afterburner:2.2.0-SNAPSHOT-jdk11
     ports:
       - "8090:8080"
     environment:
       "spring.application.name": "optimus-prime-fe"
-      "spring.profiles.active": "logstash"
       "afterburner.name": "optimus-prime-fe"
       "management.metrics.tags.system_under_test": "OptimusPrime"
       "management.metrics.tags.test_environment": "acc"
@@ -176,6 +180,7 @@ services:
       "afterburner.mybatis.datasource.username": "root"
       "afterburner.mybatis.datasource.password": "perfana"
       "afterburner.mybatis.datasource.driver-class-name": "org.mariadb.jdbc.Driver"
+      "JDK_JAVA_OPTIONS": "-javaagent:/pyroscope.jar"
     restart: always
     networks:
       - perfana
@@ -183,14 +188,14 @@ services:
       resources:
         limits:
           cpus: '2'
-          memory: 512M
+          memory: 1024M
 
   ######################################################################################################################
   optimus-prime-be:
-    image: stokpop/afterburner-jdk:2.0.0
+    image: perfana/afterburner:2.2.0-SNAPSHOT-jdk11
     environment:
       "spring.application.name": "optimus-prime-be"
-      "spring.profiles.active": "employee-db,logstash"
+      "spring.profiles.active": "employee-db"
       "afterburner.name": "optimus-prime-be"
       "management.metrics.tags.system_under_test": "OptimusPrime"
       "management.metrics.tags.test_environment": "acc"
@@ -217,7 +222,7 @@ services:
       resources:
         limits:
           cpus: '2'
-          memory: 512M
+          memory: 1024M
 
   ######################################################################################################################
   wiremock:
@@ -238,7 +243,7 @@ services:
 
   ######################################################################################################################
   grafana:
-    image: grafana/grafana:8.5.3
+    image: grafana/grafana:9.1.7
     ports:
       - "3000:3000"
     environment:
@@ -248,10 +253,10 @@ services:
         GF_SECURITY_ADMIN_PASSWORD: "perfana"
         GF_SECURITY_ALLOW_EMBEDDING: "true"
         GF_INSTALL_PLUGINS: "marcusolsson-json-datasource"
-        GF_UNIFIED_ALERTING_ENABLED: "false"
-        GF_ALERTING_ENABLED: "true"
     volumes:
       - grafana-storage:/var/lib/grafana
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+
     networks:
       - perfana
 
@@ -378,4 +383,3 @@ volumes:
   mongo2-storage:
   mongo3-storage:
   omnidb-storage:
-
