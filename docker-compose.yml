@@ -2,8 +2,13 @@ version: '3.7'
 services:
 
 ######################################################################################################################
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
   perfana:
-    image: perfana/perfana-fe:perfana-2.4.2
+    image: perfana/perfana-fe:perfana-2.6.1
     init: true
     expose:
       - 4000
@@ -12,6 +17,7 @@ services:
     networks:
       - perfana
     environment:
+      SNAPSHOT_STATUS_DELAY: 1000
       PORT: 3000
       ROOT_URL: "http://localhost:4000"
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
@@ -55,7 +61,7 @@ services:
 
   ######################################################################################################################
   perfana-grafana:
-    image: perfana/perfana-grafana:perfana-2.4.2
+    image: perfana/perfana-grafana:perfana-2.6.1
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SYNC_INTERVAL: 30000
@@ -81,7 +87,7 @@ services:
 
   ######################################################################################################################
   perfana-snapshot:
-    image: perfana/perfana-snapshot:perfana-2.4.2
+    image: perfana/perfana-snapshot-test:arm64-4
     depends_on:
       - mongo1
       - mongo2
@@ -94,7 +100,7 @@ services:
 
   ######################################################################################################################
   perfana-check:
-    image: perfana/perfana-check:perfana-2.4.2
+    image: perfana/perfana-check:perfana-2.6.1
     expose:
     - 9191
     ports:
@@ -109,9 +115,27 @@ services:
     networks:
       - perfana
 
+
+  ######################################################################################################################
+  perfana-scheduler:
+    image: perfana/perfana-scheduler:perfana-2.6.1
+    expose:
+    - 9292
+    ports:
+    - "9292:9292"
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    environment:
+      SPRING_DATA_MONGODB_URI: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
+      SPRING_PROFILES_ACTIVE: "dev"
+    networks:
+      - perfana
+
   ######################################################################################################################
   jenkins:
-    image: perfana/perfana-jenkins-blog:latest
+    image: perfana/perfana-jenkins-blog:lts-20221218-arm64
     expose:
     - 8080
     ports:
@@ -125,7 +149,7 @@ services:
 
   ######################################################################################################################
   influxdb:
-    image: influxdb:1.7.6
+    image: influxdb:1.8.10
     ports:
     - "8086:8086"
     - "2003:2003"
@@ -156,7 +180,7 @@ services:
 
   ######################################################################################################################
   optimus-prime-fe:
-    image: perfana/afterburner:2.2.0-SNAPSHOT-jdk11
+    image: perfana/afterburner:2.2.0-SNAPSHOT-070b0f0
     ports:
       - "8090:8080"
     environment:
@@ -180,7 +204,6 @@ services:
       "afterburner.mybatis.datasource.username": "root"
       "afterburner.mybatis.datasource.password": "perfana"
       "afterburner.mybatis.datasource.driver-class-name": "org.mariadb.jdbc.Driver"
-      "JDK_JAVA_OPTIONS": "-javaagent:/pyroscope.jar"
     restart: always
     networks:
       - perfana
@@ -192,7 +215,7 @@ services:
 
   ######################################################################################################################
   optimus-prime-be:
-    image: perfana/afterburner:2.2.0-SNAPSHOT-jdk11
+    image: perfana/afterburner:2.2.0-SNAPSHOT-070b0f0
     environment:
       "spring.application.name": "optimus-prime-be"
       "spring.profiles.active": "employee-db"
@@ -243,7 +266,9 @@ services:
 
   ######################################################################################################################
   grafana:
-    image: grafana/grafana:9.1.7
+    image: grafana/grafana:9.5.13
+    expose: 
+      - "3000"
     ports:
       - "3000:3000"
     environment:
@@ -295,8 +320,6 @@ services:
   ######################################################################################################################
   mariadb:
     image: mariadb:10.5.5
-    volumes:
-      - ./test_db:/db
     environment:
       MYSQL_ROOT_PASSWORD: perfana
     ports:
@@ -304,6 +327,7 @@ services:
     networks:
       - perfana
     volumes:
+    - ./test_db:/db
     - ./test_db:/docker-entrypoint-initdb.d
     - ./mariadb:/etc/mysql/conf.d
     deploy:

@@ -63,9 +63,10 @@ echo "Starting the rest of the environment ..."
 docker-compose --compatibility up -d perfana-grafana
 docker-compose --compatibility up -d perfana-snapshot
 docker-compose --compatibility up -d perfana-check
+docker-compose --compatibility up -d perfana-scheduler
 docker-compose --compatibility up -d telegraf
 docker-compose --compatibility up -d wiremock
-docker-compose --compatibility up -d omnidb
+#docker-compose --compatibility up -d omnidb
 docker-compose --compatibility up -d prometheus
 docker-compose --compatibility up -d alertmanager
 docker-compose --compatibility up -d jaeger
@@ -73,12 +74,12 @@ echo "Sleeping for $SLEEP_TIME secs to give containers a chance to start up..."
 sleep $SLEEP_TIME
 docker-compose --compatibility up -d optimus-prime-fe
 docker-compose --compatibility up -d optimus-prime-be
-echo "Sleeping for $SLEEP_TIME secs to give afterburners a chance to start up..."
-sleep $SLEEP_TIME
+#echo "Sleeping for $SLEEP_TIME secs to give afterburners a chance to start up..."
+#sleep $SLEEP_TIME
 docker-compose --compatibility up -d jenkins
 
-echo "Sleeping for $SLEEP_TIME secs to give jenkins a chance to start up..."
-sleep $SLEEP_TIME
+#echo "Sleeping for $SLEEP_TIME secs to give jenkins a chance to start up..."
+#sleep $SLEEP_TIME
 
 # if no apiKey was found, assume it is a fresh install and load fixture data
 if [[  $API_KEY_EXISTS == false ]]; then
@@ -88,5 +89,7 @@ if [[  $API_KEY_EXISTS == false ]]; then
 else
     echo "Existing api keys found in Grafana, skipping fixture data ..."
 fi
+
+#docker-compose --compatibility up -d rabbitmq
 
 echo "Done!"

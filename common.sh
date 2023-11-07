@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export MONGO_VERSION="4.4"
+export MONGO_VERSION="5.0"
 
 COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-$(basename $(pwd))}
 
