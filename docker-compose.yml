@@ -1,9 +1,13 @@
-version: '3.7'
 services:
 
 ######################################################################################################################
-  perfana:
-    image: perfana/perfana-fe:perfana-2.3.0
+#  rabbitmq:
+#    image: rabbitmq:management
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+  perfana-fe:
+    image: perfana/perfana-fe:3.2.0
     init: true
     expose:
       - 4000
@@ -11,7 +15,14 @@ services:
       - "4000:3000"
     networks:
       - perfana
+    volumes:
+      - ./perfana-fe/provisioning/goldenPathMetricClassifications.yaml:/opt/bundle/bundle/programs/server/assets/app/provisioning/goldenPathMetricClassifications.yaml:ro
+      - ./perfana-fe/provisioning/genericChecks.yaml:/opt/bundle/bundle/programs/server/assets/app/provisioning/genericChecks.yaml:ro
+      - ./perfana-fe/provisioning/autoConfigGrafanaDashboards.yaml:/opt/bundle/bundle/programs/server/assets/app/provisioning/autoConfigGrafanaDashboards.yaml:ro
+      - ./perfana-fe/provisioning/profiles.yaml:/opt/bundle/bundle/programs/server/assets/app/provisioning/profiles.yaml:ro
+      - ./perfana-fe/provisioning/defaultDsCompareConfig.yaml:/opt/bundle/bundle/programs/server/assets/app/provisioning/defaultDsCompareConfig.yaml:ro
     environment:
+      SNAPSHOT_STATUS_DELAY: 1000
       PORT: 3000
       ROOT_URL: "http://localhost:4000"
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
@@ -24,16 +35,25 @@ services:
         "snapshotExpires": "7776000",
         "perfanaUrl": "http://localhost:4000",
         "perfanaCheckUrl": "http://perfana-check:9191",
+        "perfanaApiPassword": "perfana",
+        "perfanaApiUser": "perfana",
         "influxDbHost": "influxdb",
         "autoSetBaselineTestRun": true,
         "autoCompareTestRuns": true,
+        "provisionGoldenPathProfiles": true,
+        "lokiRetention": 604800,
         "public": {
-            "jaegerUrl": "http://localhost:16686",
-            "perfanaUrl": "http://localhost:4000"
+          "tracingUrl": "http://localhost:3000/d/tempo-traces/tempo-traces",
+          "pyroscopeUrl": "http://localhost:4040",
+          "tracingLimit": 500,
+          "traceRequestNamePanelDescription": "perfana-request-names",
+          "betaFeatureAdapt": true,
+          "perfanaUrl": "http://localhost:4000"
         },
         "helmet": {
           "frameSrc": [
            "http://localhost:3000",
+           "http://localhost:4040",
            "http://localhost:16686"
           ]
         },
@@ -51,20 +71,66 @@ services:
         ]
        }'
 
-  ######################################################################################################################
+  ################################################################################################  ######################
   perfana-grafana:
-    image: perfana/perfana-grafana:perfana-2.3.0
+    image: perfana/perfana-grafana:2.27.0
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SYNC_INTERVAL: 30000
+      MYSQL_HOST: mariadb
+      MYSQL_USER: root
+      MYSQL_PASSWORD: perfana
     ports:
       - "3001:3000"
+    networks:
+      - perfana
+  ################################################################################################  ######################
+  perfana-ds-api:
+    image: perfana/perfana-ds:1.0.0-SNAPSHOT-6293480
+    command: |
+      uvicorn src.perfana_ds_api.app:app --host 0.0.0.0 --port 8080
+    expose:
+      - 8080
+    environment:
+      MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
+      PROJECT_NAME: "Perfana Datascience"
+      GRAFANA_URL: "http://grafana"
+      MONGO_DB: perfana
+
+    ports:
+      - "8080:8080"
+    networks:
+      - perfana
+
+   ######################################################################################################################
+  perfana-ds-metric-worker:
+    image: perfana/perfana-ds:1.0.0-SNAPSHOT-6293480
+    command: |
+      celery -A perfana_ds_api.worker.worker worker --loglevel=info -Q metrics
+    environment:
+      MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
+      PROJECT_NAME: "Perfana Datascience"
+      GRAFANA_URL: "http://grafana:3000"
+      MONGO_DB: perfana
+    networks:
+      - perfana
+
+   ######################################################################################################################
+  perfana-ds-worker:
+    image: perfana/perfana-ds:1.0.0-SNAPSHOT-6293480
+    command: |
+      celery -A perfana_ds_api.worker.worker worker --loglevel=info -P gevent -Q celery -c 5
+    environment:
+      MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
+      PROJECT_NAME: "Perfana Datascience"
+      GRAFANA_URL: "http://grafana:3000"
+      MONGO_DB: perfana
     networks:
       - perfana
 
   ######################################################################################################################
   perfana-fixture:
-    image: perfana/perfana-fixture:perfana-2.3.0
+    image: perfana/perfana-fixture:perfana-2.3.1
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
     volumes:
@@ -76,20 +142,22 @@ services:
 
   ######################################################################################################################
   perfana-snapshot:
-    image: perfana/perfana-snapshot:perfana-2.3.0
+    image: perfana/perfana-snapshot:3.0.0
     depends_on:
       - mongo1
       - mongo2
       - mongo3
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
-      DEBUG_WORKER_POOL: "true"
+      CONCURRENT_SNAPSHOTS: 1
+
+
     networks:
       - perfana
 
   ######################################################################################################################
   perfana-check:
-    image: perfana/perfana-check:perfana-2.3.0
+    image: perfana/perfana-check:3.2.7
     expose:
     - 9191
     ports:
@@ -99,38 +167,49 @@ services:
       - mongo2
       - mongo3
     environment:
-      MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
+      SPRING_DATA_MONGODB_URI: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SPRING_PROFILES_ACTIVE: "dev"
+      perfana.timeseries.fit-graphs-enabled: 'true'
+      perfana.fastapi-call.enabled: 'true'
+      perfana.fastapi-mongo.enabled: 'true'
+      logging.level.io.perfana.check.checkresult: INFO
+      logging.level.io.perfana.fastapi: INFO
+      perfana.watcher.check-result-enabled: 'true'
+      perfana.watcher.compare-result-enabled: 'true'
+      perfana.fastapi-client.api-host: http://perfana-ds-api:8080
     networks:
       - perfana
 
+
   ######################################################################################################################
-  jenkins:
-    image: perfana/perfana-jenkins-blog:latest
-    expose:
-    - 8080
+  perfana-scheduler:
+    image: perfana/perfana-scheduler:3.2.7
     ports:
-    - "8080:8080"
-    volumes:
-      - jenkins-storage:/var/jenkins_home
+    - "9292:9292"
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    environment:
+      SPRING_DATA_MONGODB_URI: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
+      SPRING_PROFILES_ACTIVE: "prd"
     networks:
       - perfana
-    # depends_on:
-    #   - influxdb
 
   ######################################################################################################################
   influxdb:
-    image: influxdb:1.7.6
+    image: influxdb:1.8.3
     ports:
     - "8086:8086"
     - "2003:2003"
-    environment:
-      INFLUXDB_GRAPHITE_ENABLED: "true"
     volumes:
     - "./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro"
     - influxdb-storage:/var/lib/influxdb
+    - ./influxdb/init-influxdb.sh:/docker-entrypoint-initdb.d/init-influxdb.sh
+
     networks:
       - perfana
+    entrypoint: /entrypoint.sh influxd
 
   ######################################################################################################################
   jaeger:
@@ -150,22 +229,24 @@ services:
       COLLECTOR_ZIPKIN_HOST_PORT: 9411
 
   ######################################################################################################################
-  optimus-prime-fe:
-    image: stokpop/afterburner-jdk:2.0.0
+  afterburner-fe:
+    image: perfana/afterburner:${SUT_VERSION}
     ports:
       - "8090:8080"
     environment:
-      "spring.application.name": "optimus-prime-fe"
+      "spring.application.name": "afterburner-fe"
       "spring.profiles.active": "logstash"
-      "afterburner.name": "optimus-prime-fe"
-      "management.metrics.tags.system_under_test": "OptimusPrime"
+      "afterburner.name": "afterburner-fe"
+      "afterburner.logback.loki.remotehost": "loki"
+      "afterburner.logback.loki.port": "3100"
+      "management.metrics.tags.system_under_test": "MyAfterburner"
       "management.metrics.tags.test_environment": "acc"
-      "management.metrics.tags.service": "optimus-prime-fe"
-      "afterburner.remote.call.base_url": "http://optimus-prime-be:8080"
+      "management.metrics.tags.service": "afterburner-fe"
+      "afterburner.remote.call.base_url": "http://afterburner-be:8080"
       "afterburner.remote.call.httpclient.socket.timeout.millis": "10000"
       "JAVA_OPTS" : "-Xmx312m"
       "spring.zipkin.enabled": "true"
-      "spring.zipkin.base-url": "http://jaeger:9411/"
+      "spring.zipkin.base-url": "http://tempo:9411/"
       "spring.sleuth.sampler.probability": "0.1"
       "spring.sleuth.keys.http.headers": "perfana-test-run-id,perfana-request-name"
       "spring.sleuth.propagation.tag.enabled": "true"
@@ -176,6 +257,15 @@ services:
       "afterburner.mybatis.datasource.username": "root"
       "afterburner.mybatis.datasource.password": "perfana"
       "afterburner.mybatis.datasource.driver-class-name": "org.mariadb.jdbc.Driver"
+      "JDK_JAVA_OPTIONS": "-javaagent:/pyroscope.jar"
+      "PYROSCOPE_APPLICATION_NAME": "afterburner-fe"
+      "PYROSCOPE_PROFILING_INTERVAL": "13ms"
+      "PYROSCOPE_FORMAT": "jfr"
+      "PYROSCOPE_PROFILER_EVENT": "itimer"
+      "PYROSCOPE_UPLOAD_INTERVAL": "3s"
+      "PYROSCOPE_LOG_LEVEL": "info"
+      "PYROSCOPE_SERVER_ADDRESS": "http://pyroscope:4040"
+      "PYROSCOPE_AUTH_TOKEN": "abc123"
     restart: always
     networks:
       - perfana
@@ -183,23 +273,25 @@ services:
       resources:
         limits:
           cpus: '2'
-          memory: 512M
+          memory: 1024M
 
   ######################################################################################################################
-  optimus-prime-be:
-    image: stokpop/afterburner-jdk:2.0.0
+  afterburner-be:
+    image: perfana/afterburner:${SUT_VERSION}
     environment:
-      "spring.application.name": "optimus-prime-be"
-      "spring.profiles.active": "employee-db,logstash"
-      "afterburner.name": "optimus-prime-be"
-      "management.metrics.tags.system_under_test": "OptimusPrime"
+      "spring.application.name": "afterburner-be"
+      "spring.profiles.active": "employee-db, logstash"
+      "afterburner.name": "afterburner-be"
+      "afterburner.logback.loki.remotehost": "loki"
+      "afterburner.logback.loki.port": "3100"
+      "management.metrics.tags.system_under_test": "MyAfterburner"
       "management.metrics.tags.test_environment": "acc"
-      "management.metrics.tags.service": "optimus-prime-be"
-      "afterburner.remote.call.base_url": "http://wiremock:8080"
+      "management.metrics.tags.service": "afterburner-be"
+      # "afterburner.remote.call.base_url": "http://wiremock:8080"
       "afterburner.remote.call.httpclient.socket.timeout.millis": "10000"
       "JAVA_OPTS" : "-Xmx312m"
       "spring.zipkin.enabled": "true"
-      "spring.zipkin.base-url": "http://jaeger:9411/"
+      "spring.zipkin.base-url": "http://tempo:9411/"
       "spring.sleuth.sampler.probability": "0.1"
       "spring.sleuth.keys.http.headers": "perfana-test-run-id,perfana-request-name"
       "spring.sleuth.propagation.tag.enabled": "true"
@@ -217,7 +309,7 @@ services:
       resources:
         limits:
           cpus: '2'
-          memory: 512M
+          memory: 1024M
 
   ######################################################################################################################
   wiremock:
@@ -238,7 +330,9 @@ services:
 
   ######################################################################################################################
   grafana:
-    image: grafana/grafana:8.5.3
+    image: grafana/grafana:11.4.0
+    expose:
+      - "3000"
     ports:
       - "3000:3000"
     environment:
@@ -247,24 +341,29 @@ services:
         GF_SECURITY_ADMIN_USER: "perfana"
         GF_SECURITY_ADMIN_PASSWORD: "perfana"
         GF_SECURITY_ALLOW_EMBEDDING: "true"
-        GF_INSTALL_PLUGINS: "marcusolsson-json-datasource"
-        GF_UNIFIED_ALERTING_ENABLED: "false"
-        GF_ALERTING_ENABLED: "true"
+        GF_INSTALL_PLUGINS: "marcusolsson-json-datasource, grafana-pyroscope-app"
+        
     volumes:
       - grafana-storage:/var/lib/grafana
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+
     networks:
       - perfana
-
+    #network_mode: host
   ######################################################################################################################
   prometheus:
     image: prom/prometheus
     user:  root
     volumes:
-      - ./prometheus-config:/prometheus
+      - ./prometheus:/prometheus
       - prometheus-storage:/data
     command:
       - '--config.file=/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/data'
+      - "--web.enable-remote-write-receiver"
+
     ports:
       - 9090:9090
     depends_on:
@@ -290,8 +389,6 @@ services:
   ######################################################################################################################
   mariadb:
     image: mariadb:10.5.5
-    volumes:
-      - ./test_db:/db
     environment:
       MYSQL_ROOT_PASSWORD: perfana
     ports:
@@ -312,7 +409,7 @@ services:
 ######################################################################################################################
   mongo1:
     hostname: mongo1
-    image: mongo:$MONGO_VERSION
+    image: mongo:7.0
     expose:
     - 27011
     ports:
@@ -324,7 +421,7 @@ services:
      - perfana
   mongo2:
     hostname: mongo2
-    image: mongo:$MONGO_VERSION
+    image: mongo:7.0
     expose:
     - 27012
     ports:
@@ -336,7 +433,7 @@ services:
      - perfana
   mongo3:
     hostname: mongo3
-    image: mongo:$MONGO_VERSION
+    image: mongo:7.0
     expose:
     - 27013
     ports:
@@ -362,7 +459,64 @@ services:
     networks:
       - perfana
 
+  #######################################################################################################################
+  loadtest:
+    image: perfana/maven-gatling-loadtest:0.0.4
+    environment:
+        SUT_VERSION: 1.0.0
+        GIT_SHA: 6293480
+    volumes:
+      - ./loadtest:/loadtest
+    entrypoint: >
+      sh -c "
+      echo Unpacking loadtest tar;
+      mkdir -p /loadtest/src;
+      tar -xzf /loadtest/loadtest-gatling.tar.gz --strip-components=1 -C /loadtest/src;
+      echo Finished unpacking loadtest tar;
+      tail -f /dev/null"
+    networks:
+      - perfana
 
+  ######################################################################################################################
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "3200:3200"  # Tempo HTTP API
+      - "14268:14268" # Jaeger ingest
+      - "14250:14250" # Jaeger GRPC
+      - "4317:4317"   # OpenTelemetry GRPC
+      - "4318:4318"   # OpenTelemetry HTTP
+      - "9411:9411"   # Zipkin
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  pyroscope:
+    image: grafana/pyroscope:latest
+    command: [ "server" ]
+    volumes:
+      - pyroscope-storage:/var/lib/pyroscope
+    ports:
+      - "4040:4040"     # Pyroscope HTTP API & UI
+      - "4100:4100"     # Profiling data ingest
+    networks:
+      - perfana
+
+######################################################################################################################
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    user: "10001"
+    networks:
+      - perfana
 #######################################################################################################################
 networks:
   perfana:
@@ -371,11 +525,26 @@ networks:
 #######################################################################################################################
 volumes:
   grafana-storage:
-  jenkins-storage:
+  pyroscope-storage:
   influxdb-storage:
   prometheus-storage:
   mongo1-storage:
   mongo2-storage:
   mongo3-storage:
   omnidb-storage:
-
+  loadtest-dir:
+  unpack-loadtest-tar:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./loadtest/loadtest-gatling.tar.gz
+      o: bind
+  pom-xml-file:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./loadtest/pom.xml
+      o: bind
+  tempo-data:
+  pyroscope-data:
+  loki-data:

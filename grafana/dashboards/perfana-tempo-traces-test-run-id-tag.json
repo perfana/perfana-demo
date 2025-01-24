@@ -1,0 +1,248 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": "Tempo",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trace ID"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": false,
+                    "title": "Show trace details",
+                    "url": "/d/tempo-traces/tempo-traces?org&var-traceId=$${__value.text}&$${service:queryparam}&$${perfanaTestRunId:queryparam}&$${minDuration:queryparam}&$${maxDuration:queryparam}&$${limit:queryparam}&kiosk"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Duration"
+          }
+        ]
+      },
+      "pluginVersion": "9.5.9",
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "key": "Q-a2eb9262-8641-4f17-8360-ee471866ef25-0",
+          "limit": 100,
+          "maxDuration": "$maxDuration",
+          "minDuration": "$minDuration",
+          "queryType": "nativeSearch",
+          "refId": "A",
+          "search": "perfana-test-run-id=$perfanaTestRunId",
+          "serviceName": "$service"
+        }
+      ],
+      "title": "Traces for test run id \"$perfanaTestRunId\"",
+      "type": "table"
+    },
+    {
+      "datasource": "Tempo",
+      "gridPos": {
+        "h": 28,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 2,
+      "targets": [
+        {
+          "datasource": "Tempo",
+          "key": "Q-3e6de2d5-c4ef-4ffa-9d06-9ffff08e36bc-0",
+          "limit": 20,
+          "query": "$traceId",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Trace details for trace id \"$traceId\"",
+      "type": "traces"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "bumble-bee-fe",
+          "value": "bumble-bee-fe"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "service",
+        "options": [],
+        "query": "",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "BumbleBee-performance-test-k6-67",
+          "value": "BumbleBee-performance-test-k6-67"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "perfanaTestRunId",
+        "options": [],
+        "query": "",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "minDuration",
+        "options": [],
+        "query": "",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "maxDuration",
+        "options": [],
+        "query": "",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "500",
+          "value": "500"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "limit",
+        "options": [],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "58bd8f8dcd7f913d01fe3128161743b5",
+          "value": "58bd8f8dcd7f913d01fe3128161743b5"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "traceId",
+        "options": [],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "2023-10-10T07:30:40.206Z",
+    "to": "2023-10-10T07:42:40.418Z"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Tempo traces test run",
+  "uid": "tempo-traces-test-run",
+  "version": 2,
+  "weekStart": ""
+}
