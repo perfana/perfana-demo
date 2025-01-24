@@ -2,9 +2,9 @@ rs.initiate(
   {
     _id : "rs0",
     members: [
-      { _id : 0, host : "172.17.0.1:27011" },
-      { _id : 1, host : "172.17.0.1:27012" },
-      { _id : 2, host : "172.17.0.1:27013" }
+      { _id : 0, host : "host.docker.internal:27011" },
+      { _id : 1, host : "host.docker.internal:27012" },
+      { _id : 2, host : "host.docker.internal:27013" }
     ]
   }
 ) 

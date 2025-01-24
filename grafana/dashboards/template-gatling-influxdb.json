@@ -1,0 +1,3252 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 9,
+      "panels": [],
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "refId": "A"
+        }
+      ],
+      "title": "Load",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "id": 46,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "mean response time",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            }
+          ],
+          "hide": false,
+          "measurement": "requests",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"duration\") FROM \"30d\".\"requests\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"result\" = 'OK') AND $timeFilter GROUP BY time($__interval)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "OK"
+            }
+          ]
+        }
+      ],
+      "title": "Mean overall response times",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 34,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "id": 3,
+      "interval": "10s",
+      "links": [],
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "Total",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "nodeName::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "scenario::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "users",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "select sum(value) from (SELECT max(\"active\") as value FROM \"30d\".\"users\" WHERE (\"testEnvironment\"::tag =~ /^$test_environment$/ AND \"systemUnderTest\"::tag =~ /^$system_under_test$/) AND $timeFilter GROUP BY time($__interval), \"nodeName\"::tag, \"scenario\"::tag) where $timeFilter group by time($__interval)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "active"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "max"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "testEnvironment::tag",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest::tag",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            }
+          ]
+        },
+        {
+          "alias": "Users for load generator: $tag_nodeName",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "nodeName::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "users",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "select sum(value) from (SELECT max(\"active\") as value FROM \"30d\".\"users\" WHERE (\"testEnvironment\"::tag =~ /^$test_environment$/ AND \"systemUnderTest\"::tag =~ /^$system_under_test$/) AND $timeFilter GROUP BY time($__interval), \"nodeName\"::tag, \"scenario\"::tag) where $timeFilter group by time($__interval), \"nodeName\"",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "active"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "testEnvironment::tag",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest::tag",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            }
+          ]
+        }
+      ],
+      "title": "Active users",
+      "transformations": [],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "id": 38,
+      "interval": "10s",
+      "links": [],
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "Requests per second",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            }
+          ],
+          "measurement": "requests",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT count(\"duration\")  / 10 FROM \"30d\".\"requests\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"result\" = 'OK') AND $timeFilter GROUP BY time($interval)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              },
+              {
+                "params": [
+                  " / 10"
+                ],
+                "type": "math"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "OK"
+            }
+          ]
+        }
+      ],
+      "title": "Total passed requests per second",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      },
+      "id": 37,
+      "interval": "10s",
+      "links": [],
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "Errors per second",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            }
+          ],
+          "measurement": "requests",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT count(\"duration\")  / 10 FROM \"30d\".\"requests\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"result\" = 'KO') AND $timeFilter GROUP BY time($interval)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              },
+              {
+                "params": [
+                  " / 10"
+                ],
+                "type": "math"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "KO"
+            }
+          ]
+        }
+      ],
+      "title": "Total failed requests per second",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "description": "perfana-request-names",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 1,
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "id": 6,
+      "interval": "10s",
+      "links": [],
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "requests",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT count(\"duration\")  / 10 FROM \"30d\".\"requests\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"result\" = 'OK') AND $timeFilter GROUP BY time($interval), \"name\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              },
+              {
+                "params": [
+                  " / 10"
+                ],
+                "type": "math"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "OK"
+            }
+          ]
+        }
+      ],
+      "title": "Passed requests per second",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "description": "perfana-request-names",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 1,
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "id": 39,
+      "interval": "10s",
+      "links": [],
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "requests",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT count(\"duration\")  / 10 FROM \"30d\".\"requests\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"result\" = 'KO') AND $timeFilter GROUP BY time($interval), \"name\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              },
+              {
+                "params": [
+                  " / 10"
+                ],
+                "type": "math"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "KO"
+            }
+          ]
+        }
+      ],
+      "title": "Failed requests per second",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      },
+      "id": 43,
+      "interval": "10s",
+      "links": [],
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Count"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.3",
+      "targets": [
+        {
+          "alias": "$tag_name $measurement ",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "errorMessage"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "requests",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT count(\"duration\") FROM \"30d\".\"requests\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"result\" = 'KO') AND $timeFilter GROUP BY \"name\", \"errorMessage\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "KO"
+            }
+          ]
+        }
+      ],
+      "title": "Error messages count",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "Time": 0,
+              "count": 3,
+              "errorMessage": 2,
+              "name": 1
+            },
+            "renameByName": {
+              "count": "Count",
+              "errorMessage": "Error message",
+              "name": "Request"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 37
+      },
+      "id": 44,
+      "interval": "10s",
+      "links": [],
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_name $tag_errorMessage",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "errorMessage"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "requests",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT count(\"duration\")  / 10 FROM \"30d\".\"requests\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"result\" = 'KO') AND $timeFilter GROUP BY time($interval), \"name\", \"errorMessage\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              },
+              {
+                "params": [
+                  " / 10"
+                ],
+                "type": "math"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "KO"
+            }
+          ]
+        }
+      ],
+      "title": "Errors per second",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "id": 18,
+      "links": [],
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "KO"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.3",
+      "targets": [
+        {
+          "alias": "$tag_name $tag_result",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "requests",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT count(\"duration\")  as \"OK\" FROM \"30d\".\"requests\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"result\" = 'OK' AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/) AND $timeFilter GROUP BY \"name\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "OK"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            }
+          ]
+        },
+        {
+          "alias": "$tag_name $tag_result",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "description": "perfana-request-names",
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "requests",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT count(\"duration\") as \"KO\"  FROM \"30d\".\"requests\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"result\" = 'KO' AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/) AND $timeFilter GROUP BY \"name\"",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "KO"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            }
+          ]
+        }
+      ],
+      "title": "Number of requests OK vs KO",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "name",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "count": "OK",
+              "count 1": "OK",
+              "count 2": "KO"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "id": 45,
+      "interval": "10s",
+      "links": [],
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "Cumulative % failed",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "errorMessage"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "requests",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT (CUMULATIVE_SUM(mean(\"failed\"))  /  CUMULATIVE_SUM(mean(\"total\")) ) * 100 FROM \"30d\".\"gatling-throughput\"  WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/) AND $timeFilter group by time(10s) fill(0)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "KO"
+            }
+          ]
+        }
+      ],
+      "title": "Percentage failed requests",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 62
+      },
+      "id": 10,
+      "panels": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "decimals": 0,
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 627
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": false,
+                        "title": "Show request details",
+                        "url": "/d/gatling-request-performance-influxdb/gatling-request-performance?orgId=1&$${system_under_test:queryparam}&$${test_environment:queryparam}&$${simulation:queryparam}&var-requestName=${__value.text}&$${__url_time_range}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 13,
+            "w": 24,
+            "x": 0,
+            "y": 62
+          },
+          "id": 42,
+          "interval": "10s",
+          "links": [],
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "frameIndex": 2,
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "10.2.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "influxdb",
+                "uid": "influxdb-gatling"
+              },
+              "groupBy": [
+                {
+                  "params": [
+                    "name"
+                  ],
+                  "type": "tag"
+                }
+              ],
+              "measurement": "requests",
+              "orderByTime": "ASC",
+              "policy": "30d",
+              "query": "SELECT mean(\"duration\"), min(\"duration\"), percentile(\"duration\", 50), percentile(\"duration\", 90), percentile(\"duration\", 99), max(\"duration\"), count(\"duration\") FROM \"30d\".\"requests\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"result\" = 'OK') AND $timeFilter GROUP BY \"name\"",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "table",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "duration"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ],
+                [
+                  {
+                    "params": [
+                      "duration"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "min"
+                  }
+                ],
+                [
+                  {
+                    "params": [
+                      "duration"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [
+                      "50"
+                    ],
+                    "type": "percentile"
+                  }
+                ],
+                [
+                  {
+                    "params": [
+                      "duration"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [
+                      "90"
+                    ],
+                    "type": "percentile"
+                  }
+                ],
+                [
+                  {
+                    "params": [
+                      "duration"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [
+                      "99"
+                    ],
+                    "type": "percentile"
+                  }
+                ],
+                [
+                  {
+                    "params": [
+                      "duration"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "max"
+                  }
+                ],
+                [
+                  {
+                    "params": [
+                      "duration"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "count"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "simulation",
+                  "operator": "=~",
+                  "value": "/^$simulation$/"
+                },
+                {
+                  "condition": "AND",
+                  "key": "systemUnderTest",
+                  "operator": "=~",
+                  "value": "/^$system_under_test$/"
+                },
+                {
+                  "condition": "AND",
+                  "key": "testEnvironment",
+                  "operator": "=~",
+                  "value": "/^$test_environment$/"
+                },
+                {
+                  "condition": "AND",
+                  "key": "result",
+                  "operator": "=",
+                  "value": "OK"
+                }
+              ]
+            }
+          ],
+          "title": "Response times",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                },
+                "indexByName": {},
+                "renameByName": {
+                  "mean": "",
+                  "percentile": "P50",
+                  "percentile_1": "P95",
+                  "percentile_2": "P99",
+                  "request": ""
+                }
+              }
+            }
+          ],
+          "type": "table"
+        }
+      ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "refId": "A"
+        }
+      ],
+      "title": "Performance overview",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 63
+      },
+      "id": 48,
+      "panels": [],
+      "title": "Performance over time",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 64
+      },
+      "id": 30,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "gatling-percentiles",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"cq_mean_response_time\") FROM \"30d\".\"gatling-percentiles\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"result\" = 'OK') AND $timeFilter GROUP BY time($__interval), \"name\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "cq_mean_response_time"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "OK"
+            }
+          ]
+        }
+      ],
+      "title": "Average Response times",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 64
+      },
+      "id": 49,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "gatling-percentiles",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"cq_max_response_time\") FROM \"30d\".\"gatling-percentiles\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"result\" = 'OK') AND $timeFilter GROUP BY time($__interval), \"name\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "cq_max_response_time"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "OK"
+            }
+          ]
+        }
+      ],
+      "title": "Response times maximum",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 75
+      },
+      "id": 32,
+      "interval": "10s",
+      "links": [],
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "gatling-percentiles",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"cq_stddev_response_time\") FROM \"30d\".\"gatling-percentiles\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"result\" = 'OK') AND $timeFilter GROUP BY time($__interval), \"name\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "cq_stddev_response_time"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "OK"
+            }
+          ]
+        }
+      ],
+      "title": "Response times stdDev",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 75
+      },
+      "id": 52,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "gatling-percentiles",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"cq_50pct_response_time\") FROM \"30d\".\"gatling-percentiles\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"result\" = 'OK') AND $timeFilter GROUP BY time($__interval), \"name\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "cq_50pct_response_time"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "OK"
+            }
+          ]
+        }
+      ],
+      "title": "Response times 50th percentile",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 86
+      },
+      "id": 51,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "gatling-percentiles",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"cq_90pct_response_time\") FROM \"30d\".\"gatling-percentiles\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"result\" = 'OK') AND $timeFilter GROUP BY time($__interval), \"name\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "cq_90pct_response_time"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "OK"
+            }
+          ]
+        }
+      ],
+      "title": "Response times 90th percentile",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-gatling"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 86
+      },
+      "id": 31,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-gatling"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "gatling-percentiles",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"cq_99pct_response_time\") FROM \"30d\".\"gatling-percentiles\" WHERE (\"simulation\" =~ /^$simulation$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"result\" = 'OK') AND $timeFilter GROUP BY time($__interval), \"name\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "cq_99pct_response_time"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "simulation",
+              "operator": "=~",
+              "value": "/^$simulation$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "result",
+              "operator": "=",
+              "value": "OK"
+            }
+          ]
+        }
+      ],
+      "title": "Response times 99th percentile",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": [
+    "perfana",
+    "perfana-template",
+    "perfana-performance-test-tool",
+    "gatling"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "MagicPlus",
+          "value": "MagicPlus"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb-gatling"
+        },
+        "definition": "show tag values  from requests with key=\"systemUnderTest\"",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "system_under_test",
+        "options": [],
+        "query": "show tag values  from requests with key=\"systemUnderTest\"",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "magicplus-perf",
+          "value": "magicplus-perf"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb-gatling"
+        },
+        "definition": "show tag values from requests with key=\"testEnvironment\" where \"systemUnderTest\" =~ /$system_under_test/",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "test_environment",
+        "options": [],
+        "query": "show tag values from requests with key=\"testEnvironment\" where \"systemUnderTest\" =~ /$system_under_test/",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "Magicplus",
+          "value": "Magicplus"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb-gatling"
+        },
+        "definition": "show tag values from requests with key= \"simulation\" where \"systemUnderTest\" =~ /$system_under_test/ and \"testEnvironment\" =~ /$test_environment/",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "simulation",
+        "options": [],
+        "query": "show tag values from requests with key= \"simulation\" where \"systemUnderTest\" =~ /$system_under_test/ and \"testEnvironment\" =~ /$test_environment/",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "2024-04-30T08:33:47.408Z",
+    "to": "now"
+  },
+  "timepicker": {
+    "now": true,
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "Gatling",
+  "uid": "gatling-overview-influxdb",
+  "version": 8,
+  "weekStart": ""
+}

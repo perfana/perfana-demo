@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="LOKI" class="LokiGatlingAppender">
+        <url>http://localhost:3100/loki/api/v1/push</url>
+        <batchSize>100</batchSize>
+        <batchTimeoutMs>1000</batchTimeoutMs>
+        
+        <label>
+            <pattern>service_name=gatling,level=%level,logger=%logger</pattern>
+        </label>
+        
+        <message>
+        	<pattern>%message</pattern>
+		</message>
+    </appender>
+
+    <logger name="io.gatling.http.engine.response" level="DEBUG"/>
+    <logger name="io.gatling.http.action.ws.fsm.WsLogger" level="DEBUG"/>
+
+    <root level="INFO">
+        <appender-ref ref="LOKI"/>
+    </root>
+</configuration>

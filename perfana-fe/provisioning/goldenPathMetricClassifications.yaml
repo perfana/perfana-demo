@@ -1,0 +1,499 @@
+- dashboardUid: gatling-overview-influxdb
+  panelId: 6
+  panelTitle: Passed requests per second
+  metricClassification: RED_rate
+  higherIsBetter: true
+- dashboardUid: gatling-overview-influxdb
+  panelId: 38
+  panelTitle: Total passed requests per second
+  metricClassification: RED_rate
+  higherIsBetter: true
+- dashboardUid: gatling-overview-influxdb
+  panelId: 37
+  panelTitle: Total failed requests per second
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: gatling-overview-influxdb
+  panelId: 39
+  panelTitle: Failed requests per second
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: gatling-overview-influxdb
+  panelId: 45
+  panelTitle: Percentage failed requests
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: gatling-overview-influxdb
+  panelId: 44
+  panelTitle: Errors per second
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: gatling-overview-influxdb
+  panelId: 52
+  panelTitle: Response times 50th percentile
+  metricClassification: RED_duration
+  higherIsBetter: false
+
+
+- dashboardUid: neoload-overview-influxdb
+  panelId: 6
+  panelTitle: Passed requests per second
+  metricClassification: RED_rate
+  higherIsBetter: true
+- dashboardUid: neoload-overview-influxdb
+  panelId: 38
+  panelTitle: Total passed requests per second
+  metricClassification: RED_rate
+  higherIsBetter: true
+- dashboardUid: neoload-overview-influxdb
+  panelId: 37
+  panelTitle: Total failed requests per second
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: neoload-overview-influxdb
+  panelId: 39
+  panelTitle: Failed requests per second
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: neoload-overview-influxdb
+  panelId: 45
+  panelTitle: Percentage failed requests
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: neoload-overview-influxdb
+  panelId: 44
+  panelTitle: Errors per second
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: neoload-overview-influxdb
+  panelId: 66
+  panelTitle: Transaction response times average
+  metricClassification: RED_duration
+  higherIsBetter: false
+  absThreshold: 0.02
+
+
+
+- dashboardUid: jmeter-overview-influxdb
+  panelId: 6
+  panelTitle: Passed requests per second
+  metricClassification: RED_rate
+  higherIsBetter: true
+- dashboardUid: jmeter-overview-influxdb
+  panelId: 38
+  panelTitle: Total passed requests per second
+  metricClassification: RED_rate
+  higherIsBetter: true
+- dashboardUid: jmeter-overview-influxdb
+  panelId: 37
+  panelTitle: Total failed requests per second
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: jmeter-overview-influxdb
+  panelId: 39
+  panelTitle: Failed requests per second
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: jmeter-overview-influxdb
+  panelId: 45
+  panelTitle: Percentage failed requests
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: jmeter-overview-influxdb
+  panelId: 44
+  panelTitle: Errors per second
+  metricClassification: RED_errors
+  higherIsBetter: false
+
+- dashboardUid: k6-http-overview-influxdb
+  panelId: 6
+  panelTitle: Passed requests per second
+  metricClassification: RED_rate
+  higherIsBetter: true
+- dashboardUid: k6-http-overview-influxdb
+  panelId: 38
+  panelTitle: Total passed requests per second
+  metricClassification: RED_rate
+  higherIsBetter: true
+- dashboardUid: k6-http-overview-influxdb
+  panelId: 37
+  panelTitle: Total failed requests per second
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: k6-http-overview-influxdb
+  panelId: 39
+  panelTitle: Failed requests per second
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: k6-http-overview-influxdb
+  panelId: 45
+  panelTitle: Percentage failed requests
+  metricClassification: RED_errors
+  higherIsBetter: false
+- dashboardUid: k6-http-overview-influxdb
+  panelId: 44
+  panelTitle: Errors per second
+  metricClassification: RED_errors
+  higherIsBetter: false
+
+- dashboardUid: kubernetes-namespace-resources-mimir
+  panelId: 16
+  panelTitle: Pods CPU usage as percentage of limit
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: kubernetes-namespace-resources-mimir
+  panelId: 20
+  panelTitle: Pods memory usage
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: kubernetes-namespace-resources-mimir
+  panelId: 24
+  panelTitle: Container restarts
+  metricClassification: USE_errors
+  higherIsBetter: false
+- dashboardUid: kubernetes-namespace-resources-mimir
+  panelId: 22
+  panelTitle: CPU Throttling %
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: kubernetes-pod-metrics-mimir
+  panelId: 99
+  panelTitle: Average pods CPU usage % of limit
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: kubernetes-pod-metrics-mimir
+  panelId: 36
+  panelTitle: Pods memory usage
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-mimir
+  panelId: 32
+  panelTitle: Threads
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-mimir
+  panelId: 166
+  panelTitle: Thread States
+  metricClassification: USE_saturation
+  higherIsBetter: false
+  absThreshold: 10
+- dashboardUid: spring-boot-kubernetes-hickari-cp-mimir
+  panelId: 18
+  panelTitle: Idle connections
+  metricClassification: USE_usage
+  higherIsBetter: true
+- dashboardUid: spring-boot-kubernetes-hickari-cp-mimir
+  panelId: 10
+  panelTitle: Active connections
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-hickari-cp-mimir
+  panelId: 25
+  panelTitle: Queries / second
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-hickari-cp-mimir
+  panelId: 24
+  panelTitle: Timeout total time
+  metricClassification: USE_errors
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-hickari-cp-mimir
+  panelId: 23
+  panelTitle: Usage time
+  metricClassification: USE_usage
+  higherIsBetter: false
+  ignore: true
+  ignoreMeanDiffSmallerThan: 10
+  description: 'optional_string_value'
+- dashboardUid: spring-boot-kubernetes-hickari-cp-mimir
+  panelId: 16
+  panelTitle: Acquire time
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-hickari-cp-mimir
+  panelId: 19
+  panelTitle: Pending connections
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 98
+  panelTitle: Collections end of minor GC by cause
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 101
+  panelTitle: Average Pause Durations end of minor GC by cause
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 151
+  panelTitle: Maximum Pause Durations end of minor GC by cause
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 99
+  panelTitle: Young generation memory pool increase
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 176
+  panelTitle: Collections end of major GC by cause
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 177
+  panelTitle: Average Pause Durations end of major GC by cause
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 178
+  panelTitle: Maximum Pause Durations end of major GC by cause
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 179
+  panelTitle: Old generation memory pool increase
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 24
+  panelTitle: Average JVM Heap % used
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 25
+  panelTitle: Average JVM Non-Heap % used
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 26
+  panelTitle: Average JVM Total % used
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 163
+  panelTitle: Average Eden Space in use
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 172
+  panelTitle: Average Survivor Space in use
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 175
+  panelTitle: Average Old Gen in use
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 78
+  panelTitle: Average CodeHeap 'non-nmethods' % in use
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 154
+  panelTitle: Average CodeHeap 'non-profiled nmethods' % in use
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 157
+  panelTitle: Average CodeHeap 'profiled nmethods' % in use
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panelId: 160
+  panelTitle: Average Compressed Class Space % in use
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: spring-boot-kubernetes-httpconpool-mimir
+  panelId: 106
+  panelTitle: HTTP connection pool in use
+  metricClassification: USE_usage
+  higherIsBetter: false
+  absThreshold: 0.1
+
+- dashboardUid: spring-boot-kubernetes-jvm-mimir
+  panelId: 1
+  panelTitle: Log Events (1m)
+  metricClassification: USE_errors
+  higherIsBetter: false
+
+
+- dashboardUid: bc53520866e45005fc33f9a3c7e4c92f
+  panelId: 64
+  panelTitle: 95th percentile span durations
+  metricClassification: RED_duration
+  higherIsBetter: false
+  absThreshold: 0.05
+
+
+- dashboardUid: jfr-exporter-influxdb
+  panelId: 2
+  panelTitle: CPU
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: jfr-exporter-influxdb
+  panelId: 7
+  panelTitle: Heap used
+  metricClassification: USE_usage
+  higherIsBetter: false
+- dashboardUid: jfr-exporter-influxdb
+  panelId: 6
+  panelTitle: Threads active
+  metricClassification: USE_usage
+  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 4
+#  panelTitle: Memory allocation rate
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+- dashboardUid: jfr-exporter-influxdb
+  panelId: 3
+  panelTitle: Garbage collections (young)
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: jfr-exporter-influxdb
+  panelId: 10
+  panelTitle: Garbage collections max (young)
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: jfr-exporter-influxdb
+  panelId: 24
+  panelTitle: Garbage collections total time (young)
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: jfr-exporter-influxdb
+  panelId: 8
+  panelTitle: Garbage collections (old)
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: jfr-exporter-influxdb
+  panelId: 12
+  panelTitle: Garbage collections max (old)
+  metricClassification: USE_saturation
+  higherIsBetter: false
+- dashboardUid: jfr-exporter-influxdb
+  panelId: 22
+  panelTitle: Garbage collections total time (old)
+  metricClassification: USE_saturation
+  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 9
+#  panelTitle: Safe points
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 11
+#  panelTitle: Safe point max
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 23
+#  panelTitle: Safe point total time
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 13
+#  panelTitle: Big allocations
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 15
+#  panelTitle: Big allocation stacktraces
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 16
+#  panelTitle: Large allocation samples
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 17
+#  panelTitle: Large allocation samples stacktraces
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 19
+#  panelTitle: Java Monitor Enter
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 21
+#  panelTitle: Java Monitor Enter stacktraces
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 25
+#  panelTitle: Java Monitor Wait
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 26
+#  panelTitle: Java Monitor Wait stacktraces
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 18
+#  panelTitle: Socket read bytes
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 20
+#  panelTitle: Socket write bytes
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 5
+#  panelTitle: Classes loaded
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 28
+#  panelTitle: Memory Resident Set Size
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 29
+#  panelTitle: Memory Native Committed per Type
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 30
+#  panelTitle: Memory Native Reserved per Type
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 27
+#  panelTitle: Native Memory Total
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 31
+#  panelTitle: Thread context switch rate
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+- dashboardUid: jfr-exporter-influxdb
+  panelId: 32
+  panelTitle: Container CPU throttle time
+  metricClassification: USE_saturation
+  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 33
+#  panelTitle: Container CPU slices
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+- dashboardUid: jfr-exporter-influxdb
+  panelId: 34
+  panelTitle: Container memory usage
+  metricClassification: USE_usage
+  higherIsBetter: false
+#- dashboardUid: jfr-exporter-influxdb
+#  panelId: 35
+#  panelTitle: Container memory request failures
+#  metricClassification: UNKNOWN
+#  higherIsBetter: false
+- dashboardUid: span-metrics
+  panelId: 64
+  panelTitle: 95th percentile span durations
+  metricClassification: RED_duration
+  higherIsBetter: false
