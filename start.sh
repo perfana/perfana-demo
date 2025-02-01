@@ -109,7 +109,8 @@ api_key=$( curl --location 'http://localhost:4000/api/key' \
 # Replace __apiKey__ in ./loadtest/pom.xml with the fetched API key
 sed -i '' "s/__apiKey__/$api_key/" ./loadtest/pom.xml
 
-echo "Running load test with SUT_VERSION=${SUT_VERSION} and GIT_SHA=${GIT_SHA}"
-docker-compose exec loadtest mvn -DSUT_VERSION=${SUT_VERSION} -DGIT_SHA=${GIT_SHA} events-gatling:test
-
+echo "Running 3 baseline load tests with SUT_VERSION=${SUT_VERSION} and GIT_SHA=${GIT_SHA}"
+./deploy-and-test.sh baseline
+./deploy-and-test.sh baseline
+./deploy-and-test.sh baseline
 echo "Done!"

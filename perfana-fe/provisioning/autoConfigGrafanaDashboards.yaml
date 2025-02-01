@@ -118,3 +118,20 @@
   dashboardUid: span-metrics
   createSeparateDashboardForVariable: requestName
   readOnly: true  
+- _id: gatling-loki-logs
+  profile: gatling
+  grafana: Default
+  dashboardName: Gatling Loki Logs
+  dashboardUid: gatling-loki-logs
+  createSeparateDashboardForVariable: simulation
+  readOnly: true
+- _id: docker-telegraf-influxdb
+  profile: docker
+  grafana: Default
+  dashboardName: Docker container metrics
+  dashboardUid: docker-telegraf-influxdb
+  createSeparateDashboardForVariable: container
+  matchRegexForVariables:
+    - name: container
+      regex: perfana-containers
+  readOnly: true

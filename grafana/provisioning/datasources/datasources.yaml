@@ -89,6 +89,17 @@ datasources:
     basicAuthUser: admin
     secureJsonData:
       basicAuthPassword: perfana
+  - name: influxDb-telegraf
+    type: influxdb
+    url: http://influxdb:8086
+    access: proxy
+    uid: influxdb-telegraf
+    editable: true
+    database: telegraf
+    basicAuth: true
+    basicAuthUser: admin
+    secureJsonData:
+      basicAuthPassword: perfana
   - name: Tempo
     type: tempo
     uid: tempo

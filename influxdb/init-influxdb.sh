@@ -8,6 +8,8 @@ influx -execute 'CREATE DATABASE gatling3'
 influx -execute 'CREATE RETENTION POLICY "30d" ON gatling3 DURATION 30d REPLICATION 1 DEFAULT'
 influx -execute 'CREATE DATABASE jmeter'
 influx -execute 'CREATE RETENTION POLICY "30d" ON jmeter DURATION 30d REPLICATION 1 DEFAULT'
+influx -execute 'CREATE DATABASE telegraf'
+influx -execute 'CREATE RETENTION POLICY "30d" ON telegraf DURATION 30d REPLICATION 1 DEFAULT'
 
 # Create continuous queries
 influx -execute 'CREATE CONTINUOUS QUERY gatling_cq_failed_rps1 ON gatling3 BEGIN SELECT CUMULATIVE_SUM(count("duration")) as "failed" INTO "gatling-throughput" FROM "30d"."requests" WHERE "result" = 'KO' GROUP BY time(10s),result,simulation,testEnvironment,systemUnderTest END'

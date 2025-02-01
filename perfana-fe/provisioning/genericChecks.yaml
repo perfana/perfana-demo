@@ -253,3 +253,22 @@
     benchmark:
       operator: pst
       value: 10
+- _id: docker-cpu
+  profile: docker
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: Docker container metrics
+  dashboardUid: docker-telegraf-influxdb
+  panel:
+    title: CPU
+    id: 1
+    type: timeseries
+    yAxesFormat: short
+    evaluateType: avg
+    requirement:
+      operator: lt
+      value: 70
+    benchmark:
+      operator: pst-pct
+      value: 20
+    excludeRampUpTime: true
