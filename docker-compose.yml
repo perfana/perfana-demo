@@ -7,7 +7,8 @@ services:
 #      - "5672:5672"
 #      - "15672:15672"
   perfana-fe:
-    image: perfana/perfana-fe:3.2.0
+    image: perfana/perfana-fe:3.3.0
+
     init: true
     expose:
       - 4000
@@ -45,7 +46,9 @@ services:
         "public": {
           "tracingUrl": "http://localhost:3000/d/tempo-traces/tempo-traces",
           "pyroscopeUrl": "http://localhost:4040",
+          "tracingUi": "tempo",
           "tracingLimit": 500,
+          "tracingIframeAllowed": true,
           "traceRequestNamePanelDescription": "perfana-request-names",
           "betaFeatureAdapt": true,
           "perfanaUrl": "http://localhost:4000"
@@ -86,7 +89,7 @@ services:
       - perfana
   ################################################################################################  ######################
   perfana-ds-api:
-    image: perfana/perfana-ds:1.0.0-SNAPSHOT-6293480
+    image: perfana/perfana-ds:0.2.8
     command: |
       uvicorn src.perfana_ds_api.app:app --host 0.0.0.0 --port 8080
     expose:
@@ -104,7 +107,7 @@ services:
 
    ######################################################################################################################
   perfana-ds-metric-worker:
-    image: perfana/perfana-ds:1.0.0-SNAPSHOT-6293480
+    image: perfana/perfana-ds:0.2.8
     command: |
       celery -A perfana_ds_api.worker.worker worker --loglevel=info -Q metrics
     environment:
@@ -117,7 +120,7 @@ services:
 
    ######################################################################################################################
   perfana-ds-worker:
-    image: perfana/perfana-ds:1.0.0-SNAPSHOT-6293480
+    image: perfana/perfana-ds:0.2.8
     command: |
       celery -A perfana_ds_api.worker.worker worker --loglevel=info -P gevent -Q celery -c 5
     environment:
@@ -125,18 +128,6 @@ services:
       PROJECT_NAME: "Perfana Datascience"
       GRAFANA_URL: "http://grafana:3000"
       MONGO_DB: perfana
-    networks:
-      - perfana
-
-  ######################################################################################################################
-  perfana-fixture:
-    image: perfana/perfana-fixture:perfana-2.3.1
-    environment:
-      MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
-    volumes:
-        - ./import:/app/fixture/import
-    ports:
-      - "3002:3000"
     networks:
       - perfana
 
@@ -168,9 +159,10 @@ services:
       - mongo3
     environment:
       SPRING_DATA_MONGODB_URI: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
-      SPRING_PROFILES_ACTIVE: "dev"
+      SPRING_PROFILES_ACTIVE: "prd"
       perfana.timeseries.fit-graphs-enabled: 'true'
       perfana.fastapi-call.enabled: 'true'
+      perfana:fastapi-client.connectTimeoutMs: '10000'
       perfana.fastapi-mongo.enabled: 'true'
       logging.level.io.perfana.check.checkresult: INFO
       logging.level.io.perfana.fastapi: INFO
@@ -197,36 +189,103 @@ services:
       - perfana
 
   ######################################################################################################################
-  influxdb:
-    image: influxdb:1.8.3
+  grafana:
+    image: grafana/grafana:11.4.0
+    expose:
+      - "3000"
     ports:
-    - "8086:8086"
-    - "2003:2003"
+      - "3000:3000"
+    environment:
+        GF_AUTH_ANONYMOUS_ENABLED: "true"
+        GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+        GF_SECURITY_ADMIN_USER: "perfana"
+        GF_SECURITY_ADMIN_PASSWORD: "perfana"
+        GF_SECURITY_ALLOW_EMBEDDING: "true"
+        GF_INSTALL_PLUGINS: "marcusolsson-json-datasource, grafana-pyroscope-app"
+        
     volumes:
-    - "./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro"
-    - influxdb-storage:/var/lib/influxdb
-    - ./influxdb/init-influxdb.sh:/docker-entrypoint-initdb.d/init-influxdb.sh
+      - grafana-storage:/var/lib/grafana
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
 
     networks:
       - perfana
-    entrypoint: /entrypoint.sh influxd
+    #network_mode: host
+    ######################################################################################################################
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "3200:3200"  # Tempo HTTP API
+      - "14268:14268" # Jaeger ingest
+      - "14250:14250" # Jaeger GRPC
+      - "4317:4317"   # OpenTelemetry GRPC
+      - "4318:4318"   # OpenTelemetry HTTP
+      - "9411:9411"   # Zipkin
+    networks:
+      - perfana
 
   ######################################################################################################################
-  jaeger:
-    image: jaegertracing/all-in-one:1.22
+  pyroscope:
+    image: grafana/pyroscope:latest
+    command: [ "server" ]
+    volumes:
+      - pyroscope-storage:/var/lib/pyroscope
     ports:
-      - "5775:5775/udp"
-      - "6831:6831/udp"
-      - "6832:6832/udp"
-      - "5778:5778"
-      - "16686:16686"
-      - "14268:14268"
-      - "14250:14250"
-      - "9411:9411"
+      - "4040:4040"     # Pyroscope HTTP API & UI
+      - "4100:4100"     # Profiling data ingest
     networks:
       - perfana
-    environment:
-      COLLECTOR_ZIPKIN_HOST_PORT: 9411
+
+  ######################################################################################################################
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    user: "10001"
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  prometheus:
+    image: prom/prometheus
+    user:  root
+    volumes:
+      - ./prometheus:/prometheus
+      - prometheus-storage:/data
+    command:
+      - '--config.file=/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/data'
+      - "--web.enable-remote-write-receiver"
+
+    ports:
+      - 9090:9090
+    depends_on:
+      - alertmanager
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  alertmanager:
+    image: prom/alertmanager
+    user:  root
+    volumes:
+      - ./prometheus-config:/prometheus
+      - prometheus-storage:/data
+    command:
+      - '--config.file=/prometheus/alertmanager.yml'
+      - '--storage.path=/data'
+    ports:
+      - 9093:9093
+    networks:
+      - perfana
 
   ######################################################################################################################
   afterburner-fe:
@@ -315,76 +374,10 @@ services:
   wiremock:
     image: perfana/perfana-wiremock:2.32.0-alpine
     ports:
-     - "8060:8080"
+      - "8060:8080"
     networks:
       - perfana
 
-  ######################################################################################################################
-  telegraf:
-    image: telegraf:1.20.1
-    volumes:
-    - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
-    - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-       - perfana
-
-  ######################################################################################################################
-  grafana:
-    image: grafana/grafana:11.4.0
-    expose:
-      - "3000"
-    ports:
-      - "3000:3000"
-    environment:
-        GF_AUTH_ANONYMOUS_ENABLED: "true"
-        GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
-        GF_SECURITY_ADMIN_USER: "perfana"
-        GF_SECURITY_ADMIN_PASSWORD: "perfana"
-        GF_SECURITY_ALLOW_EMBEDDING: "true"
-        GF_INSTALL_PLUGINS: "marcusolsson-json-datasource, grafana-pyroscope-app"
-        
-    volumes:
-      - grafana-storage:/var/lib/grafana
-      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
-
-    networks:
-      - perfana
-    #network_mode: host
-  ######################################################################################################################
-  prometheus:
-    image: prom/prometheus
-    user:  root
-    volumes:
-      - ./prometheus:/prometheus
-      - prometheus-storage:/data
-    command:
-      - '--config.file=/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/data'
-      - "--web.enable-remote-write-receiver"
-
-    ports:
-      - 9090:9090
-    depends_on:
-      - alertmanager
-    networks:
-      - perfana
-
-  ######################################################################################################################
-  alertmanager:
-    image: prom/alertmanager
-    user:  root
-    volumes:
-      - ./prometheus-config:/prometheus
-      - prometheus-storage:/data
-    command:
-      - '--config.file=/prometheus/alertmanager.yml'
-      - '--storage.path=/data'
-    ports:
-      - 9093:9093
-    networks:
-      - perfana
 
   ######################################################################################################################
   mariadb:
@@ -398,13 +391,55 @@ services:
     volumes:
     - ./test_db:/docker-entrypoint-initdb.d
     - ./mariadb:/etc/mysql/conf.d
-    deploy:
-     resources:
-       limits:
-         cpus: '1'
-         memory: 512M
+#    deploy:
+#     resources:
+#       limits:
+#         cpus: '1'
+#         memory: 512M
 
 
+  ######################################################################################################################
+  influxdb:
+    image: influxdb:1.8.3
+    ports:
+      - "8086:8086"
+      - "2003:2003"
+    volumes:
+      - "./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro"
+      - influxdb-storage:/var/lib/influxdb
+      - ./influxdb/init-influxdb.sh:/docker-entrypoint-initdb.d/init-influxdb.sh
+
+    networks:
+      - perfana
+    entrypoint: /entrypoint.sh influxd
+
+  ######################################################################################################################
+  jaeger:
+    image: jaegertracing/all-in-one:1.22
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+      - "9411:9411"
+    networks:
+      - perfana
+    environment:
+      COLLECTOR_ZIPKIN_HOST_PORT: 9411
+
+  ######################################################################################################################
+  telegraf:
+    image: telegraf:1.33.1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # <-- Add this line
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    privileged: true   # <-- Add this if needed for extra permissions
+    user: telegraf:root  # ⬅️ Run Telegraf as root to avoid permission issues
+    networks:
+      - perfana
 
 ######################################################################################################################
   mongo1:
@@ -444,27 +479,12 @@ services:
     networks:
       - perfana
 
-
-#######################################################################################################################
-  omnidb:
-    image: perfana/perfana-omnidb:1.0.0-blog
-    expose:
-    - 8888
-    - 25482
-    volumes:
-      - ./omnidb:/etc/omnidb:rw
-    ports:
-    - 8888:8080
-    - 25482:25482
-    networks:
-      - perfana
-
   #######################################################################################################################
   loadtest:
     image: perfana/maven-gatling-loadtest:0.0.4
     environment:
-        SUT_VERSION: 1.0.0
-        GIT_SHA: 6293480
+      SUT_VERSION: 1.0.0
+      GIT_SHA: 6293480
     volumes:
       - ./loadtest:/loadtest
     entrypoint: >
@@ -477,46 +497,7 @@ services:
     networks:
       - perfana
 
-  ######################################################################################################################
-  tempo:
-    image: grafana/tempo:latest
-    command: [ "-config.file=/etc/tempo.yaml" ]
-    volumes:
-      - ./tempo/tempo.yaml:/etc/tempo.yaml
-    ports:
-      - "3200:3200"  # Tempo HTTP API
-      - "14268:14268" # Jaeger ingest
-      - "14250:14250" # Jaeger GRPC
-      - "4317:4317"   # OpenTelemetry GRPC
-      - "4318:4318"   # OpenTelemetry HTTP
-      - "9411:9411"   # Zipkin
-    networks:
-      - perfana
 
-  ######################################################################################################################
-  pyroscope:
-    image: grafana/pyroscope:latest
-    command: [ "server" ]
-    volumes:
-      - pyroscope-storage:/var/lib/pyroscope
-    ports:
-      - "4040:4040"     # Pyroscope HTTP API & UI
-      - "4100:4100"     # Profiling data ingest
-    networks:
-      - perfana
-
-######################################################################################################################
-  loki:
-    image: grafana/loki:latest
-    ports:
-      - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
-    volumes:
-      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
-      - loki-data:/loki
-    user: "10001"
-    networks:
-      - perfana
 #######################################################################################################################
 networks:
   perfana:

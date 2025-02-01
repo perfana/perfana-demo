@@ -1,0 +1,286 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ERROR"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 64,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "editorMode": "code",
+          "expr": "sum by(request_name) (rate({level=\"DEBUG\", service_name=\"unknown_service\"} | json | line_format \"{{.message}}\" | json | __error__!=\"JSONParserErr\" | unpack | request_name=~\"$requestName\"  [1m]))",
+          "legendFormat": "{{request_name}}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Log items per second",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 20,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 63,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "editorMode": "code",
+          "expr": "{level=\"DEBUG\"}  \n| json  \n| line_format \"{{.message}}\" | json message_json=\"message\" | json |request_name=~\"$requestName\" | line_format \"{{.request_name}} status_code {{.status_code}} {{.method}} {{.url}} {{.message_json}}\" ",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "New Panel",
+      "type": "logs"
+    }
+  ],
+  "preload": false,
+  "refresh": false,
+  "schemaVersion": 40,
+  "tags": [
+    "perfana",
+    "perfana-template",
+    "gatling",
+    "loki"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "MyAfterburner",
+          "value": "MyAfterburner"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb-gatling"
+        },
+        "definition": "show tag values  from requests with key=\"systemUnderTest\"",
+        "includeAll": false,
+        "name": "system_under_test",
+        "options": [],
+        "query": "show tag values  from requests with key=\"systemUnderTest\"",
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "acc",
+          "value": "acc"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb-gatling"
+        },
+        "definition": "show tag values from requests with key=\"testEnvironment\" where \"systemUnderTest\" =~ /$system_under_test/",
+        "includeAll": false,
+        "name": "test_environment",
+        "options": [],
+        "query": "show tag values from requests with key=\"testEnvironment\" where \"systemUnderTest\" =~ /$system_under_test/",
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "AfterburnerBasicSimulation",
+          "value": "AfterburnerBasicSimulation"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb-gatling"
+        },
+        "definition": "show tag values from requests with key= \"simulation\" where \"systemUnderTest\" =~ /$system_under_test/ and \"testEnvironment\" =~ /$test_environment/",
+        "includeAll": false,
+        "name": "simulation",
+        "options": [],
+        "query": "show tag values from requests with key= \"simulation\" where \"systemUnderTest\" =~ /$system_under_test/ and \"testEnvironment\" =~ /$test_environment/",
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": [
+            "flaky_call"
+          ],
+          "value": [
+            "flaky_call"
+          ]
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb-gatling"
+        },
+        "definition": "show tag values from requests with key= \"name\" where \"systemUnderTest\" =~ /$system_under_test/ and \"testEnvironment\" =~ /$test_environment/ and \"simulation\" =~ /$simulation/",
+        "includeAll": false,
+        "multi": true,
+        "name": "requestName",
+        "options": [],
+        "query": "show tag values from requests with key= \"name\" where \"systemUnderTest\" =~ /$system_under_test/ and \"testEnvironment\" =~ /$test_environment/ and \"simulation\" =~ /$simulation/",
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-3h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Gatling Loki Logs",
+  "uid": "gatling-loki-logs",
+  "version": 1,
+  "weekStart": ""
+}

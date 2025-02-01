@@ -46,3 +46,9 @@
   tags:
     - spanmetrics
   readOnly: true  
+- _id: docker
+  name: docker
+  description: Profile for docker metrics
+  tags:
+    - docker
+  readOnly: true  

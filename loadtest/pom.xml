@@ -25,7 +25,7 @@
         <test-events-test-run-config-command.version>[3.0.0,3.1.0)</test-events-test-run-config-command.version>
         <test-events-command-runner.version>[3.0.0,3.1.0)</test-events-command-runner.version>
 
-        <perfanaUrl>http://localhost:4000</perfanaUrl>
+        <perfanaUrl>http://perfana-fe:3000</perfanaUrl>
 
         <!-- By default debug mode is off -->
         <debug>false</debug>
@@ -55,8 +55,8 @@
         <!-- Settings for the Perfana test runs -->
         <systemUnderTest>MyAfterburner</systemUnderTest>
         <sut_version>${SUT_VERSION}</sut_version>
-        <tags>gatling,spring-boot-kubernetes,jfr,spanmetrics</tags>
-        <apiKey>ZGVtbyM4MTY1NDU2OS1jNjU1LTRiNmYtYWQwMi05MzRiODA4YzljNjU=</apiKey>
+        <tags>gatling,spring-boot-kubernetes,jfr,spanmetrics,docker</tags>
+        <apiKey>ZGVtbyMwNGI4ZTc4Mi00N2FjLTQzOTUtODk3My04NzNhZWIzOTQ0M2Q=</apiKey>
         <influxUrl>http://influxdb:8086</influxUrl>
     </properties>
 
@@ -73,16 +73,17 @@
             <version>${kotlin.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.perfana</groupId>
+            <artifactId>gatling-loki-logs</artifactId>
+            <version>0.1.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test</artifactId>
             <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>io.perfana</groupId>
-            <artifactId>gatling-loki-logs</artifactId>
-            <version>1.6.2</version>
-        </dependency>
+
     </dependencies>
 
     <build>
@@ -96,8 +97,7 @@
                     <jvmArgs>
                         <!-- test run id will be overridden with Perfana generated testRunId which is enabled by default -->
                         <jvmArg>-DtestRunId=${testRunId}</jvmArg>
-                        <!-- <jvmArg>-DtargetBaseUrl=http://afterburner-fe:8080</jvmArg> -->
-                        <jvmArg>-DtargetBaseUrl=http://localhost:8090</jvmArg>
+                        <jvmArg>-DtargetBaseUrl=http://afterburner-fe:8080</jvmArg>
                         <jvmArg>-DinitialUsersPerSecond=${initialUsersPerSecond}</jvmArg>
                         <jvmArg>-DtargetConcurrency=${targetConcurrency}</jvmArg>
                         <jvmArg>-DrampupTimeInSeconds=${rampupTimeInSeconds}</jvmArg>
@@ -126,8 +126,11 @@
                                 <name>PerfanaEvent</name>
                                 <enabled>${perfanaEnabled}</enabled>
                                 <perfanaUrl>${perfanaUrl}</perfanaUrl>
-                                <apiKey>ZGVtbyM4MTY1NDU2OS1jNjU1LTRiNmYtYWQwMi05MzRiODA4YzljNjU=</apiKey>
+                                <apiKey>ZGVtbyMwNGI4ZTc4Mi00N2FjLTQzOTUtODk3My04NzNhZWIzOTQ0M2Q=</apiKey>
                                 <assertResultsEnabled>${assertResultsEnabled}</assertResultsEnabled>
+                                <variables>
+                                    <perfana-containers>perfana-demo-afterburner*</perfana-containers>
+                                </variables>
                             </eventConfig>
                             <eventConfig implementation="io.perfana.events.commandrunner.CommandRunnerEventConfig">
                                 <name>CommandRunnerGatlingToInflux</name>
@@ -136,18 +139,6 @@
                             <eventConfig implementation="io.perfana.events.springboot.event.SpringBootEventConfig">
                                 <name>ActuatorEventFrontend</name>
                                 <tags>afterburner-fe</tags>
-                                <actuatorBaseUrl>http://afterburner-fe:8080/actuator</actuatorBaseUrl>
-                                <actuatorEnvProperties>
-                                    java.runtime.version,
-                                    JDK_JAVA_OPTIONS,
-                                    afterburner.async_core_pool_size,
-                                    featureToggleIdentityMatrix,
-                                    afterburner.remote.call.httpclient.connections.max
-                                </actuatorEnvProperties>
-                            </eventConfig>
-                            <eventConfig implementation="io.perfana.events.springboot.event.SpringBootEventConfig">
-                                <name>ActuatorEventBackend</name>
-                                <tags>afterburner-be</tags>
                                 <actuatorBaseUrl>http://afterburner-be:8080/actuator</actuatorBaseUrl>
                                 <actuatorEnvProperties>
                                     java.runtime.version,
@@ -157,6 +148,18 @@
                                     afterburner.remote.call.httpclient.connections.max
                                 </actuatorEnvProperties>
                             </eventConfig>
+<!--                            <eventConfig implementation="io.perfana.events.springboot.event.SpringBootEventConfig">-->
+<!--                                <name>ActuatorEventBackend</name>-->
+<!--                                <tags>afterburner-be</tags>-->
+<!--                                <actuatorBaseUrl>http://afterburner-be:8080/actuator</actuatorBaseUrl>-->
+<!--                                <actuatorEnvProperties>-->
+<!--                                    java.runtime.version,-->
+<!--                                    JDK_JAVA_OPTIONS,-->
+<!--                                    afterburner.async_core_pool_size,-->
+<!--                                    featureToggleIdentityMatrix,-->
+<!--                                    afterburner.remote.call.httpclient.connections.max-->
+<!--                                </actuatorEnvProperties>-->
+<!--                            </eventConfig>-->
                             <eventConfig implementation="io.perfana.events.testrunconfigcommand.TestRunConfigCommandEventConfig">
                                 <name>GitGetHash</name>
                                 <command>echo "${GIT_SHA}"</command>

@@ -11,24 +11,25 @@ while (( "$#" )); do
       echo "Deploying and testing baseline."
       export SUT_VERSION=2.4.3-good-baseline
       export GIT_SHA=c3ee4b9
-      docker-compose up -d afterburner-fe
-      docker-compose up -d afterburner-be
+      export ANNOTATIONS="Proxy Dev: make cpu more efficient"
+      docker-compose up -d --force-recreate  afterburner-fe
+      docker-compose up -d --force-recreate  afterburner-be
       break
     ;;
     cpu)
       echo "Deploying and testing baseline with cpu issue."
       export SUT_VERSION=2.4.3-changed-matrix-calc
       export GIT_SHA=decc58d
-      docker-compose up -d afterburner-fe
-      docker-compose up -d afterburner-be
+      docker-compose up -d --force-recreate  afterburner-fe
+      docker-compose up -d --force-recreate  afterburner-be
       break
     ;;
     pool)
       echo "Deploying and testing version with connection pool issue."
       export SUT_VERSION=2.4.3-default-http-conn-pool
       export GIT_SHA=e17d3dd
-      docker-compose up -d afterburner-fe
-      docker-compose up -d afterburner-be
+      docker-compose up -d --force-recreate  afterburner-fe
+      docker-compose up -d --force-recreate  afterburner-be
       break
     ;;
     *)
@@ -40,10 +41,6 @@ while (( "$#" )); do
     ;;
   esac
 done
-
-# restart services
-docker-compose restart afterburner-fe
-docker-compose restart afterburner-be
 
 # wait for services to be healthy
 echo "Waiting for services to be ready..."
@@ -75,6 +72,7 @@ if ! wait_for_service "afterburner-be"; then
     echo "Backend service failed to become healthy"
     exit 1
 fi
-
+docker-compose down loadtest
+docker-compose up -d loadtest
 echo "Running load test with SUT_VERSION=${SUT_VERSION} and GIT_SHA=${GIT_SHA}"
-docker-compose exec loadtest mvn -DSUT_VERSION=${SUT_VERSION} -DGIT_SHA=${GIT_SHA} events-gatling:test
+docker-compose exec loadtest mvn clean -DSUT_VERSION=${SUT_VERSION} -DGIT_SHA=${GIT_SHA} -Dannotations="${ANNOTATIONS}" events-gatling:test

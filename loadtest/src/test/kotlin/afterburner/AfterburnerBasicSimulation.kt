@@ -7,6 +7,7 @@ import io.gatling.javaapi.http.HttpDsl.*
 import java.lang.Exception
 import java.time.Duration
 
+
 class AfterburnerBasicSimulation : Simulation() {
 
     private val testRunId = System.getProperty("testRunId") ?: "test-run-id-from-script-" + System.currentTimeMillis()
@@ -29,6 +30,8 @@ class AfterburnerBasicSimulation : Simulation() {
         .header("perfana-test-run-id", testRunId)
         .warmUp("$baseUrl/memory/clear")
 
+    val firstName = csv("data/firstNames.csv").random()
+    
     val scn = scenario("AfterburnerBasicSimulation")
         .exec(http("simple_delay")
             .get("/delay?duration=222")
@@ -54,7 +57,14 @@ class AfterburnerBasicSimulation : Simulation() {
             .header("perfana-request-name", "memory_churn")
             .check(status().shouldBe(200)))
         .pause(1)
+        .feed(firstName)
+        .exec(http("database_call")
+            .get("/remote/call-many?count=1&path=/db/employee/find-by-name?firstName=#{FIRST_NAME}")
+            .header("perfana-request-name", "database_call")
+            .check(status().shouldBe(200)))
+        .pause(1)
 
+  
     init {
         println("(ignored) initialUsersPerSecond:     $initialUsersPerSecond")
         println("(ignored) rampupTimeInSeconds:       $rampupTimeInSeconds")
