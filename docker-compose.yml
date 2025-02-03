@@ -1,14 +1,8 @@
 services:
 
 ######################################################################################################################
-#  rabbitmq:
-#    image: rabbitmq:management
-#    ports:
-#      - "5672:5672"
-#      - "15672:15672"
   perfana-fe:
     image: perfana/perfana-fe:3.3.0
-
     init: true
     expose:
       - 4000
@@ -97,7 +91,6 @@ services:
       PROJECT_NAME: "Perfana Datascience"
       GRAFANA_URL: "http://grafana"
       MONGO_DB: perfana
-
     ports:
       - "8080:8080"
     networks:
@@ -510,7 +503,6 @@ volumes:
   mongo1-storage:
   mongo2-storage:
   mongo3-storage:
-  omnidb-storage:
   loadtest-dir:
   unpack-loadtest-tar:
     driver: local
