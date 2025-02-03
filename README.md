@@ -20,13 +20,6 @@ The Perfana demo environment can be used to try out all the features. It uses Do
 
   > If you use the download option, make sure to extract the zip to a directory named `perfana-demo`!
 
-* Add this to your hosts file
-  ```sh
-  127.0.1.1  perfana
-  127.0.1.1  jenkins  
-  127.0.1.1  grafana
-  ```
-
 * Inside the repository root run
   ```sh
   ./start.sh
@@ -78,6 +71,12 @@ To remove all containers, use
 
 ---
 
+
+
+### Automatically detect regressions
+
+The `start.sh` script will run 3 baseline test runs for the `afterburner` system under test while in `baseline mode`
+
 To deploy a version of the test application with a performance issue, run
 
 ```sh
@@ -88,12 +87,7 @@ or
 ./deploy-and-test.sh pool
 ```
 
-> The `perfana-demo` repository is updated frequently, so to get the latest and greatest pull repo and images.
 
-
-```sh
-git pull && docker-compose pull
-```
 
 ## Exploring the demo environment
 
@@ -101,9 +95,21 @@ git pull && docker-compose pull
 
 To log into Perfana, open [http://localhost:4000](http://localhost:4000) and use `admin@perfana.io` as user with password `perfana`. If you want to log in as a non-admin user, you can try users `daniel@perfana.io` or `dylan@perfana.io`, both with password `perfana`
 
+To view Tempo traces and Pyroscope profiles for your test runs, set `Tracing service name` and `Pyroscope appliication name` to `afterburner-fe` in the `Global settings` in the `System under test setting`, found in the sidebar.
+
+
 ### Grafana
 
 To log into Grafana, open [http://localhost:3000](http://localhost:3000) and use `perfana` as user with password `perfana` 
+
+### Update
+
+> The `perfana-demo` repository is updated frequently, so to get the latest and greatest pull repo and images.
+
+
+```sh
+git pull && docker-compose pull
+```
 
 ## Credits
 
