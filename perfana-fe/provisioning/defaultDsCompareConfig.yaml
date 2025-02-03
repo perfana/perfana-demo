@@ -1,0 +1,25 @@
+- application: null
+  testEnvironment: null
+  testType: null
+  panelId: null
+  metricName: null
+  applicationDashboardId: null
+  dashboardUid: null
+  statistic:
+    value: median
+    source: default
+  iqrThreshold:
+    value: 2
+    source: default
+  pctThreshold:
+    value: 0.15
+    source: default
+  absThreshold:
+    value: null
+    source: default
+  nThreshold:
+    value: 5
+    source: default
+  ignore:
+    value: false
+    source: default

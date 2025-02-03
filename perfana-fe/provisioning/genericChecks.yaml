@@ -1,0 +1,274 @@
+- _id: gatling-influxdb-99pct-response-time
+  profile: gatling
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: Gatling
+  dashboardUid: gatling-overview-influxdb
+  panel:
+    title: Response times 99th percentile
+    id: 31
+    type: timeseries
+    yAxesFormat: ms
+    evaluateType: avg
+    requirement:
+      operator: lt
+      value: 1000
+    excludeRampUpTime: true
+    validateWithDefaultIfNoData: false
+
+- _id: gatling-response_times_50th_percentile
+  profile: gatling
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: Gatling
+  dashboardUid: gatling-overview-influxdb
+  panel:
+    title: Response times 50th percentile
+    id: 52
+    type: timeseries
+    yAxesFormat: ms
+    evaluateType: avg
+    benchmark:
+      absoluteFailureThreshold: 100
+      operator: pst-pct
+      value: 20
+    excludeRampUpTime: true
+    validateWithDefaultIfNoData: false
+
+- _id: jmeter-influxdb-99pct-response-time
+  profile: jmeter
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: JMeter
+  dashboardUid: jmeter-overview-influxdb
+  panel:
+    title: Response times 99th percentile
+    id: 31
+    type: timeseries
+    yAxesFormat: ms
+    evaluateType: avg
+    requirement:
+      operator: lt
+      value: 1000
+    excludeRampUpTime: true
+    validateWithDefaultIfNoData: false
+
+- _id: jmeter-response_times_50th_percentile
+  profile: jmeter
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: Jmeter
+  dashboardUid: jmeter-overview-influxdb
+  panel:
+    title: Response times 50th percentile
+    id: 52
+    type: timeseries
+    yAxesFormat: ms
+    evaluateType: avg
+    benchmark:
+      absoluteFailureThreshold: 100
+      operator: pst-pct
+      value: 20
+    excludeRampUpTime: true
+    validateWithDefaultIfNoData: false
+
+- _id: neoload_response_times_average
+  profile: neoload
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: Neoload
+  dashboardUid: neoload-overview-influxdb
+  panel:
+    title: Transaction response times average
+    id: 66
+    type: timeseries
+    yAxesFormat: s
+    evaluateType: avg
+    requirement:
+      operator: lt
+      value: 2
+    benchmark:
+      absoluteFailureThreshold: 0.1
+      operator: pst-pct
+      value: 20
+    excludeRampUpTime: true
+    validateWithDefaultIfNoData: false
+
+- _id: k6-http-99pct-response-time
+  profile: k6
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: K6 http
+  dashboardUid: k6-http-overview-influxdb
+  panel:
+    title: Response times 99th percentile
+    id: 31
+    type: timeseries
+    yAxesFormat: ms
+    evaluateType: avg
+    requirement:
+      operator: lt
+      value: 1000
+    excludeRampUpTime: true
+    validateWithDefaultIfNoData: false
+    benchmark:
+      absoluteFailureThreshold: 100
+      operator: pst-pct
+      value: 20
+
+- _id: spring-boot-kubernetes-mimir-major-gc-duration
+  profile: spring-boot-kubernetes
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: JVM memory management G1GC
+  dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panel:
+    title: Maximum Pause Durations end of major GC by cause
+    id: 178
+    type: timeseries
+    yAxesFormat: s
+    evaluateType: max
+    requirement:
+      operator: lt
+      value: 0.6
+    excludeRampUpTime: true
+    validateWithDefaultIfNoData: true
+    validateWithDefaultIfNoDataValue: 0
+
+- _id: spring-boot-kubernetes-mimir-minor-gc-duration
+  profile: spring-boot-kubernetes
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: JVM memory management G1GC
+  dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  panel:
+    title: Maximum Pause Durations end of minor GC by cause
+    id: 151
+    type: timeseries
+    yAxesFormat: s
+    evaluateType: max
+    requirement:
+      operator: lt
+      value: 0.1
+    excludeRampUpTime: true
+    validateWithDefaultIfNoData: true
+    validateWithDefaultIfNoDataValue: 0
+
+- _id: spring-boot-kubernetes-mimir-http-conn-pool
+  profile: spring-boot-kubernetes
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: HTTP connection pool
+  dashboardUid: spring-boot-kubernetes-httpconpool-mimir
+  panel:
+    title: HTTP connection pool in use
+    id: 106
+    type: timeseries
+    yAxesFormat: percentunit
+    evaluateType: max
+    requirement:
+      operator: lt
+      value: 0.9
+    benchmark:
+      operator: pst
+      value: 0.2
+    excludeRampUpTime: true
+    validateWithDefaultIfNoData: false
+
+- _id: spring-boot-kubernetes-hickari-cp-mimir-pending_connections
+  profile: spring-boot-kubernetes
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: Hikari Connection Pool
+  dashboardUid: spring-boot-kubernetes-hickari-cp-mimir
+  panel:
+    title: Pending connections
+    id: 19
+    type: timeseries
+    yAxesFormat: short
+    evaluateType: max
+    requirement:
+      operator: lt
+      value: 10
+    excludeRampUpTime: true
+    validateWithDefaultIfNoData: false
+
+- _id: kubernetes-namespace-resources-mimir-cpu-throttling
+  profile: kubernetes
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: Kubernetes Namespace Resources
+  dashboardUid: kubernetes-namespace-resources-mimir
+  panel:
+    title: CPU Throttling %
+    id: 22
+    type: timeseries
+    yAxesFormat: percentunit
+    evaluateType: max
+    requirement:
+      operator: lt
+      value: 0.5
+    excludeRampUpTime: true
+    validateWithDefaultIfNoData: false
+
+- _id: kubernetes-pod-metrics-mimir-cpu-usage-limit
+  profile: kubernetes
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: Kubernetes Pod Metrics
+  dashboardUid: kubernetes-pod-metrics-mimir
+  panel:
+    title: Average pods CPU usage % of limit
+    id: 99
+    type: timeseries
+    yAxesFormat: percent
+    evaluateType: avg
+    requirement:
+      operator: lt
+      value: 70
+    excludeRampUpTime: true
+    validateWithDefaultIfNoData: false
+    benchmark:
+      operator: pst
+      value: 10
+
+- _id: jfr-exporter-influxdb-cpu-usage-limit
+  profile: jfr
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: JFR Exporter
+  dashboardUid: jfr-exporter-influxdb
+  panel:
+    title: CPU
+    id: 2
+    type: timeseries
+    yAxesFormat: percent
+    evaluateType: avg
+    matchPattern: "^(?!.*max_machineTotal).*"
+    requirement:
+      operator: lt
+      value: 70
+    excludeRampUpTime: true
+    validateWithDefaultIfNoData: false
+    benchmark:
+      operator: pst
+      value: 10
+- _id: docker-cpu
+  profile: docker
+  grafana: Default
+  addForWorkloadsMatchingRegex: load.*
+  dashboardName: Docker container metrics
+  dashboardUid: docker-telegraf-influxdb
+  panel:
+    title: CPU
+    id: 1
+    type: timeseries
+    yAxesFormat: short
+    evaluateType: avg
+    requirement:
+      operator: lt
+      value: 70
+    benchmark:
+      operator: pst
+      value: 10
+    excludeRampUpTime: true

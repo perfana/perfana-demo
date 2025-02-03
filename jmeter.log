@@ -1,0 +1,48 @@
+2023-05-03 22:07:05,451 INFO o.a.j.u.JMeterUtils: Setting Locale to en_EN
+2023-05-03 22:07:05,465 INFO o.a.j.JMeter: Loading user properties from: /opt/homebrew/Cellar/jmeter/5.5/libexec/bin/user.properties
+2023-05-03 22:07:05,466 INFO o.a.j.JMeter: Loading system properties from: /opt/homebrew/Cellar/jmeter/5.5/libexec/bin/system.properties
+2023-05-03 22:07:05,470 INFO o.a.j.JMeter: Copyright (c) 1998-2022 The Apache Software Foundation
+2023-05-03 22:07:05,470 INFO o.a.j.JMeter: Version 5.5
+2023-05-03 22:07:05,470 INFO o.a.j.JMeter: java.version=19.0.2
+2023-05-03 22:07:05,470 INFO o.a.j.JMeter: java.vm.name=OpenJDK 64-Bit Server VM
+2023-05-03 22:07:05,470 INFO o.a.j.JMeter: os.name=Mac OS X
+2023-05-03 22:07:05,470 INFO o.a.j.JMeter: os.arch=aarch64
+2023-05-03 22:07:05,470 INFO o.a.j.JMeter: os.version=13.3.1
+2023-05-03 22:07:05,470 INFO o.a.j.JMeter: file.encoding=UTF-8
+2023-05-03 22:07:05,470 INFO o.a.j.JMeter: java.awt.headless=null
+2023-05-03 22:07:05,470 INFO o.a.j.JMeter: Max memory     =1073741824
+2023-05-03 22:07:05,470 INFO o.a.j.JMeter: Available Processors =10
+2023-05-03 22:07:05,477 INFO o.a.j.JMeter: Default Locale=English (EN)
+2023-05-03 22:07:05,477 INFO o.a.j.JMeter: JMeter  Locale=English (EN)
+2023-05-03 22:07:05,477 INFO o.a.j.JMeter: JMeterHome=/opt/homebrew/Cellar/jmeter/5.5/libexec
+2023-05-03 22:07:05,477 INFO o.a.j.JMeter: user.dir  =/Users/daniel/workspace/perfana-demo
+2023-05-03 22:07:05,477 INFO o.a.j.JMeter: PWD       =/Users/daniel/workspace/perfana-demo
+2023-05-03 22:07:05,478 INFO o.a.j.JMeter: IP: 127.0.0.1 Name: Daniels-MacBook-Pro.local FullName: localhost
+2023-05-03 22:07:05,485 INFO o.a.j.JMeter: Loaded icon properties from org/apache/jmeter/images/icon.properties
+2023-05-03 22:07:06,155 INFO o.a.j.JMeterGuiLauncher: Setting LAF to: com.github.weisj.darklaf.DarkLaf:com.github.weisj.darklaf.theme.DarculaTheme
+2023-05-03 22:07:07,462 INFO o.j.r.JARSourceHTTP: Requesting https://jmeter-plugins.org/repo/?installID=mac_os_x-4be2a46df2f0a752d8eba2f03899aaf5-gui
+2023-05-03 22:07:09,077 INFO o.j.r.PluginManager: Plugins Status: [jpgc-casutg=2.10, jpgc-plugins-manager=1.7, jmeter-core=5.5, jmeter-ftp=5.5, jmeter-http=5.5, jmeter-jdbc=5.5, jmeter-jms=5.5, jmeter-junit=5.5, jmeter-java=5.5, jmeter-ldap=5.5, jmeter-mail=5.5, jmeter-mongodb=5.5, jmeter-native=5.5, jmeter-tcp=5.5, jmeter-components=5.5]
+2023-05-03 22:07:09,077 INFO o.j.r.PluginManagerMenuItem: Plugins Manager has upgrades: [jpgc-plugins-manager]
+2023-05-03 22:07:17,751 INFO o.a.j.s.FileServer: Default base='/Users/daniel/workspace/perfana-demo'
+2023-05-03 22:07:17,752 INFO o.a.j.g.a.Load: Loading file: /Users/daniel/workspace/afterburner/cicd/jmeter/src/test/jmeter/afterburner.jmx
+2023-05-03 22:07:17,752 INFO o.a.j.s.FileServer: Set new base='/Users/daniel/workspace/afterburner/cicd/jmeter/src/test/jmeter'
+2023-05-03 22:07:17,874 INFO o.a.j.s.SaveService: Testplan (JMX) version: 2.2. Testlog (JTL) version: 2.2
+2023-05-03 22:07:17,878 INFO o.a.j.s.SaveService: Using SaveService properties version 5.0
+2023-05-03 22:07:17,879 INFO o.a.j.s.SaveService: Using SaveService properties file encoding UTF-8
+2023-05-03 22:07:17,880 INFO o.a.j.s.SaveService: Loading file: /Users/daniel/workspace/afterburner/cicd/jmeter/src/test/jmeter/afterburner.jmx
+2023-05-03 22:07:17,948 INFO o.a.j.p.h.c.CacheManager: Will only cache the following methods: [GET]
+2023-05-03 22:07:17,950 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/html is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2023-05-03 22:07:17,950 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xhtml+xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2023-05-03 22:07:17,950 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2023-05-03 22:07:17,950 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2023-05-03 22:07:17,950 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/vnd.wap.wml is org.apache.jmeter.protocol.http.parser.RegexpHTMLParser
+2023-05-03 22:07:17,950 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/css is org.apache.jmeter.protocol.http.parser.CssParser
+2023-05-03 22:07:17,951 INFO o.a.j.s.SampleResult: Note: Sample TimeStamps are START times
+2023-05-03 22:07:17,951 INFO o.a.j.s.SampleResult: sampleresult.default.encoding is set to ISO-8859-1
+2023-05-03 22:07:17,951 INFO o.a.j.s.SampleResult: sampleresult.useNanoTime=true
+2023-05-03 22:07:17,951 INFO o.a.j.s.SampleResult: sampleresult.nanoThreadSleep=5000
+2023-05-03 22:07:18,040 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must contain the string: '.functions.'
+2023-05-03 22:07:18,040 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must not contain the string: '.gui.'
+2023-05-03 22:07:18,563 INFO o.a.j.v.ViewResultsFullVisualizer: Add JavaFX to your Java installation if you want to use renderer: org.apache.jmeter.visualizers.RenderInBrowser
+2023-05-03 22:07:18,597 INFO o.a.j.v.ViewResultsFullVisualizer: Add JavaFX to your Java installation if you want to use renderer: org.apache.jmeter.visualizers.RenderInBrowser
+2023-05-03 22:07:18,652 INFO o.a.j.s.FileServer: Set new base='/Users/daniel/workspace/afterburner/cicd/jmeter/src/test/jmeter'

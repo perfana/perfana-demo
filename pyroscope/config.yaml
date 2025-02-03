@@ -1,0 +1,11 @@
+server:
+  http_listen_port: 4040
+
+storage:
+  tsdb:
+    path: /tmp/pyroscope
+
+distributor:
+  profiles:
+    enabled_profiles: [cpu, mem, goroutines, mutex, block]
+    remote_timeout: 10s
