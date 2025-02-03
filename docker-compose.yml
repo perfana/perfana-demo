@@ -92,8 +92,6 @@ services:
     image: perfana/perfana-ds:0.2.8
     command: |
       uvicorn src.perfana_ds_api.app:app --host 0.0.0.0 --port 8080
-    expose:
-      - 8080
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       PROJECT_NAME: "Perfana Datascience"
