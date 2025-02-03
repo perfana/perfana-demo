@@ -12,8 +12,12 @@ while (( "$#" )); do
       export SUT_VERSION=2.4.3-good-baseline
       export GIT_SHA=c3ee4b9
       export ANNOTATIONS="Proxy Dev: make cpu more efficient"
-      docker-compose up -d --force-recreate  afterburner-fe
-      docker-compose up -d --force-recreate  afterburner-be
+      docker-compose stop afterburner-fe
+      docker-compose stop afterburner-be
+      docker-compose rm -f afterburner-fe
+      docker-compose rm -f  afterburner-be
+      docker-compose up -d afterburner-fe
+      docker-compose up -d afterburner-be
       break
     ;;
     cpu)
