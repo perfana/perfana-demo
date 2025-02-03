@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-export MONGO_VERSION="4.4"
+export MONGO_VERSION="7.0"
+export CONFIG_FILE=`$(pwd)/mongodb/init-mongo.js`
 
 COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-$(basename $(pwd))}
 
@@ -29,11 +30,11 @@ check-os () {
 
 current_os="$(check-os)"
 if [ $current_os != "mac" ] && [ $current_os == "cygwin" ]; then
-    CONFIG_FILE=`cygpath.exe -m $(pwd)/init-mongo.js`
+    CONFIG_FILE=`cygpath.exe -m $(pwd)/mongodb/init-mongo.js`
     DOCKER_CMD="winpty docker"
 else
     DOCKER_CMD="docker"
-    CONFIG_FILE=$(pwd)/init-mongo.js
+    CONFIG_FILE=$(pwd)/mongodb/init-mongo.js
 fi
 
 GRAFANA_CREDS=perfana:perfana

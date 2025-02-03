@@ -1,0 +1,54 @@
+- _id: gatling-profile
+  name: gatling
+  description: Profile for Gatling load test tool dashboards and metrics
+  tags:
+    - gatling
+  readOnly: true
+- _id: k6-profile
+  name: k6
+  description: Profile for K6 load test tool dashboards and metrics
+  tags:
+    - k6
+  readOnly: true
+- _id: jmeter-profile
+  name: jmeter
+  description: Profile for Jmeter load test tool dashboards and metrics
+  tags:
+    - jmeter
+  readOnly: true
+- _id: neoload-profile
+  name: neoload
+  description: Profile for neoload load test tool dashboards and metrics
+  tags:
+    - neoload
+  readOnly: true
+- _id: jfr-profile
+  name: jfr
+  description: Profile for jfr dashboard and metrics
+  tags:
+    - jfr
+  readOnly: true
+- _id: spring-boot-kubernetes-profile
+  name: spring-boot-kubernetes
+  description: Profile for Spring Boot application dashboards and metrics
+  tags:
+    - spring-boot-kubernetes
+  readOnly: true
+- _id: kubernetes
+  name: kubernetes
+  description: Profile for Kubernetes dashboards and metrics
+  tags:
+    - kubernetes
+  readOnly: true
+- _id: spanmetrics
+  name: spanmetrics
+  description: Profile for span metrics
+  tags:
+    - spanmetrics
+  readOnly: true  
+- _id: docker
+  name: docker
+  description: Profile for docker metrics
+  tags:
+    - docker
+  readOnly: true  
