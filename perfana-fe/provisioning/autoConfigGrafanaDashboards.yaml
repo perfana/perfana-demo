@@ -1,0 +1,137 @@
+- _id: gatling-overview
+  profile: gatling
+  grafana: Default
+  dashboardName: Gatling
+  dashboardUid: gatling-overview-influxdb
+  createSeparateDashboardForVariable: simulation
+  readOnly: true
+- _id: jmeter-overview
+  profile: jmeter
+  grafana: Default
+  dashboardName: JMeter
+  dashboardUid: jmeter-overview-influxdb
+  readOnly: true
+- _id: k6-http-overview
+  profile: k6
+  grafana: Default
+  dashboardName: K6 http
+  dashboardUid: k6-http-overview-influxdb
+  readOnly: true
+- _id: neoload-overview-influxdb
+  profile: neoload
+  grafana: Default
+  dashboardName: Neoload
+  dashboardUid: neoload-overview-influxdb
+  readOnly: true
+- _id: spring-boot-kubernetes-jvm
+  profile: spring-boot-kubernetes
+  grafana: Default
+  dashboardName: JVM
+  dashboardUid: spring-boot-kubernetes-jvm-mimir
+  createSeparateDashboardForVariable: service
+  setHardcodedValueForVariables:
+    - name: jvm_memory_pool_heap
+      values:
+        - All
+    - name: jvm_memory_pool_nonheap
+      values:
+        - All
+  readOnly: true
+- _id: spring-boot-kubernetes-hikari-cp
+  profile: spring-boot-kubernetes
+  grafana: Default
+  dashboardName: Hikari Connection Pool
+  dashboardUid: spring-boot-kubernetes-hickari-cp-mimir
+  createSeparateDashboardForVariable: service
+  readOnly: true
+- _id: spring-boot-kubernetes-jvm-g1gc
+  profile: spring-boot-kubernetes
+  grafana: Default
+  dashboardName: JVM memory management G1GC
+  dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
+  createSeparateDashboardForVariable: service
+  readOnly: true
+- _id: spring-boot-kubernetes-loki
+  profile: spring-boot-kubernetes
+  grafana: Default
+  dashboardName: Loki
+  dashboardUid: loki
+  createSeparateDashboardForVariable: service
+  readOnly: true
+  setHardcodedValueForVariables:
+    - name: level
+      values:
+        - INFO
+        - WARN
+        - ERROR
+- _id: spring-boot-kubernetes-jvm-server-requests-mimir
+  profile: spring-boot-kubernetes
+  grafana: Default
+  dashboardName: HTTP server requests
+  dashboardUid: spring-boot-kubernetes-http-server-mimir
+  createSeparateDashboardForVariable: service
+  readOnly: true
+- _id: spring-boot-kubernetes-jvm-client-requests-mimir
+  profile: spring-boot-kubernetes
+  grafana: Default
+  dashboardName: HTTP client requests
+  dashboardUid: spring-boot-kubernetes-http-client-mimir
+  createSeparateDashboardForVariable: service
+  readOnly: true
+- _id: spring-boot-kubernetes-http-con-pool-mimir
+  profile: spring-boot-kubernetes
+  grafana: Default
+  dashboardName: HTTP connection pool
+  dashboardUid: spring-boot-kubernetes-httpconpool-mimir
+  createSeparateDashboardForVariable: service
+  readOnly: true
+- _id: spring-boot-kubernetes-loki
+  profile: spring-boot-kubernetes
+  grafana: Default
+  dashboardName: Loki
+  dashboardUid: loki
+  createSeparateDashboardForVariable: service
+  readOnly: true
+- _id: kubernetes-namespace-resources
+  profile: kubernetes
+  grafana: Default
+  dashboardName: Kubernetes Namespace Resources
+  dashboardUid: kubernetes-namespace-resources-mimir
+  readOnly: true
+- _id: kubernetes-pod-metrics
+  profile: kubernetes
+  grafana: Default
+  dashboardName: Kubernetes Pod Metrics
+  dashboardUid: kubernetes-pod-metrics-mimir
+  readOnly: true
+- _id: jfr-metrics
+  profile: jfr
+  grafana: Default
+  dashboardName: JFR Exporter
+  dashboardUid: jfr-exporter-influxdb
+  createSeparateDashboardForVariable: service
+  readOnly: true
+- _id: spanmetrics
+  profile: spanmetrics
+  grafana: Default
+  dashboardName: Span metrics
+  dashboardUid: span-metrics
+  createSeparateDashboardForVariable: requestName
+  readOnly: true  
+- _id: gatling-loki-logs
+  profile: gatling
+  grafana: Default
+  dashboardName: Gatling Loki Logs
+  dashboardUid: gatling-loki-logs
+  createSeparateDashboardForVariable: simulation
+  readOnly: true
+- _id: docker-telegraf-influxdb
+  profile: docker
+  grafana: Default
+  dashboardName: Docker container metrics
+  dashboardUid: docker-telegraf-influxdb
+  createSeparateDashboardForVariable: container
+  matchRegexForVariables:
+    - name: container
+      regex: perfana-containers
+  readOnly: true
