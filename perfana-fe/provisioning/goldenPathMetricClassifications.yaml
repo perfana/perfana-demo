@@ -33,6 +33,7 @@
   panelTitle: Response times 50th percentile
   metricClassification: RED_duration
   higherIsBetter: false
+  absThreshold: 0.025
 
 
 - dashboardUid: neoload-overview-influxdb
@@ -204,7 +205,6 @@
   higherIsBetter: false
   ignore: true
   ignoreMeanDiffSmallerThan: 10
-  description: 'optional_string_value'
 - dashboardUid: spring-boot-kubernetes-hickari-cp-mimir
   panelId: 16
   panelTitle: Acquire time
@@ -225,16 +225,19 @@
   panelTitle: Average Pause Durations end of minor GC by cause
   metricClassification: USE_saturation
   higherIsBetter: false
+  absThreshold: 0.1
 - dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
   panelId: 151
   panelTitle: Maximum Pause Durations end of minor GC by cause
   metricClassification: USE_saturation
   higherIsBetter: false
+  absThreshold: 0.1
 - dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
   panelId: 99
   panelTitle: Young generation memory pool increase
   metricClassification: USE_saturation
   higherIsBetter: false
+  absThreshold: 25000000
 - dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
   panelId: 176
   panelTitle: Collections end of major GC by cause
@@ -245,16 +248,19 @@
   panelTitle: Average Pause Durations end of major GC by cause
   metricClassification: USE_saturation
   higherIsBetter: false
+  absThreshold: 0.1
 - dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
   panelId: 178
   panelTitle: Maximum Pause Durations end of major GC by cause
   metricClassification: USE_saturation
   higherIsBetter: false
+  absThreshold: 0.1
 - dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
   panelId: 179
   panelTitle: Old generation memory pool increase
   metricClassification: USE_saturation
   higherIsBetter: false
+  absThreshold: 25000000
 - dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
   panelId: 24
   panelTitle: Average JVM Heap % used
@@ -275,6 +281,7 @@
   panelTitle: Average Eden Space in use
   metricClassification: USE_usage
   higherIsBetter: false
+  absThreshold: 25000000
 - dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
   panelId: 172
   panelTitle: Average Survivor Space in use
@@ -285,6 +292,7 @@
   panelTitle: Average Old Gen in use
   metricClassification: USE_usage
   higherIsBetter: false
+  absThreshold: 25000000
 - dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
   panelId: 78
   panelTitle: Average CodeHeap 'non-nmethods' % in use
@@ -496,4 +504,9 @@
   panelId: 64
   panelTitle: 95th percentile span durations
   metricClassification: RED_duration
+  higherIsBetter: false
+- dashboardUid: docker-telegraf-influxdb
+  panelId: 1
+  panelTitle: CPU
+  metricClassification: USE_usage
   higherIsBetter: false

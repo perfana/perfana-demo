@@ -189,7 +189,7 @@
     evaluateType: max
     requirement:
       operator: lt
-      value: 1
+      value: 10
     excludeRampUpTime: true
     validateWithDefaultIfNoData: false
 
@@ -269,6 +269,6 @@
       operator: lt
       value: 70
     benchmark:
-      operator: pst-pct
-      value: 20
+      operator: pst
+      value: 10
     excludeRampUpTime: true
