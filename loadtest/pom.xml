@@ -56,7 +56,7 @@
         <systemUnderTest>MyAfterburner</systemUnderTest>
         <sut_version>${SUT_VERSION}</sut_version>
         <tags>gatling,spring-boot-kubernetes,jfr,spanmetrics,docker</tags>
-        <apiKey>ZGVtbyMwNGI4ZTc4Mi00N2FjLTQzOTUtODk3My04NzNhZWIzOTQ0M2Q=</apiKey>
+        <apiKey>__apiKey__</apiKey>
         <influxUrl>http://influxdb:8086</influxUrl>
     </properties>
 
@@ -126,7 +126,7 @@
                                 <name>PerfanaEvent</name>
                                 <enabled>${perfanaEnabled}</enabled>
                                 <perfanaUrl>${perfanaUrl}</perfanaUrl>
-                                <apiKey>ZGVtbyMwNGI4ZTc4Mi00N2FjLTQzOTUtODk3My04NzNhZWIzOTQ0M2Q=</apiKey>
+                                <apiKey>__apiKey__</apiKey>
                                 <assertResultsEnabled>${assertResultsEnabled}</assertResultsEnabled>
                                 <variables>
                                     <perfana-containers>perfana-demo-afterburner*</perfana-containers>
