@@ -90,6 +90,7 @@
         "y": 0
       },
       "id": 1,
+      "interval": "10s",
       "options": {
         "legend": {
           "calcs": [],
@@ -128,7 +129,7 @@
           "measurement": "docker_container_cpu",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"usage_percent\") FROM \"docker_container_cpu\" WHERE (\"container_name\" =~ /^$container$/ AND \"system_under_test\"::tag =~ /^$system_under_test$/ AND \"test_environment\"::tag =~ /^$test_environment$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT mean(\"usage_percent\") FROM \"30d\".\"docker_container_cpu\" WHERE (\"container_name\" =~ /^$container$/ AND \"system_under_test\" =~ /^$system_under_test$/ AND \"test_environment\" =~ /^$test_environment$/) AND $timeFilter GROUP BY time($__interval)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -238,6 +239,7 @@
         "y": 0
       },
       "id": 13,
+      "interval": "10s",
       "options": {
         "legend": {
           "calcs": [],
@@ -276,7 +278,7 @@
           "measurement": "docker_container_blkio",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"io_service_bytes_recursive_read\") FROM \"docker_container_blkio\" WHERE (\"container_name\" =~ /^$container$/ AND \"system_under_test\"::tag =~ /^$system_under_test$/ AND \"test_environment\"::tag =~ /^$test_environment$/)  AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT mean(\"io_service_bytes_recursive_read\") FROM \"30d\".\"docker_container_blkio\" WHERE (\"container_name\" =~ /^$container$/ AND \"system_under_test\" =~ /^$system_under_test$/ AND \"test_environment\" =~ /^$test_environment$/)  AND $timeFilter GROUP BY time($__interval) ",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -434,6 +436,7 @@
         "y": 12
       },
       "id": 14,
+      "interval": "10s",
       "options": {
         "legend": {
           "calcs": [],
@@ -472,7 +475,7 @@
           "measurement": "docker_container_mem",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"usage_percent\") FROM \"docker_container_mem\" WHERE (\"container_name\" =~ /^$container$/ AND \"system_under_test\"::tag =~ /^$system_under_test$/ AND \"test_environment\"::tag =~ /^$test_environment$/) AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT mean(\"usage_percent\") FROM \"30d\".\"docker_container_mem\" WHERE (\"container_name\" =~ /^$container$/ AND \"system_under_test\" =~ /^$system_under_test$/ AND \"test_environment\" =~ /^$test_environment$/) AND $timeFilter GROUP BY time($__interval) ",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -576,6 +579,7 @@
         "y": 12
       },
       "id": 85,
+      "interval": "10s",
       "options": {
         "legend": {
           "calcs": [],
@@ -614,7 +618,7 @@
           "measurement": "docker_container_net",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"rx_bytes\") FROM \"docker_container_net\" WHERE (\"container_name\" =~ /^$container$/ AND \"system_under_test\"::tag =~ /^$system_under_test$/ AND \"test_environment\"::tag =~ /^$test_environment$/)  AND $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT mean(\"rx_bytes\") FROM \"30d\".\"docker_container_net\" WHERE (\"container_name\" =~ /^$container$/ AND \"system_under_test\" =~ /^$system_under_test$/ AND \"test_environment\" =~ /^$test_environment$/) AND $timeFilter GROUP BY time($__interval) ",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -766,8 +770,7 @@
         },
         "datasource": "influxdb-telegraf",
         "definition": "show tag values from docker_container_cpu with key=\"container_name\" where \"system_under_test\" =~ /$system_under_test/ and \"test_environment\" =~ /$test_environment/",
-        "includeAll": true,
-        "label": "Container",
+        "includeAll": false,
         "multi": true,
         "name": "container",
         "options": [],
