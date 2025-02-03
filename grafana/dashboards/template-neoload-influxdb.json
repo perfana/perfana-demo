@@ -1,0 +1,4177 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 9,
+      "panels": [],
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "refId": "A"
+        }
+      ],
+      "title": "Load",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 8,
+        "x": 0,
+        "y": 1
+      },
+      "id": 46,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Name",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_elementType",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "elementType::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "elementTimeSeries",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"avgDuration\") FROM \"30d\".\"elementTimeSeries\" WHERE (\"testEnvironment\"::tag =~ /^$test_environment$/ AND \"systemUnderTest\"::tag =~ /^$system_under_test$/) AND $timeFilter GROUP BY time($__interval), \"elementType\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "avgDuration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment::tag",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest::tag",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            }
+          ]
+        }
+      ],
+      "title": "Mean overall response times",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "cps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 8,
+        "x": 8,
+        "y": 1
+      },
+      "id": 38,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_elementType",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "elementType::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"elementsPerSecond\") FROM \"30d\".\"elementTimeSeries\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/) AND $timeFilter GROUP BY time($interval), \"elementType\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "elementsPerSecond"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            }
+          ]
+        }
+      ],
+      "title": "Throughput",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 8,
+        "x": 16,
+        "y": 1
+      },
+      "id": 37,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_elementType",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "elementType::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"errorRate\") FROM \"30d\".\"elementTimeSeries\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/) AND $timeFilter GROUP BY time($interval), \"elementType\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "errorRate"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            }
+          ]
+        }
+      ],
+      "title": "Error rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "cps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "id": 58,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "name::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "elementTimeSeries",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"elementsPerSecond\") FROM \"30d\".\"elementTimeSeries\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'TRANSACTION') AND $timeFilter GROUP BY time($interval), \"userPath\"::tag, \"name\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "elementsPerSecond"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "TRANSACTION"
+            }
+          ]
+        }
+      ],
+      "title": "Throughput per transaction",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      },
+      "id": 59,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_parent $tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "name::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "parent::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "elementTimeSeries",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"elementsPerSecond\") FROM \"30d\".\"elementTimeSeries\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'REQUEST') AND $timeFilter GROUP BY time($interval), \"userPath\"::tag, \"name\"::tag, \"parent\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "elementsPerSecond"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "REQUEST"
+            }
+          ]
+        }
+      ],
+      "title": "Throughput per request",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "id": 60,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "elementTimeSeries",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"errorRate\") FROM \"30d\".\"elementTimeSeries\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'TRANSACTION') AND $timeFilter GROUP BY time($interval), \"name\"::tag, \"userPath\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "errorRate"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "TRANSACTION"
+            }
+          ]
+        }
+      ],
+      "title": "Error rate per transaction",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "description": "perfana-request-names",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "id": 61,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_parent $tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "parent::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "elementTimeSeries",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"errorRate\") FROM \"30d\".\"elementTimeSeries\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'REQUEST') AND $timeFilter GROUP BY time($interval), \"name\"::tag, \"userPath\"::tag, \"parent\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "errorRate"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "REQUEST"
+            }
+          ]
+        }
+      ],
+      "title": "Error rate per request",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      },
+      "id": 18,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "10.2.3",
+      "targets": [
+        {
+          "alias": "$tag_name $tag_result",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "parent::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT last(\"passed\"), last(\"errors\"), last(\"count\") FROM \"30d\".\"elementValues\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'TRANSACTION') AND $timeFilter GROUP BY \"name\", \"userPath\"::tag, \"parent\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "passed"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "errors"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "count"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "TRANSACTION"
+            }
+          ]
+        }
+      ],
+      "title": "Passed vs Failed transactions",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "parent": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 0,
+              "last": 4,
+              "last_1": 5,
+              "last_2": 6,
+              "name": 2,
+              "parent": 3,
+              "userPath": 1
+            },
+            "renameByName": {
+              "count": "OK",
+              "count 1": "OK",
+              "count 2": "KO",
+              "last": "Passed",
+              "last_1": "Failed",
+              "last_2": "Total",
+              "name": "Transaction",
+              "userPath": "UserPath"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 12,
+        "y": 37
+      },
+      "id": 57,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "UserPath"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.3",
+      "targets": [
+        {
+          "alias": "$tag_name $tag_result",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "parent::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT last(\"passed\"), last(\"errors\"), last(\"count\") FROM \"30d\".\"elementValues\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'REQUEST') AND $timeFilter GROUP BY \"name\", \"userPath\"::tag, \"parent\"::tag",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "passed"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "errors"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "count"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "REQUEST"
+            }
+          ]
+        }
+      ],
+      "title": "Passed vs Failed requests",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "last_2": false,
+              "parent": false
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 0,
+              "last": 4,
+              "last_1": 5,
+              "last_2": 6,
+              "name": 3,
+              "parent": 2,
+              "userPath": 1
+            },
+            "renameByName": {
+              "count": "OK",
+              "count 1": "OK",
+              "count 2": "KO",
+              "last": "Passed",
+              "last_1": "Failed",
+              "last_2": "Total",
+              "name": "Request",
+              "parent": "Transaction",
+              "userPath": "UserPath"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 51
+      },
+      "id": 43,
+      "interval": "10s",
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.3",
+      "targets": [
+        {
+          "alias": "$tag_name $measurement ",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "code::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "request::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "transaction::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "errors",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT count(\"message\") FROM \"30d\".\"errors\" WHERE (\"testEnvironment\"::tag =~ /^$test_environment$/ AND \"systemUnderTest\"::tag =~ /^$system_under_test$/) AND $timeFilter GROUP BY \"userPath\"::tag, \"code\"::tag, \"request\"::tag, \"transaction\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "message"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment::tag",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest::tag",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            }
+          ]
+        }
+      ],
+      "title": "Error messages count",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 0,
+              "code": 4,
+              "count": 5,
+              "request": 3,
+              "transaction": 2,
+              "userPath": 1
+            },
+            "renameByName": {
+              "count": "Count",
+              "errorMessage": "Error message",
+              "name": "Request",
+              "userPath": "UserPath"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 51
+      },
+      "id": 44,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_transaction $tag_request $tag_code",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "request::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "transaction::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "code::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "errors",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT count(\"message\") FROM \"30d\".\"errors\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/) AND $timeFilter GROUP BY time($interval), \"request\"::tag, \"transaction\"::tag, \"userPath\"::tag, \"code\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "message"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            }
+          ]
+        }
+      ],
+      "title": "Errors per second",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 34,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 0,
+        "y": 62
+      },
+      "id": 3,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "users",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "nodeName::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "resultTimeSeries",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"userLoad\") FROM \"30d\".\"resultTimeSeries\" WHERE (\"testEnvironment\"::tag =~ /^$test_environment$/ AND \"systemUnderTest\"::tag =~ /^$system_under_test$/) AND $timeFilter GROUP BY time($__interval), \"nodeName\"::tag fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "userLoad"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "testEnvironment::tag",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest::tag",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            }
+          ]
+        }
+      ],
+      "title": "Concurrent users",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 74
+      },
+      "id": 48,
+      "panels": [],
+      "title": "Transaction response times",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "decimals": 0,
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              },
+              {
+                "id": "links",
+                "value": []
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 75
+      },
+      "id": 42,
+      "interval": "10s",
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 2,
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "UserPath"
+          }
+        ]
+      },
+      "pluginVersion": "10.2.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "name::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT last(\"perc50\"), last(\"perc90\"), last(\"perc95\"), last(\"perc99\"), last(\"minDuration\"), last(\"avgDuration\"), last(\"maxDuration\") FROM \"30d\".\"elementValues\" WHERE (\"systemUnderTest\" =~ /^$system_under_test$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"elementType\"::tag = 'TRANSACTION') AND $timeFilter GROUP BY \"name\", \"userPath\"::tag, \"name\"::tag",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "perc50"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "perc90"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "perc95"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "perc99"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "minDuration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "avgDuration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "maxDuration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "TRANSACTION"
+            }
+          ]
+        }
+      ],
+      "title": "Transaction response times overview",
+      "transformations": [
+        {
+          "filter": {
+            "id": "byRefId",
+            "options": ""
+          },
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time elementTimeseries": true,
+              "Time percentiles": true,
+              "userPath": false
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 1,
+              "max": 5,
+              "mean": 4,
+              "min": 3,
+              "name": 2,
+              "userPath": 0
+            },
+            "renameByName": {
+              "last": "P50",
+              "last_1": "P90",
+              "last_2": "P95",
+              "last_3": "P99",
+              "last_4": "Min",
+              "last_5": "Avg",
+              "last_6": "Max",
+              "max": "Max",
+              "mean": "Mean",
+              "mean_1": "Avg",
+              "mean_2": "Max",
+              "mean_3": "Rps",
+              "min": "Min",
+              "name": "Transaction",
+              "percentile": "P50",
+              "percentile_1": "P95",
+              "percentile_2": "P99",
+              "request": "",
+              "userPath": "UserPath"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 0,
+        "y": 87
+      },
+      "id": 53,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"minDuration\") FROM \"30d\".\"elementTimeSeries\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'TRANSACTION') AND $timeFilter GROUP BY time($__interval), \"name\", \"userPath\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "minDuration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "TRANSACTION"
+            }
+          ]
+        }
+      ],
+      "title": "Transaction response times minimum",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 8,
+        "y": 87
+      },
+      "id": 64,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"maxDuration\") FROM \"30d\".\"elementTimeSeries\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'TRANSACTION') AND $timeFilter GROUP BY time($__interval), \"name\", \"userPath\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "maxDuration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "TRANSACTION"
+            }
+          ]
+        }
+      ],
+      "title": "Transaction response times maximum",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 87
+      },
+      "id": 66,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"avgDuration\") FROM \"30d\".\"elementTimeSeries\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'TRANSACTION') AND $timeFilter GROUP BY time($__interval), \"name\", \"userPath\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "avgDuration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "TRANSACTION"
+            }
+          ]
+        }
+      ],
+      "title": "Transaction response times average",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 0,
+        "y": 98
+      },
+      "id": 68,
+      "interval": "30s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"perc50\") FROM \"30d\".\"elementValues\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'TRANSACTION') AND $timeFilter GROUP BY time($__interval), \"name\", \"userPath\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "perc50"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "TRANSACTION"
+            }
+          ]
+        }
+      ],
+      "title": "Transaction response times 50th percentile",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 8,
+        "y": 98
+      },
+      "id": 71,
+      "interval": "30s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"perc90\") FROM \"30d\".\"elementValues\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'TRANSACTION') AND $timeFilter GROUP BY time($__interval), \"name\", \"userPath\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "perc90"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "TRANSACTION"
+            }
+          ]
+        }
+      ],
+      "title": "Transaction response times 90th percentile",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 98
+      },
+      "id": 72,
+      "interval": "30s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"perc99\") FROM \"30d\".\"elementValues\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'TRANSACTION') AND $timeFilter GROUP BY time($__interval), \"name\", \"userPath\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "perc99"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "TRANSACTION"
+            }
+          ]
+        }
+      ],
+      "title": "Transaction response times 99th percentile",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 109
+      },
+      "id": 70,
+      "panels": [],
+      "title": "Request response times",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "decimals": 0,
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              },
+              {
+                "id": "links",
+                "value": []
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 110
+      },
+      "id": 62,
+      "interval": "10s",
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 2,
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "10.2.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "parent::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "name::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT last(\"minDuration\"), last(\"avgDuration\"), last(\"maxDuration\") FROM \"30d\".\"elementValues\" WHERE (\"systemUnderTest\" =~ /^$system_under_test$/ AND \"testEnvironment\" =~ /^$test_environment$/ AND \"elementType\"::tag = 'REQUEST') AND $timeFilter GROUP BY \"name\", \"userPath\"::tag, \"parent\"::tag, \"name\"::tag",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "minDuration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "avgDuration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "maxDuration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "REQUEST"
+            }
+          ]
+        }
+      ],
+      "title": "Requests response times overview",
+      "transformations": [
+        {
+          "filter": {
+            "id": "byRefId",
+            "options": ""
+          },
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time elementTimeseries": true,
+              "Time percentiles": true,
+              "userPath": false
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 1,
+              "last": 4,
+              "last_1": 5,
+              "last_2": 6,
+              "last_3": 7,
+              "last_4": 8,
+              "last_5": 9,
+              "last_6": 10,
+              "name": 3,
+              "parent": 2,
+              "userPath": 0
+            },
+            "renameByName": {
+              "Time": "",
+              "last": "Min",
+              "last_1": "Avg",
+              "last_2": "Max",
+              "last_3": "P99",
+              "last_4": "Min",
+              "last_5": "Avg",
+              "last_6": "Max",
+              "max": "Max",
+              "mean": "Mean",
+              "mean_1": "Avg",
+              "mean_2": "Max",
+              "mean_3": "Rps",
+              "min": "Min",
+              "name": "Request",
+              "parent": "Transaction",
+              "percentile": "P50",
+              "percentile_1": "P95",
+              "percentile_2": "P99",
+              "request": "",
+              "userPath": "UserPath"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 8,
+        "x": 0,
+        "y": 121
+      },
+      "id": 63,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_parent $tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "parent::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"minDuration\") FROM \"30d\".\"elementTimeSeries\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'REQUEST') AND $timeFilter GROUP BY time($__interval), \"name\", \"userPath\"::tag, \"parent\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "minDuration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "REQUEST"
+            }
+          ]
+        }
+      ],
+      "title": "Request response times minimum",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 8,
+        "y": 121
+      },
+      "id": 65,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_parent $tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "parent::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"maxDuration\") FROM \"30d\".\"elementTimeSeries\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'REQUEST') AND $timeFilter GROUP BY time($__interval), \"name\", \"userPath\"::tag, \"parent\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "maxDuration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "REQUEST"
+            }
+          ]
+        }
+      ],
+      "title": "Request response times maximum",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-neoload"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 8,
+        "x": 16,
+        "y": 121
+      },
+      "id": 67,
+      "interval": "10s",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "alias": "$tag_userPath $tag_parent $tag_name",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-neoload"
+          },
+          "dsType": "influxdb",
+          "fields": [
+            {
+              "func": "mean",
+              "name": "value"
+            }
+          ],
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "userPath::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "parent::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "elementValues",
+          "orderByTime": "ASC",
+          "policy": "30d",
+          "query": "SELECT mean(\"avgDuration\") FROM \"30d\".\"elementTimeSeries\" WHERE (\"testEnvironment\" =~ /^$test_environment$/ AND \"systemUnderTest\" =~ /^$system_under_test$/ AND \"elementType\"::tag = 'REQUEST') AND $timeFilter GROUP BY time($__interval), \"name\", \"userPath\"::tag, \"parent\"::tag",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "avgDuration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "testEnvironment",
+              "operator": "=~",
+              "value": "/^$test_environment$/"
+            },
+            {
+              "condition": "AND",
+              "key": "systemUnderTest",
+              "operator": "=~",
+              "value": "/^$system_under_test$/"
+            },
+            {
+              "condition": "AND",
+              "key": "elementType::tag",
+              "operator": "=",
+              "value": "REQUEST"
+            }
+          ]
+        }
+      ],
+      "title": "Request response times average",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": [
+    "perfana",
+    "perfana-template",
+    "perfana-performance-test-tool",
+    "neoload"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "JetFire",
+          "value": "JetFire"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb-neoload"
+        },
+        "definition": "show tag values  from resultTimeseries with key=\"systemUnderTest\"",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "system_under_test",
+        "options": [],
+        "query": "show tag values  from resultTimeseries with key=\"systemUnderTest\"",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "acme",
+          "value": "acme"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb-neoload"
+        },
+        "definition": "show tag values from resultTimeseries with key=\"testEnvironment\" where \"systemUnderTest\" =~ /$system_under_test/",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "test_environment",
+        "options": [],
+        "query": "show tag values from resultTimeseries with key=\"testEnvironment\" where \"systemUnderTest\" =~ /$system_under_test/",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {
+    "now": true,
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "Neoload",
+  "uid": "neoload-overview-influxdb",
+  "version": 1,
+  "weekStart": ""
+}

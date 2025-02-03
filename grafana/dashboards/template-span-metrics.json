@@ -1,0 +1,669 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 19,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 64,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, avg by(le,span_name,service) (increase(traces_spanmetrics_latency_bucket{perfana_request_name=~\"$requestName\", service=~\"$service\"}[1m])))",
+          "legendFormat": "{{service}} | {{span_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "95th percentile span durations",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 19,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 65,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by(service, span_name) (increase(traces_spanmetrics_calls_total{perfana_request_name=~\"$requestName\", service=~\"$service\"}[1m])) / 60",
+          "legendFormat": "{{service}} | {{span_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Spans / sec",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "span_name"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 500
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Service"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 67,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.50, max by(le,span_name,service) (increase(traces_spanmetrics_latency_bucket{perfana_request_name=~\"$requestName\", service=~\"$service\"}[1m])))",
+          "format": "table",
+          "legendFormat": "{{service}} | {{span_name}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, max by(le,span_name,service) (increase(traces_spanmetrics_latency_bucket{perfana_request_name=~\"$requestName\", service=~\"$service\"}[1m])))",
+          "format": "table",
+          "hide": false,
+          "legendFormat": "{{service}} | {{span_name}}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.99, max by(le,span_name,service) (increase(traces_spanmetrics_latency_bucket{perfana_request_name=~\"$requestName\", service=~\"$service\"}[1m])))",
+          "format": "table",
+          "hide": false,
+          "legendFormat": "{{service}} | {{span_name}}",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Span duration percentiles",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "span_name",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Value #A": {
+                "aggregations": [
+                  "mean"
+                ],
+                "operation": "aggregate"
+              },
+              "Value #B": {
+                "aggregations": [
+                  "mean"
+                ],
+                "operation": "aggregate"
+              },
+              "Value #C": {
+                "aggregations": [
+                  "mean"
+                ],
+                "operation": "aggregate"
+              },
+              "service": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "span_name": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "service 2": true,
+              "service 3": true
+            },
+            "indexByName": {
+              "Value #A (mean)": 4,
+              "Value #B (mean)": 5,
+              "Value #C (mean)": 6,
+              "service 1": 0,
+              "service 2": 2,
+              "service 3": 3,
+              "span_name": 1
+            },
+            "renameByName": {
+              "Value #A (mean)": "50th percentile",
+              "Value #B (mean)": "90th percentile",
+              "Value #C (mean)": "95th percentile",
+              "service 1": "Service",
+              "span_name": "Span name"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "span_name"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 500
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "service"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 66,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "9.5.13",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by(service, span_name) (increase(traces_spanmetrics_calls_total{perfana_request_name=~\"$requestName\", service=~\"$service\"}[$__range]))",
+          "format": "table",
+          "legendFormat": "{{service}} | {{span_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Span count",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Value": "Count"
+            }
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Count": {
+                "aggregations": [
+                  "range"
+                ],
+                "operation": "aggregate"
+              },
+              "service": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "span_name": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "refresh": "",
+  "schemaVersion": 40,
+  "tags": [
+    "perfana",
+    "spanmetrics",
+    "perfana-template"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "undefined",
+          "value": "undefined"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb-gatling"
+        },
+        "definition": "show tag values  from requests with key=\"systemUnderTest\"",
+        "includeAll": false,
+        "name": "system_under_test",
+        "options": [],
+        "query": {
+          "query": "show tag values  from requests with key=\"systemUnderTest\"",
+          "refId": "InfluxVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "undefined",
+          "value": "undefined"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb-gatling"
+        },
+        "definition": "show tag values from requests with key=\"testEnvironment\" where \"systemUnderTest\" =~ /$system_under_test/",
+        "includeAll": false,
+        "name": "test_environment",
+        "options": [],
+        "query": {
+          "query": "show tag values from requests with key=\"testEnvironment\" where \"systemUnderTest\" =~ /$system_under_test/",
+          "refId": "InfluxVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb-gatling"
+        },
+        "definition": "show tag values from requests with key= \"name\" where \"systemUnderTest\" =~ /$system_under_test/ and \"testEnvironment\" =~ /$test_environment/ ",
+        "includeAll": false,
+        "name": "requestName",
+        "options": [],
+        "query": {
+          "query": "show tag values from requests with key= \"name\" where \"systemUnderTest\" =~ /$system_under_test/ and \"testEnvironment\" =~ /$test_environment/ ",
+          "refId": "InfluxVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": [
+            "afterburner-be"
+          ],
+          "value": [
+            "afterburner-be"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(traces_spanmetrics_latency_bucket,service)",
+        "includeAll": false,
+        "multi": true,
+        "name": "service",
+        "options": [],
+        "query": {
+          "query": "label_values(traces_spanmetrics_latency_bucket,service)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Span metrics",
+  "uid": "span-metrics",
+  "version": 3,
+  "weekStart": ""
+}
