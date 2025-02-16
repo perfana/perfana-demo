@@ -65,8 +65,6 @@ To stop start existing containers, run
 ./start.sh
 ```
 
-
-
 To remove all containers, use
 
 ```sh
