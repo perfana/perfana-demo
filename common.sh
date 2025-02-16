@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
 export MONGO_VERSION="7.0"
-export CONFIG_FILE=`$(pwd)/mongodb/init-mongo.js`
-
+export CONFIG_FILE="$(pwd)/mongodb/init-mongo.js"
 COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-$(basename $(pwd))}
 
 # use current directory as basename for the network, this only works when common.sh is in same dir as 
