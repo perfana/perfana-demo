@@ -22,7 +22,7 @@ The Perfana demo environment can be used to try out all the features. It uses Do
 
 * Inside the repository root run
   ```sh
-  ./start.sh
+  ./init-demo.sh
   ```
 
 This spins up a number of containers
@@ -58,6 +58,14 @@ To stop all containers, run
 ```sh
 ./stop.sh
 ```
+
+To stop start existing containers, run
+
+```sh
+./start.sh
+```
+
+
 
 To remove all containers, use
 
