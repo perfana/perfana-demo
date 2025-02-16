@@ -33,7 +33,7 @@
   panelTitle: Response times 50th percentile
   metricClassification: RED_duration
   higherIsBetter: false
-  absThreshold: 0.025
+  absThreshold: 25
 
 
 - dashboardUid: neoload-overview-influxdb
