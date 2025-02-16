@@ -59,7 +59,7 @@ To stop all containers, run
 ./stop.sh
 ```
 
-To stop start existing containers, run
+To  start existing containers, run
 
 ```sh
 ./start.sh
@@ -83,12 +83,15 @@ To remove all containers, use
 
 The `start.sh` script will run 3 baseline test runs for the `afterburner` system under test while in `baseline mode`
 
-To deploy a version of the test application with a performance issue, run
+After the baseline test runs have finished, disable the `baseline mode` and try to deploy a  version of the test application with a performance issue.
+
+To deploy a version of the test application with a cpu issue, run
 
 ```sh
 ./deploy-and-test.sh cpu
 ````
-or 
+To deploy a version of the test application with a connection pool issue, run
+
 ```sh
 ./deploy-and-test.sh pool
 ```
