@@ -510,3 +510,13 @@
   panelTitle: CPU
   metricClassification: USE_usage
   higherIsBetter: false
+- dashboardUid: loki
+  panelId: 1
+  panelTitle: Log items per second
+  metricClassification: USE_errors
+  higherIsBetter: false
+- dashboardUid: gatling-loki-logs
+  panelId: 64
+  panelTitle: Log items per second
+  metricClassification: RED_errors
+  higherIsBetter: false  
