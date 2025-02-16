@@ -191,11 +191,12 @@
         "type": "custom"
       },
       {
+        "allValue": ".*",
         "current": {
           "text": "perfana-request-name=Add employee | new-employee | /delay",
           "value": "perfana-request-name=Add employee | new-employee | /delay"
         },
-        "includeAll": false,
+        "includeAll": true,
         "name": "perfanaRequestName",
         "options": [],
         "query": "",
