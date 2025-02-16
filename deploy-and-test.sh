@@ -24,6 +24,7 @@ while (( "$#" )); do
       echo "Deploying and testing baseline with cpu issue."
       export SUT_VERSION=2.4.3-changed-matrix-calc
       export GIT_SHA=decc58d
+      export ANNOTATIONS="Proxy Dev: make matrix calculation more variable"
       docker-compose up -d --force-recreate  afterburner-fe
       docker-compose up -d --force-recreate  afterburner-be
       break
@@ -32,6 +33,7 @@ while (( "$#" )); do
       echo "Deploying and testing version with connection pool issue."
       export SUT_VERSION=2.4.3-default-http-conn-pool
       export GIT_SHA=e17d3dd
+      export ANNOTATIONS="Proxy Dev: use default httpclient connection pool size"
       docker-compose up -d --force-recreate  afterburner-fe
       docker-compose up -d --force-recreate  afterburner-be
       break
