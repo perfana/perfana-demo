@@ -181,37 +181,66 @@
     "list": [
       {
         "current": {
-          "text": "jet-fire-fe",
-          "value": "jet-fire-fe"
+          "text": "afterburner-fe",
+          "value": "afterburner-fe"
         },
-        "includeAll": false,
+        "datasource": {
+          "type": "tempo",
+          "uid": "tempo"
+        },
+        "definition": "",
         "name": "service",
         "options": [],
-        "query": "",
-        "type": "custom"
+        "query": {
+          "label": "service.name",
+          "refId": "TempoDatasourceVariableQueryEditor-VariableQuery",
+          "type": 1
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
       },
       {
-        "allValue": ".*",
         "current": {
-          "text": "perfana-request-name=Add employee | new-employee | /delay",
-          "value": "perfana-request-name=Add employee | new-employee | /delay"
+          "text": "flaky_call",
+          "value": "flaky_call"
         },
-        "includeAll": true,
+        "datasource": {
+          "type": "tempo",
+          "uid": "tempo"
+        },
+        "definition": "",
         "name": "perfanaRequestName",
         "options": [],
-        "query": "",
-        "type": "custom"
+        "query": {
+          "label": "perfana-request-name",
+          "refId": "TempoDatasourceVariableQueryEditor-VariableQuery",
+          "type": 1
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
       },
       {
         "current": {
-          "text": "perfana-test-run-id=JetFire-acme-neo-loadTest-00004",
-          "value": "perfana-test-run-id=JetFire-acme-neo-loadTest-00004"
+          "text": "MyAfterburner-acc-loadTest-00002",
+          "value": "MyAfterburner-acc-loadTest-00002"
         },
-        "includeAll": false,
+        "datasource": {
+          "type": "tempo",
+          "uid": "tempo"
+        },
+        "definition": "",
         "name": "perfanaTestRunId",
         "options": [],
-        "query": "",
-        "type": "custom"
+        "query": {
+          "label": "perfana-test-run-id",
+          "refId": "TempoDatasourceVariableQueryEditor-VariableQuery",
+          "type": 1
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
       },
       {
         "current": {
