@@ -23,6 +23,9 @@ while [[ $# -gt 0 ]]; do
 done
 set -- "${POSITIONAL[@]-default}" # restore positional parameters
 
+export SUT_VERSION=2.4.3-good-baseline
+export GIT_SHA=c3ee4b9
+
 SLEEP_TIME=${SLEEP_TIME:-15}
 echo "using sleep time of $SLEEP_TIME seconds, use -s or --sleep option to change"
 
