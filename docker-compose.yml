@@ -2,7 +2,7 @@ services:
 
 ######################################################################################################################
   perfana-fe:
-    image: perfana/perfana-fe:3.3.10
+    image: perfana/perfana-fe:3.3.12
     init: true
     expose:
       - 4000
@@ -39,7 +39,7 @@ services:
         "lokiRetention": 604800,
         "public": {
           "tracingUrl": "http://localhost:3000/d/tempo-traces/tempo-traces",
-          "pyroscopeUrl": "http://localhost:3000/a/grafana-pyroscope-app",
+          "pyroscopeUrl": "http://localhost:3000/a/grafana-pyroscope-app/explore",
           "pyroscopeStandAlone": false,
           "tracingUi": "tempo",
           "tracingLimit": 500,
