@@ -396,7 +396,6 @@ services:
     image: influxdb:1.8.3
     ports:
       - "8086:8086"
-      - "2003:2003"
     volumes:
       - "./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro"
       - influxdb-storage:/var/lib/influxdb
