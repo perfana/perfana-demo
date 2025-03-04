@@ -134,7 +134,7 @@
                             </eventConfig>
                             <eventConfig implementation="io.perfana.events.commandrunner.CommandRunnerEventConfig">
                                 <name>CommandRunnerGatlingToInflux</name>
-                                <onStartTest>sh -c "g2i target/gatling --stop-timeout 120 -a ${influxUrl} -u perfana -p perfana -bgatling3 -t ${testEnvironment} -y ${systemUnderTest} -d | awk '{print $2}'"</onStartTest>
+                                <onStartTest>sh -c "x2i target/gatling --stop-timeout 120 -a ${influxUrl} -u perfana -p perfana -bgatling3 -t ${testEnvironment} -y ${systemUnderTest} -d | awk '{print $2}'"</onStartTest>
                             </eventConfig>
                             <eventConfig implementation="io.perfana.events.springboot.event.SpringBootEventConfig">
                                 <name>ActuatorEventFrontend</name>
