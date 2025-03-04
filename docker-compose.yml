@@ -161,6 +161,7 @@ services:
       perfana.watcher.check-result-enabled: 'true'
       perfana.watcher.compare-result-enabled: 'true'
       perfana.fastapi-client.api-host: http://perfana-ds-api:8080
+      JDK_JAVA_OPTIONS: "-XX:UseSVE=0"  # workaround for M4 processors
     networks:
       - perfana
 
@@ -177,6 +178,7 @@ services:
     environment:
       SPRING_DATA_MONGODB_URI: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SPRING_PROFILES_ACTIVE: "prd"
+      JDK_JAVA_OPTIONS: "-XX:UseSVE=0"  # workaround for M4 processors
     networks:
       - perfana
 
@@ -295,7 +297,6 @@ services:
       "management.metrics.tags.service": "afterburner-fe"
       "afterburner.remote.call.base_url": "http://afterburner-be:8080"
       "afterburner.remote.call.httpclient.socket.timeout.millis": "10000"
-      "JAVA_OPTS" : "-Xmx312m -XX:UseSVE=0"
       "spring.zipkin.enabled": "true"
       "spring.zipkin.base-url": "http://tempo:9411/"
       "spring.sleuth.sampler.probability": "0.1"
@@ -308,7 +309,7 @@ services:
       "afterburner.mybatis.datasource.username": "root"
       "afterburner.mybatis.datasource.password": "perfana"
       "afterburner.mybatis.datasource.driver-class-name": "org.mariadb.jdbc.Driver"
-      "JDK_JAVA_OPTIONS": "-javaagent:/pyroscope.jar"
+      "JDK_JAVA_OPTIONS": "-javaagent:/pyroscope.jar -XX:UseSVE=0"
       "PYROSCOPE_APPLICATION_NAME": "afterburner-fe"
       "PYROSCOPE_PROFILING_INTERVAL": "13ms"
       "PYROSCOPE_FORMAT": "jfr"
@@ -340,7 +341,6 @@ services:
       "management.metrics.tags.service": "afterburner-be"
       # "afterburner.remote.call.base_url": "http://wiremock:8080"
       "afterburner.remote.call.httpclient.socket.timeout.millis": "10000"
-      "JAVA_OPTS" : "-Xmx312m -XX:UseSVE=0"
       "spring.zipkin.enabled": "true"
       "spring.zipkin.base-url": "http://tempo:9411/"
       "spring.sleuth.sampler.probability": "0.1"
@@ -353,6 +353,7 @@ services:
       "afterburner.datasource.employee.username": "root"
       "afterburner.datasource.employee.password": "perfana"
       "afterburner.datasource.employee.poolMaximumActiveConnections": "5"
+      "JDK_JAVA_OPTIONS": "-javaagent:jfr-exporter.jar=influxUrl=http://influxdb:8086,influxDatabase=jfr,tag=service/afterburner-fe,tag=systemUnderTest/MyAfterburner,tag=testEnvironment/acc -XX:NativeMemoryTracking=summary"
     restart: always
     networks:
       - perfana
