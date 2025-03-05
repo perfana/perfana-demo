@@ -202,7 +202,10 @@ services:
       - ./grafana/grafana.ini:/etc/grafana/grafana.ini
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
-
+      - ./grafana/provisioning/alerting:/etc/grafana/provisioning/alerting
+    
+    
+    
     networks:
       - perfana
     #network_mode: host
@@ -258,11 +261,8 @@ services:
       - '--config.file=/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/data'
       - "--web.enable-remote-write-receiver"
-
     ports:
       - 9090:9090
-    depends_on:
-      - alertmanager
     networks:
       - perfana
 
@@ -271,7 +271,7 @@ services:
     image: prom/alertmanager
     user:  root
     volumes:
-      - ./prometheus-config:/prometheus
+      - ./prometheus:/prometheus
       - prometheus-storage:/data
     command:
       - '--config.file=/prometheus/alertmanager.yml'
@@ -520,3 +520,5 @@ volumes:
   tempo-data:
   pyroscope-data:
   loki-data:
+
+

@@ -3,11 +3,11 @@ global: {}
 receivers:
 - name: default-receiver
   webhook_configs:
-  - url: 'http://perfana:3000/api/prometheus-alerts'
+  - url: 'http://perfana-fe:3000/api/prometheus-alerts'
     send_resolved: false
     http_config:
       basic_auth:
-        username: admin@perfana.io
+        username: perfana
         password: perfana
 
 route:

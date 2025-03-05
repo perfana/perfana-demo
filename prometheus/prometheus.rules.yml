@@ -18,14 +18,22 @@ groups:
     annotations:
       description: 'GC Pause > 50 ms detected'
       summary: 'GC Pause > 50 ms detected'
-  - alert: HighConnectionPoolUsage
+  - alert: HighDatabaseConnectionPoolUsage
     expr: round(100 * avg by(system_under_test, test_environment, pool, service) (hikaricp_connections_active) / avg by(system_under_test, test_environment, pool, service) (hikaricp_connections_max)) > 80
     for: 0s
     labels:
       severity: warning
     annotations:
-      description: '80% of Maximum Connection pool used'
-      summary: '80% of Maximum Connection pool used'
+      description: '80% of Maximum DatabaseConnection pool used'
+      summary: '80% of Maximum DatabaseConnection pool used'
+  - alert: HighHttpConnectionPoolUsage
+    expr: round(100 * avg by (system_under_test, test_environment, service, httpclient) (httpcomponents_httpclient_pool_total_connections{state="leased"}) / avg by (system_under_test, test_environment, service, httpclient) (httpcomponents_httpclient_pool_total_max))  > 80
+    for: 0s
+    labels:
+      severity: warning
+    annotations:
+      description: '80% of Maximum HttpConnection pool used'
+      summary: '80% of Maximum HttpConnection pool used'
   - alert: ExecutorTasksQueued
     expr: avg by(system_under_test,test_environment ) (executor_queued_tasks) > 50
     for: 0s

@@ -1,0 +1,13 @@
+apiVersion: 1
+contactPoints:
+  - orgId: 1
+    name: perfana
+    is_default: true
+    receivers:
+      - uid: perfana
+        type: webhook
+        settings:
+          httpMethod: POST
+          url: http://perfana-fe:3000/api/grafana-alerts
+          username: perfana
+          password: perfana
