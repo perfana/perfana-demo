@@ -57,7 +57,7 @@ services:
         },
         "grafanaInstances": [
               {
-                "label": "Demo",
+                "label": "Default",
                 "clientUrl": "http://localhost:3000",
                 "serverUrl": "http://grafana:3000",
                 "orgId": "1",
