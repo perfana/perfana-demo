@@ -78,8 +78,6 @@ services:
       MYSQL_HOST: mariadb
       MYSQL_USER: root
       MYSQL_PASSWORD: perfana
-    ports:
-      - "3001:3000"
     networks:
       - perfana
   ################################################################################################  ######################
