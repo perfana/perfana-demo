@@ -2,7 +2,7 @@ services:
 
 ######################################################################################################################
   perfana-fe:
-    image: perfana/perfana-fe:3.3.13
+    image: perfana/perfana-fe-test:3.3.14-perfana-chat-SNAPSHOT-131dd410
     init: true
     expose:
       - 4000
@@ -38,6 +38,7 @@ services:
         "provisionGoldenPathProfiles": true,
         "lokiRetention": 604800,
         "public": {
+          "perfanaChatUrl": "http://localhost:3001",
           "tracingUrl": "http://localhost:3000/d/tempo-traces/tempo-traces",
           "pyroscopeUrl": "http://localhost:3000/a/grafana-pyroscope-app/explore",
           "pyroscopeStandAlone": false,
@@ -51,6 +52,7 @@ services:
         "helmet": {
           "frameSrc": [
            "http://localhost:3000",
+           "http://localhost:3001",
            "http://localhost:4040",
            "http://localhost:16686"
           ]
@@ -180,6 +182,30 @@ services:
     networks:
       - perfana
 
+  ######################################################################################################################
+  perfana-chat:
+    image: perfana/perfana-chat
+    ports:
+      - "3001:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0
+      - NEXT_PUBLIC_MCP_SERVER_URL=http://perfana-mcp:8888/mcp
+      - OPENAI_API_KEY=***REMOVED***
+      - OPENAI_MODEL=gpt-4o-mini
+      - NEXT_PUBLIC_COPILOTKIT_RUNTIME_URL=/api/copilotkit
+    networks:
+      - perfana
+  ######################################################################################################################
+  perfana-mcp:
+    image: perfana/perfana-mcp
+    tty: true
+    stdin_open: true
+    environment:
+      - MCP_MONGODB_URI=mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0
+      - MCP_MONGODB_READONLY=true
+      - MCP_PORT=8888
+    networks:
+      - perfana
   ######################################################################################################################
   grafana:
     image: grafana/grafana:11.4.0

@@ -52,6 +52,8 @@ docker-compose  up -d perfana-scheduler
 docker-compose  up -d perfana-ds-api
 docker-compose  up -d perfana-ds-worker
 docker-compose  up -d perfana-ds-metric-worker
+docker-compose  up -d perfana-mcp
+docker-compose  up -d perfana-chat
 docker-compose  up -d telegraf
 docker-compose  up -d prometheus
 docker-compose  up -d alertmanager
