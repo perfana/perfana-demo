@@ -2,7 +2,7 @@ services:
 
 ######################################################################################################################
   perfana-fe:
-    image: perfana/perfana-fe-test:3.3.14-perfana-chat-SNAPSHOT-131dd410
+    image: perfana/perfana-fe-test:3.3.14-perfana-chat-SNAPSHOT-54e5f920
     init: true
     expose:
       - 4000

@@ -56,7 +56,7 @@
         <systemUnderTest>MyAfterburner</systemUnderTest>
         <sut_version>${SUT_VERSION}</sut_version>
         <tags>gatling,spring-boot-kubernetes,jfr,spanmetrics,docker</tags>
-        <apiKey></apiKey>
+        <apiKey>ZGVtbyM3NGNmMjk4MC05OTNmLTQxMTAtODI4Yi0zMmU1ZTdmMGY1Y2Q=</apiKey>
         <influxUrl>http://influxdb:8086</influxUrl>
     </properties>
 
