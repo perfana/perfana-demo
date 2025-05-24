@@ -110,7 +110,8 @@ api_key=$( curl --location 'http://localhost:4000/api/key' \
              }' | jq -r '.key.data')
 
 # Replace __apiKey__ in ./loadtest/pom.xml with the fetched API key
-sed -i '' "s/__apiKey__/$api_key/" ./loadtest/pom.xml
+# Cross-platform sed command using shared function
+cross_platform_sed "s/__apiKey__/$api_key/" ./loadtest/pom.xml
 
 echo "Running 3 baseline load tests with SUT_VERSION=${SUT_VERSION} and GIT_SHA=${GIT_SHA}"
 ./deploy-and-test.sh baseline
