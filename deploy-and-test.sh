@@ -10,45 +10,53 @@ while (( "$#" )); do
     baseline)
       echo "Deploying and testing baseline."
       export SUT_VERSION=2.4.3-good-baseline
-      export GIT_SHA=c3ee4b9
+      export GIT_SHA=85f8408
       export ANNOTATIONS="Proxy Dev: make cpu more efficient"
-      docker-compose stop afterburner-fe
-      docker-compose stop afterburner-be
-      docker-compose rm -f afterburner-fe
-      docker-compose rm -f  afterburner-be
-      docker-compose up -d afterburner-fe
-      docker-compose up -d afterburner-be
+      docker compose stop afterburner-fe
+      docker compose stop afterburner-be
+      docker compose rm -f afterburner-fe
+      docker compose rm -f  afterburner-be
+      docker compose up -d afterburner-fe
+      docker compose up -d afterburner-be
       break
     ;;
     backend)
       echo "Deploying and testing image with backend calls issue."
       export SUT_VERSION=2.4.3-increased-backend-calls
-      export GIT_SHA=9225e0f
+      export GIT_SHA=a2d09ca
       export ANNOTATIONS="Proxy Dev: Accidentally triple the amount of back end calls"
-      docker-compose stop afterburner-fe
-      docker-compose stop afterburner-be
-      docker-compose rm -f afterburner-fe
-      docker-compose rm -f  afterburner-be
-      docker-compose up -d afterburner-fe
-      docker-compose up -d afterburner-be
+      docker compose stop afterburner-fe
+      docker compose stop afterburner-be
+      docker compose rm -f afterburner-fe
+      docker compose rm -f  afterburner-be
+      docker compose up -d afterburner-fe
+      docker compose up -d afterburner-be
       break
     ;;
     cpu)
-      echo "Deploying and testing baseline with cpu issue."
-      export SUT_VERSION=2.4.3-changed-matrix-calc
-      export GIT_SHA=decc58d
-      export ANNOTATIONS="Proxy Dev: make matrix calculation more variable"
-      docker-compose up -d --force-recreate  afterburner-fe
-      docker-compose up -d --force-recreate  afterburner-be
+     echo "Deploying and testing baseline with cpu issue."
+     export SUT_VERSION=2.4.3-changed-matrix-calc
+     export GIT_SHA=26361d2
+     export ANNOTATIONS="Proxy Dev: make matrix calculation more variable"
+     docker compose stop afterburner-fe
+     docker compose stop afterburner-be
+     docker compose rm -f afterburner-fe
+     docker compose rm -f  afterburner-be
+     docker compose up -d afterburner-fe
+     docker compose up -d afterburner-be
       break
     ;;
     pool)
       echo "Deploying and testing version with connection pool issue."
       export SUT_VERSION=2.4.3-default-http-conn-pool
-      export GIT_SHA=e17d3dd
+      export GIT_SHA=19b60ef
       export ANNOTATIONS="Proxy Dev: use default httpclient connection pool size"
-      docker-compose up -d --force-recreate  afterburner-fe
-      docker-compose up -d --force-recreate  afterburner-be
+      docker compose stop afterburner-fe
+      docker compose stop afterburner-be
+      docker compose rm -f afterburner-fe
+      docker compose rm -f  afterburner-be
+      docker compose up -d afterburner-fe
+      docker compose up -d afterburner-be
       break
     ;;
     *)
@@ -70,7 +78,7 @@ wait_for_service() {
 
     echo "Waiting for $service to be healthy..."
     while [ $attempt -le $max_attempts ]; do
-        if docker-compose ps "$service" | grep -q "Up"; then
+        if docker compose ps "$service" | grep -q "Up"; then
             echo "$service is healthy!"
             return 0
         fi
@@ -91,7 +99,7 @@ if ! wait_for_service "afterburner-be"; then
     echo "Backend service failed to become healthy"
     exit 1
 fi
-docker-compose down loadtest
-docker-compose up -d loadtest
+docker compose down loadtest
+docker compose up -d loadtest
 echo "Running load test with SUT_VERSION=${SUT_VERSION} and GIT_SHA=${GIT_SHA}"
-docker-compose exec loadtest mvn clean -DSUT_VERSION=${SUT_VERSION} -DGIT_SHA=${GIT_SHA} -Dannotations="${ANNOTATIONS}" events-gatling:test
+docker compose exec loadtest mvn clean -DSUT_VERSION=${SUT_VERSION} -DGIT_SHA=${GIT_SHA} -Dannotations="${ANNOTATIONS}" events-gatling:test
