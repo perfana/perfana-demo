@@ -10,7 +10,7 @@ while (( "$#" )); do
     baseline)
       echo "Deploying and testing baseline."
       export SUT_VERSION=2.4.3-good-baseline
-      export GIT_SHA=85f8408
+      export GIT_SHA=4e2db5f
       export ANNOTATIONS="Proxy Dev: make cpu more efficient"
       docker compose stop afterburner-fe
       docker compose stop afterburner-be

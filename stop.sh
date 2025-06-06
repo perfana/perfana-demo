@@ -1,4 +1,4 @@
 #!/bin/bash
 source common.sh
-docker-compose down
+docker compose down
 

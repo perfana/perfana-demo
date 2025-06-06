@@ -117,7 +117,7 @@ To log into Grafana, open [http://localhost:3000](http://localhost:3000) and use
 
 
 ```sh
-git pull && docker-compose pull
+git pull && docker compose pull
 ```
 
 ## Credits

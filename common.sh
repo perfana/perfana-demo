@@ -5,7 +5,7 @@ export CONFIG_FILE="$(pwd)/mongodb/init-mongo.js"
 COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-$(basename $(pwd))}
 
 # use current directory as basename for the network, this only works when common.sh is in same dir as 
-# the docker-compose.yml file and is executed from that directory
+# the docker compose.yml file and is executed from that directory
 PERFANA_NETWORK=${COMPOSE_PROJECT_NAME}_perfana
 if [[ "$(docker network ls)" =~ $PERFANA_NETWORK ]]; then
    DOCKER_HOST_IP=$(docker network inspect $PERFANA_NETWORK -f '{{range .IPAM.Config}}{{.Gateway}}{{end}}')
