@@ -1,4 +1,5 @@
 .idea/
 loadtest/target/
-
+loadtest/log/
+loadtest/src/._test
 .DS_Store
