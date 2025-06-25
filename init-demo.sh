@@ -62,8 +62,6 @@ sleep $SLEEP_TIME
 echo "Starting the rest of the environment ..."
 docker-compose  up -d perfana-grafana
 docker-compose  up -d perfana-snapshot
-docker-compose  up -d perfana-check
-docker-compose  up -d perfana-scheduler
 docker-compose  up -d perfana-ds-api
 docker-compose  up -d perfana-ds-worker
 docker-compose  up -d perfana-ds-metric-worker
