@@ -49,7 +49,7 @@ class AfterburnerBasicSimulation : Simulation() {
             .check(status().shouldBe(200)))
         .pause(1)
         .exec(http("remote_call_delayed")
-            .get("/remote/call?path=remote/call?path=delay")
+            .get("/remote/call-many?count=5&path=delay?duration=222")
             .header("perfana-request-name", "remote_call_delayed")
             .check(status().shouldBe(200)))
         .exec(http("memory_churn")
