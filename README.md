@@ -32,8 +32,6 @@ This spins up a number of containers
 | perfana-fe               | Perfana front end                                 | 4000                  |
 | perfana-grafana          | Perfana - Grafana integration service             | n/a                   |
 | perfana-snapshot         | Perfana snapshot service                          | n/a                   |
-| perfana-check            | Perfana results check service                     | n/a                   |
-| perfana-scheduler        | Perfana schduled jobs                             | n/a                   |
 | perfana-ds-api           | Perfana data science api                          | 8080                  |
 | perfana-ds-worker        | Perfana data science api                          | n/a                   |
 | perfana-ds-metric-worker | Perfana data science api                          | n/a                   |
