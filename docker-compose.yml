@@ -123,7 +123,7 @@ services:
 
   ######################################################################################################################
   perfana-snapshot:
-    image: perfana/perfana-snapshot:3.0.0
+    image: perfana/perfana-snapshot:3.1.0
     depends_on:
       - mongo1
       - mongo2
@@ -131,7 +131,6 @@ services:
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       CONCURRENT_SNAPSHOTS: 1
-
 
     networks:
       - perfana
