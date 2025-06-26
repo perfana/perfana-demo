@@ -71,7 +71,7 @@ services:
 
   ################################################################################################  ######################
   perfana-grafana:
-    image: perfana/perfana-grafana:3.0.0
+    image: perfana/perfana-grafana:3.0.1
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SYNC_INTERVAL: 30000
