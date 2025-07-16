@@ -2,7 +2,7 @@ services:
 
 ######################################################################################################################
   perfana-fe:
-    image: perfana/perfana-fe:3.4.7
+    image: perfana/perfana-fe:3.5.3
     init: true
     expose:
       - 4000
@@ -71,7 +71,7 @@ services:
 
   ################################################################################################  ######################
   perfana-grafana:
-    image: perfana/perfana-grafana:3.0.1
+    image: perfana/perfana-grafana:3.0.3
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SYNC_INTERVAL: 30000
@@ -82,7 +82,7 @@ services:
       - perfana
   ################################################################################################  ######################
   perfana-ds-api:
-    image: perfana/perfana-ds:1.0.0
+    image: perfana/perfana-ds:1.0.2
     command: |
       uvicorn src.perfana_ds_api.app:app --host 0.0.0.0 --port 8080
     environment:
@@ -97,7 +97,7 @@ services:
 
    ######################################################################################################################
   perfana-ds-metric-worker:
-    image: perfana/perfana-ds:1.0.0
+    image: perfana/perfana-ds:1.0.2
     command: |
       celery -A perfana_ds_api.worker.worker worker --loglevel=info -Q metrics
     environment:
@@ -110,7 +110,7 @@ services:
 
    ######################################################################################################################
   perfana-ds-worker:
-    image: perfana/perfana-ds:1.0.0
+    image: perfana/perfana-ds:1.0.2
     command: |
       celery -A perfana_ds_api.worker.worker worker --loglevel=info -P gevent -Q celery -c 5
     environment:
