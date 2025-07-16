@@ -51,4 +51,19 @@ confirm() {
     esac
 }
 
+# Cross-platform sed function that handles differences between macOS (BSD) and Linux (GNU) sed
+# Usage: cross_platform_sed 's/old/new/g' filename
+cross_platform_sed() {
+    local pattern="$1"
+    local file="$2"
+    
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS (BSD sed) requires empty string after -i
+        sed -i '' "$pattern" "$file"
+    else
+        # Linux (GNU sed) doesn't require empty string after -i
+        sed -i "$pattern" "$file"
+    fi
+}
+
 

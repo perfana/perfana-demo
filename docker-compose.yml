@@ -2,7 +2,7 @@ services:
 
 ######################################################################################################################
   perfana-fe:
-    image: perfana/perfana-fe-test:3.3.14-perfana-chat-SNAPSHOT-54e5f920
+    image: perfana/perfana-fe:3.5.3
     init: true
     expose:
       - 4000
@@ -24,12 +24,12 @@ services:
       MONGO_OPLOG_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/local?replicaSet=rs0"
       METEOR_SETTINGS: '{
         "adminEmail":"admin@perfana.io",
-        "adminPassword":"perfana",
+        "adminPassword":"admin",
         "prometheusRetention": "1296000",
         "influxDbRetention": "2592000",
         "snapshotExpires": "7776000",
         "perfanaUrl": "http://localhost:4000",
-        "perfanaCheckUrl": "http://perfana-check:9191",
+        "perfanaDsApiUrl": "http://perfana-ds-api:8080",
         "perfanaApiPassword": "perfana",
         "perfanaApiUser": "perfana",
         "influxDbHost": "influxdb",
@@ -73,7 +73,7 @@ services:
 
   ################################################################################################  ######################
   perfana-grafana:
-    image: perfana/perfana-grafana:2.27.0
+    image: perfana/perfana-grafana:3.0.3
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SYNC_INTERVAL: 30000
@@ -84,7 +84,7 @@ services:
       - perfana
   ################################################################################################  ######################
   perfana-ds-api:
-    image: perfana/perfana-ds:0.2.8
+    image: perfana/perfana-ds:1.0.2
     command: |
       uvicorn src.perfana_ds_api.app:app --host 0.0.0.0 --port 8080
     environment:
@@ -99,7 +99,7 @@ services:
 
    ######################################################################################################################
   perfana-ds-metric-worker:
-    image: perfana/perfana-ds:0.2.8
+    image: perfana/perfana-ds:1.0.2
     command: |
       celery -A perfana_ds_api.worker.worker worker --loglevel=info -Q metrics
     environment:
@@ -112,7 +112,7 @@ services:
 
    ######################################################################################################################
   perfana-ds-worker:
-    image: perfana/perfana-ds:0.2.8
+    image: perfana/perfana-ds:1.0.2
     command: |
       celery -A perfana_ds_api.worker.worker worker --loglevel=info -P gevent -Q celery -c 5
     environment:
@@ -125,7 +125,7 @@ services:
 
   ######################################################################################################################
   perfana-snapshot:
-    image: perfana/perfana-snapshot:3.0.0
+    image: perfana/perfana-snapshot:3.1.0
     depends_on:
       - mongo1
       - mongo2
@@ -134,51 +134,6 @@ services:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       CONCURRENT_SNAPSHOTS: 1
 
-
-    networks:
-      - perfana
-
-  ######################################################################################################################
-  perfana-check:
-    image: perfana/perfana-check:3.2.7
-    expose:
-    - 9191
-    ports:
-    - "9191:9191"
-    depends_on:
-      - mongo1
-      - mongo2
-      - mongo3
-    environment:
-      SPRING_DATA_MONGODB_URI: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
-      SPRING_PROFILES_ACTIVE: "prd"
-      perfana.timeseries.fit-graphs-enabled: 'true'
-      perfana.fastapi-call.enabled: 'true'
-      perfana:fastapi-client.connectTimeoutMs: '10000'
-      perfana.fastapi-mongo.enabled: 'true'
-      logging.level.io.perfana.check.checkresult: INFO
-      logging.level.io.perfana.fastapi: INFO
-      perfana.watcher.check-result-enabled: 'true'
-      perfana.watcher.compare-result-enabled: 'true'
-      perfana.fastapi-client.api-host: http://perfana-ds-api:8080
-      JDK_JAVA_OPTIONS: "-XX:UseSVE=0"  # workaround for M4 processors
-    networks:
-      - perfana
-
-
-  ######################################################################################################################
-  perfana-scheduler:
-    image: perfana/perfana-scheduler:3.2.7
-    ports:
-    - "9292:9292"
-    depends_on:
-      - mongo1
-      - mongo2
-      - mongo3
-    environment:
-      SPRING_DATA_MONGODB_URI: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
-      SPRING_PROFILES_ACTIVE: "prd"
-      JDK_JAVA_OPTIONS: "-XX:UseSVE=0"  # workaround for M4 processors
     networks:
       - perfana
 
@@ -208,7 +163,7 @@ services:
       - perfana
   ######################################################################################################################
   grafana:
-    image: grafana/grafana:11.4.0
+    image: grafana/grafana:11.4.5-security-01
     expose:
       - "3000"
     ports:
@@ -333,7 +288,7 @@ services:
       "afterburner.mybatis.datasource.username": "root"
       "afterburner.mybatis.datasource.password": "perfana"
       "afterburner.mybatis.datasource.driver-class-name": "org.mariadb.jdbc.Driver"
-      "JDK_JAVA_OPTIONS": "-javaagent:/pyroscope.jar -XX:UseSVE=0"
+      "JDK_JAVA_OPTIONS": "-javaagent:/pyroscope.jar"
       "PYROSCOPE_APPLICATION_NAME": "afterburner-fe"
       "PYROSCOPE_PROFILING_INTERVAL": "13ms"
       "PYROSCOPE_FORMAT": "jfr"
@@ -497,7 +452,7 @@ services:
 
   #######################################################################################################################
   loadtest:
-    image: perfana/maven-gatling-loadtest:0.0.7-SNAPSHOT
+    image: perfana/maven-gatling-loadtest:0.0.6
     environment:
       SUT_VERSION: 1.0.0
       GIT_SHA: 6293480
