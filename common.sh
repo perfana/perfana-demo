@@ -36,6 +36,25 @@ else
     CONFIG_FILE=$(pwd)/mongodb/init-mongo.js
 fi
 
+# Configure JVM options based on CPU architecture
+# The -XX:UseSVE=0 flag is ARM-specific and causes crashes on Intel Macs
+setup_jvm_arch_options() {
+    ARCH=$(uname -m)
+    
+    if [[ "$ARCH" == "arm64" || "$ARCH" == "aarch64" ]]; then
+        # ARM-based CPU: enable SVE optimization
+        export JVM_ARCH_OPTIONS=" -XX:UseSVE=0"
+        echo "Detected ARM architecture ($ARCH). Setting JVM_ARCH_OPTIONS='$JVM_ARCH_OPTIONS'"
+    else
+        # Intel/AMD x86_64: no SVE flag needed
+        export JVM_ARCH_OPTIONS=""
+        echo "Detected x86_64 architecture ($ARCH). No additional JVM flags needed."
+    fi
+}
+
+# Call the setup function
+setup_jvm_arch_options
+
 GRAFANA_CREDS=perfana:perfana
 
 confirm() {
