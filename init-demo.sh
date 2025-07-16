@@ -85,7 +85,7 @@ sleep $SLEEP_TIME
 
 docker-compose  up -d loadtest
 
-echo "Creating indeces and schemas for perfana-ds-api.."
+echo "Creating indeces for perfana-ds.."
 
 # Create indexes
 curl -X 'POST' \
@@ -93,12 +93,16 @@ curl -X 'POST' \
   -H 'accept: application/json' \
   -d ''
 # Create schemas
+echo "Creating  schemas for perfana-ds.."
+
 curl -X 'POST' \
   'http://localhost:8080/manage/createSchemas?panels=true&metrics=true&metricStatistics=true&controlGroupStatistics=true&trackedDifferences=true&adaptInput=true&adaptResults=true&adaptTrackedResults=true&adaptConclusion=true' \
   -H 'accept: application/json' \
   -d ''
 
 # Fetch the API key
+echo "Creating api key.."
+
 api_key=$( curl --location 'http://localhost:4000/api/key' \
              --header 'Content-Type: application/json' \
              --user 'perfana:perfana' \
