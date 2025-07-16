@@ -262,7 +262,7 @@ services:
       "afterburner.mybatis.datasource.username": "root"
       "afterburner.mybatis.datasource.password": "perfana"
       "afterburner.mybatis.datasource.driver-class-name": "org.mariadb.jdbc.Driver"
-      "JDK_JAVA_OPTIONS": "-javaagent:/pyroscope.jar -XX:UseSVE=0"
+      "JDK_JAVA_OPTIONS": "-javaagent:/pyroscope.jar"
       "PYROSCOPE_APPLICATION_NAME": "afterburner-fe"
       "PYROSCOPE_PROFILING_INTERVAL": "13ms"
       "PYROSCOPE_FORMAT": "jfr"
