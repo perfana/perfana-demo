@@ -73,13 +73,16 @@ services:
 
   ################################################################################################  ######################
   perfana-grafana:
-    image: perfana/perfana-grafana:3.0.3
+    image: perfana-grafana:next-gen
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       SYNC_INTERVAL: 30000
       MYSQL_HOST: mariadb
       MYSQL_USER: root
       MYSQL_PASSWORD: perfana
+      DATABASE_TYPE: postgres
+      SUPABASE_URL: http://host.docker.internal:54321
+      SUPABASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
     networks:
       - perfana
   ################################################################################################  ######################
@@ -114,7 +117,7 @@ services:
   perfana-ds-worker:
     image: perfana/perfana-ds:1.0.2
     command: |
-      celery -A perfana_ds_api.worker.worker worker --loglevel=info -P gevent -Q celery -c 5
+        celery -A perfana_ds_api.worker.worker worker --loglevel=info -P gevent -Q celery -c 5
     environment:
       MONGO_URL: "mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0"
       PROJECT_NAME: "Perfana Datascience"
@@ -139,7 +142,7 @@ services:
 
   ######################################################################################################################
   perfana-chat:
-    image: perfana/perfana-chat
+    image: perfana/perfana-chat:0.0.23
     ports:
       - "3001:3000"
     environment:
@@ -148,11 +151,14 @@ services:
       - OPENAI_API_KEY=***REMOVED***
       - OPENAI_MODEL=gpt-4o-mini
       - NEXT_PUBLIC_COPILOTKIT_RUNTIME_URL=/api/copilotkit
+      - PYROSCOPE_URL=http://pyroscope:4040
+      - TEMPO_URL=http://tempo:3200
+      - GITHUB_TOKEN=***REMOVED***
     networks:
       - perfana
   ######################################################################################################################
   perfana-mcp:
-    image: perfana/perfana-mcp
+    image: perfana/perfana-mcp:0.0.4
     tty: true
     stdin_open: true
     environment:

@@ -43,11 +43,11 @@ class AfterburnerBasicSimulation : Simulation() {
             .header("perfana-request-name", "simple_cpu_burn")
             .check(status().shouldBe(200)))
         .pause(1)
-//        .exec(http("flaky_call")
-//            .get("/flaky?maxRandomDelay=240&flakiness=5")
-//            .header("perfana-request-name", "flaky_call")
-//            .check(status().shouldBe(200)))
-//        .pause(1)
+        .exec(http("flaky_call")
+            .get("/flaky?maxRandomDelay=240&flakiness=5")
+            .header("perfana-request-name", "flaky_call")
+            .check(status().shouldBe(200)))
+        .pause(1)
         .exec(http("remote_call_delayed")
             .get("/remote/call-many?count=5&path=delay?duration=222")
             .header("perfana-request-name", "remote_call_delayed")
@@ -73,8 +73,8 @@ class AfterburnerBasicSimulation : Simulation() {
 
         setUp(
             scn.injectOpen(
-                //atOnceUsers(initialUsersPerSecond),
-                //rampUsers(initialUsersPerSecond).during(Duration.ofSeconds(rampupTimeInSeconds)),
+                atOnceUsers(initialUsersPerSecond),
+                rampUsers(initialUsersPerSecond).during(Duration.ofSeconds(rampupTimeInSeconds)),
                 constantUsersPerSec(targetConcurrency.toDouble()).during(Duration.ofSeconds(constantLoadTimeInSeconds))
             ).protocols(httpProtocol)
         )
