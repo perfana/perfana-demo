@@ -588,31 +588,6 @@ services:
       - perfana
 
 ######################################################################################################################
-# MOCK SERVICES
-######################################################################################################################
-
-  # Dynatrace Mock Services - for development without actual Dynatrace instances
-  # SaaS mock (port 8092): DQL queries via /platform/storage/query/v1/query:execute
-  # Managed mock (port 8091): Metrics API v2 via /api/v2/metrics/query
-  dynatrace-saas-mock:
-    image: wiremock/wiremock:3.3.1
-    container_name: dynatrace-saas-mock
-    ports:
-      - "8092:8080"
-    volumes:
-      - ./dynatrace-mock/saas/mappings:/home/wiremock/mappings:ro
-    command: ["--global-response-templating", "--verbose"]
-    networks:
-      - perfana
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/__admin/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-######################################################################################################################
 # SUPPORTING DATABASES
 ######################################################################################################################
 

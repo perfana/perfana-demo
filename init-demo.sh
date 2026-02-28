@@ -76,9 +76,8 @@ docker compose -f "$COMPOSE_FILE" up -d grafana prometheus alertmanager tempo py
 echo "[6/8] Starting demo applications..."
 docker compose -f "$COMPOSE_FILE" up -d afterburner-fe afterburner-be wiremock
 
-# Start mock services and load testing
-echo "[7/8] Starting mock services and load testing..."
-docker compose -f "$COMPOSE_FILE" up -d dynatrace-saas-mock dynatrace-managed-mock
+# Start load testing
+echo "[7/8] Starting load testing..."
 docker compose -f "$COMPOSE_FILE" up -d loadtest jmetertest
 
 # Wait for Perfana API and create API key
@@ -136,10 +135,6 @@ echo "  Afterburner Frontend:  http://localhost:8090"
 echo "  MariaDB:               localhost:3306"
 echo "  InfluxDB:              http://localhost:8086"
 echo "  Wiremock:              http://localhost:8060"
-echo ""
-echo "Mock Services:"
-echo "  Dynatrace SaaS Mock:     http://localhost:8092"
-echo "  Dynatrace Managed Mock:  http://localhost:8091"
 echo ""
 echo "Commands:"
 echo "  docker compose -f $COMPOSE_FILE ps      # Check status"
