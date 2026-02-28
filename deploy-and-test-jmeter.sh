@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -o pipefail
+set -o nounset
 
 if [ $# -ne 1 ]; then
   echo "Supply one option: 'baseline', 'cpu', 'backend' or 'pool'."
@@ -9,12 +11,12 @@ fi
 COMPOSE_FILE="docker-compose-next-gen.yml"
 
 restart_afterburner() {
-    docker compose -f $COMPOSE_FILE stop afterburner-fe
-    docker compose -f $COMPOSE_FILE stop afterburner-be
-    docker compose -f $COMPOSE_FILE rm -f afterburner-fe
-    docker compose -f $COMPOSE_FILE rm -f afterburner-be
-    docker compose -f $COMPOSE_FILE up -d afterburner-fe
-    docker compose -f $COMPOSE_FILE up -d afterburner-be
+    docker compose -f "$COMPOSE_FILE" stop afterburner-fe
+    docker compose -f "$COMPOSE_FILE" stop afterburner-be
+    docker compose -f "$COMPOSE_FILE" rm -f afterburner-fe
+    docker compose -f "$COMPOSE_FILE" rm -f afterburner-be
+    docker compose -f "$COMPOSE_FILE" up -d afterburner-fe
+    docker compose -f "$COMPOSE_FILE" up -d afterburner-be
 }
 
 while (( "$#" )); do
@@ -74,7 +76,7 @@ wait_for_service() {
 
     echo "Waiting for $service to be healthy..."
     while [ $attempt -le $max_attempts ]; do
-        if docker compose -f $COMPOSE_FILE ps "$service" | grep -q "Up"; then
+        if docker compose -f "$COMPOSE_FILE" ps "$service" | grep -q "Up"; then
             echo "$service is healthy!"
             return 0
         fi
@@ -98,8 +100,8 @@ fi
 
 # Restart jmetertest container to ensure clean state
 echo "Restarting jmetertest container..."
-docker compose -f $COMPOSE_FILE down jmetertest
-docker compose -f $COMPOSE_FILE up -d jmetertest
+docker compose -f "$COMPOSE_FILE" down jmetertest
+docker compose -f "$COMPOSE_FILE" up -d jmetertest
 
 # Wait for jmetertest container to be ready
 if ! wait_for_service "jmetertest"; then
@@ -109,7 +111,7 @@ fi
 
 # Run JMeter tests in container
 echo "Running JMeter load test: ${JMETER_TEST} with SUT_VERSION=${SUT_VERSION}"
-docker compose -f $COMPOSE_FILE exec jmetertest mvn clean verify \
+docker compose -f "$COMPOSE_FILE" exec jmetertest mvn clean verify \
   -DSUT_VERSION=${SUT_VERSION} \
   -DGIT_SHA=${GIT_SHA} \
   -DtestFile="${JMETER_TEST}" \
