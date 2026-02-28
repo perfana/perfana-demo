@@ -8,7 +8,7 @@ if [ $# -ne 1 ]; then
 fi
 
 # Function to restart afterburner services
-COMPOSE_FILE="docker-compose-next-gen.yml"
+COMPOSE_FILE="docker-compose.yml"
 
 restart_afterburner() {
     docker compose -f "$COMPOSE_FILE" stop afterburner-fe

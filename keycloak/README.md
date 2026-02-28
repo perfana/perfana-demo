@@ -28,7 +28,7 @@ volumes:
 ### perfana-web (Public Client)
 - **Client ID**: perfana-web
 - **Type**: Public (PKCE-enabled)
-- **URLs**: http://localhost:4002 (and dev ports 3000, 4000, 4001)
+- **URLs**: http://localhost:4000 (and dev ports 3000, 4000, 4001)
 - **Grant Types**: Authorization Code with PKCE, Direct Grant
 - **Usage**: Next.js frontend authentication
 
@@ -123,7 +123,7 @@ For production, update these settings via Keycloak Admin Console:
 
 ```bash
 # Start Keycloak
-docker compose -f docker-compose-next-gen.yml up -d keycloak
+docker compose -f docker-compose.yml up -d keycloak
 
 # Access at http://localhost:8080
 # Admin credentials from .env or defaults:
@@ -146,17 +146,17 @@ docker compose -f docker-compose-next-gen.yml up -d keycloak
 1. Edit `perfana-realm.json` directly
 2. Restart Keycloak:
 ```bash
-docker compose -f docker-compose-next-gen.yml restart keycloak
+docker compose -f docker-compose.yml restart keycloak
 ```
 
 **Note**: Keycloak only imports realms if they don't exist. To re-import:
 ```bash
 # Stop and remove Keycloak data
-docker compose -f docker-compose-next-gen.yml down
+docker compose -f docker-compose.yml down
 docker volume rm perfana-demo_keycloak_data
 
 # Start fresh (will re-import realm)
-docker compose -f docker-compose-next-gen.yml up -d keycloak
+docker compose -f docker-compose.yml up -d keycloak
 ```
 
 ## Client Credentials
@@ -219,7 +219,7 @@ if (req.user.realm_access?.roles?.includes('admin')) {
 
 **Check Keycloak logs**:
 ```bash
-docker compose -f docker-compose-next-gen.yml logs keycloak | grep -i import
+docker compose -f docker-compose.yml logs keycloak | grep -i import
 ```
 
 **Verify volume mount**:
@@ -239,7 +239,7 @@ docker exec perfana-keycloak ls -la /opt/keycloak/data/import
 
 **Check redirect URIs**:
 - Ensure client redirect URIs include your URL
-- Check for trailing slashes (http://localhost:4002 vs http://localhost:4002/)
+- Check for trailing slashes (http://localhost:4000 vs http://localhost:4000/)
 - Verify web origins match
 
 ### Token Validation Fails

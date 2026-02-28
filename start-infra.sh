@@ -1,19 +1,18 @@
 #!/bin/bash
 # ================================================================================================
-# Perfana Next-Gen Quick Start Script
+# Perfana Infrastructure Start Script
 # ================================================================================================
-# Starts all services (infrastructure + Perfana) for an already-initialized environment.
-# For first-time setup, use init-demo-next-gen.sh instead.
+# Starts all infrastructure services for local development.
+# Perfana services (api, web, worker, grafana-sync) should be run on the host via `npm run dev`.
 #
 # Prerequisites:
 #   - Docker and Docker Compose installed
-#   - Environment previously initialized with init-demo-next-gen.sh
 # ================================================================================================
 
 set -o pipefail
 set -o nounset
 
-COMPOSE_FILE="docker-compose-next-gen.yml"
+COMPOSE_FILE="docker-compose.yml"
 
 # Set environment variables with defaults
 export SUT_VERSION=${SUT_VERSION:-2.4.3-good-baseline}
@@ -21,7 +20,7 @@ export POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-perfana}
 export KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:-admin}
 export KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-admin}
 
-echo "Starting Perfana Next-Gen Services..."
+echo "Starting Perfana Infrastructure..."
 echo ""
 
 # Start core infrastructure first
@@ -37,7 +36,7 @@ if [ $MIGRATION_EXIT -ne 0 ]; then
   echo "  docker compose -f $COMPOSE_FILE logs perfana-migration"
 fi
 
-# Start authentication
+# Wait for postgres to be healthy before starting keycloak
 echo "[3/7] Starting authentication..."
 docker compose -f "$COMPOSE_FILE" up -d keycloak-theme-provider
 docker compose -f "$COMPOSE_FILE" up -d keycloak
@@ -58,32 +57,28 @@ docker exec perfana-keycloak /opt/keycloak/bin/kcadm.sh set-password \
   && echo "       Test user ready: perfana@example.com / Perfana1!" \
   || echo "       WARNING: Could not set test user password"
 
-# Start Perfana services
-echo "[4/7] Starting Perfana services..."
-docker compose -f "$COMPOSE_FILE" up -d perfana-api perfana-web perfana-worker perfana-grafana-sync perfana-snapshot perfana-report
-
 # Start observability stack
-echo "[5/7] Starting observability stack..."
+echo "[4/7] Starting observability stack..."
 docker compose -f "$COMPOSE_FILE" up -d grafana prometheus alertmanager tempo pyroscope loki telegraf
 
 # Start demo applications
-echo "[6/7] Starting demo applications..."
+echo "[5/7] Starting demo applications..."
 docker compose -f "$COMPOSE_FILE" up -d afterburner-fe afterburner-be wiremock
 
 # Start mock services and load testing
-echo "[7/7] Starting mock services and load testing..."
+echo "[6/7] Starting mock services..."
 docker compose -f "$COMPOSE_FILE" up -d dynatrace-saas-mock dynatrace-managed-mock
+
+echo "[7/7] Starting load testing..."
 docker compose -f "$COMPOSE_FILE" up -d loadtest jmetertest
 
 echo ""
-echo "All services started!"
+echo "Infrastructure started!"
 echo ""
 echo "Core Services:"
 echo "  PostgreSQL:            localhost:5432"
 echo "  Redis:                 localhost:6379"
 echo "  Keycloak:              http://localhost:8080  (admin/admin)"
-echo "  Perfana Web:           http://localhost:4000"
-echo "  Perfana API:           http://localhost:3001"
 echo "  Grafana:               http://localhost:3000  (perfana/perfana)"
 echo ""
 echo "Observability:"
@@ -102,6 +97,12 @@ echo ""
 echo "Mock Services:"
 echo "  Dynatrace SaaS Mock:     http://localhost:8092"
 echo "  Dynatrace Managed Mock:  http://localhost:8091"
+echo ""
+echo "Perfana services NOT started (run locally):"
+echo "  npm run dev:api          -> http://localhost:3001"
+echo "  npm run dev:web          -> http://localhost:4001"
+echo "  npm run dev:grafana-sync"
+echo "  npm run dev              -> all services"
 echo ""
 echo "Commands:"
 echo "  docker compose -f $COMPOSE_FILE ps      # Check status"

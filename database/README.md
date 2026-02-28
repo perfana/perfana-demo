@@ -15,7 +15,7 @@ GRANT ALL PRIVILEGES ON DATABASE keycloak TO perfana;
 ```
 
 ### 02-init-perfana-schema.sh
-Shell script that loads the complete Perfana schema into the `perfana_native` database.
+Shell script that loads the complete Perfana schema into the `perfana` database.
 
 ### 03-perfana-schema.sql
 Complete Perfana database schema dump (190KB) containing:
@@ -29,7 +29,7 @@ Source: `/Users/daniel/workspace/perfana-next-gen/database/schema/schema_dump.sq
 
 ## Database Structure
 
-### perfana_native Database
+### perfana Database
 
 Main application database containing:
 
@@ -65,12 +65,12 @@ Keycloak authentication database (managed by Keycloak).
 
 1. Start PostgreSQL container:
 ```bash
-docker compose -f docker-compose-next-gen.yml up -d postgres
+docker compose -f docker-compose.yml up -d postgres
 ```
 
 2. Wait for initialization (check logs):
 ```bash
-docker compose -f docker-compose-next-gen.yml logs -f postgres
+docker compose -f docker-compose.yml logs -f postgres
 ```
 
 3. Verify databases:
@@ -84,13 +84,13 @@ To completely reset and re-run initialization scripts:
 
 ```bash
 # Stop all services
-docker compose -f docker-compose-next-gen.yml down
+docker compose -f docker-compose.yml down
 
 # Remove postgres volume (WARNING: deletes all data)
 docker volume rm perfana-demo_postgres_data
 
 # Start postgres (will re-run init scripts)
-docker compose -f docker-compose-next-gen.yml up -d postgres
+docker compose -f docker-compose.yml up -d postgres
 ```
 
 ## Troubleshooting
@@ -98,14 +98,14 @@ docker compose -f docker-compose-next-gen.yml up -d postgres
 ### Check Initialization Logs
 
 ```bash
-docker compose -f docker-compose-next-gen.yml logs postgres | grep -i "init"
+docker compose -f docker-compose.yml logs postgres | grep -i "init"
 ```
 
 ### Verify Schema Loaded
 
 ```bash
-# Connect to perfana_native
-docker exec -it perfana-postgres psql -U perfana -d perfana_native
+# Connect to perfana
+docker exec -it perfana-postgres psql -U perfana -d perfana
 
 # List tables
 \dt
