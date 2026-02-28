@@ -2,185 +2,146 @@
 # ================================================================================================
 # Perfana Next-Gen Demo Initialization Script
 # ================================================================================================
-# This script initializes the Perfana next-gen demo environment with:
-# - PostgreSQL database (TimescaleDB)
-# - Keycloak authentication server
-# - Next-Gen Perfana services (perfana-web, perfana-api, perfana-worker, perfana-grafana-sync)
-# - Observability stack (Grafana, Prometheus, Tempo, Pyroscope, Loki)
-# - Afterburner demo application
+# First-time setup for the full Perfana next-gen demo environment.
+# Starts all infrastructure + Perfana services, creates an API key,
+# and runs baseline load tests.
 #
-# Architecture: ARM64 (Apple Silicon M1/M2) with Node.js 20.19.5
-# Images: Using version 0.1.0 ARM64 builds
-# - perfana/perfana-web:0.1.0
-# - perfana/perfana-api:0.1.0
-# - perfana/perfana-worker:0.1.0
-# - perfana/perfana-grafana-sync:0.1.0
+# Prerequisites:
+#   - Docker and Docker Compose installed
+#   - jq installed (for API key extraction)
 # ================================================================================================
 
-set -o errexit
 set -o pipefail
 set -o nounset
 
-source common.sh
+COMPOSE_FILE="docker-compose-next-gen.yml"
 
-POSITIONAL=()
-while [[ $# -gt 0 ]]; do
-  key="$1"
-
-  case "$key" in
-    -s|--sleep)
-    SLEEP_TIME="$2"
-    shift # past argument
-    shift # past value
-    ;;
-    *)    # unknown option
-    POSITIONAL+=("$1") # save it in an array for later
-    shift # past argument
-    ;;
-  esac
-done
-set -- "${POSITIONAL[@]-default}" # restore positional parameters
-
-export SUT_VERSION=2.4.3-good-baseline
-export GIT_SHA=c3ee4b9
-
-# Generate required environment variables for next-gen stack
+# Set environment variables with defaults
+export SUT_VERSION=${SUT_VERSION:-2.4.3-good-baseline}
 export POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-perfana}
 export KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:-admin}
 export KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-admin}
 
-SLEEP_TIME=${SLEEP_TIME:-15}
-echo "using sleep time of $SLEEP_TIME seconds, use -s or --sleep option to change"
+echo "Initializing Perfana Next-Gen Demo Environment..."
+echo ""
 
-echo "Starting PostgreSQL database (TimescaleDB) ..."
-docker-compose -f docker-compose-next-gen.yml up -d postgres
+# Start core infrastructure first
+echo "[1/8] Starting core databases..."
+docker compose -f "$COMPOSE_FILE" up -d postgres redis mariadb influxdb
 
-echo "Sleeping for $SLEEP_TIME secs to give PostgreSQL time to start up..."
-sleep $SLEEP_TIME
+# Run database migrations (waits for postgres healthy, then exits)
+echo "[2/8] Running database migrations..."
+docker compose -f "$COMPOSE_FILE" up perfana-migration
+MIGRATION_EXIT=$?
+if [ $MIGRATION_EXIT -ne 0 ]; then
+  echo "WARNING: Database migration failed (exit code $MIGRATION_EXIT). Check logs:"
+  echo "  docker compose -f $COMPOSE_FILE logs perfana-migration"
+fi
 
-echo "Starting Keycloak authentication server ..."
-docker-compose -f docker-compose-next-gen.yml up -d keycloak
+# Start authentication
+echo "[3/8] Starting authentication..."
+docker compose -f "$COMPOSE_FILE" up -d keycloak-theme-provider
+docker compose -f "$COMPOSE_FILE" up -d keycloak
 
-echo "Starting Redis for BullMQ job queue ..."
-docker-compose -f docker-compose-next-gen.yml up -d redis
+# Wait for Keycloak to be healthy, then ensure test user password is set
+echo "       Waiting for Keycloak..."
+for i in $(seq 1 30); do
+  kc_status=$(docker compose -f "$COMPOSE_FILE" ps keycloak --format "{{.Status}}" 2>/dev/null)
+  if echo "$kc_status" | grep -q "healthy"; then
+    break
+  fi
+  sleep 2
+done
+docker exec perfana-keycloak /opt/keycloak/bin/kcadm.sh config credentials \
+  --server http://localhost:8080 --realm master --user "${KEYCLOAK_ADMIN}" --password "${KEYCLOAK_ADMIN_PASSWORD}" 2>/dev/null
+docker exec perfana-keycloak /opt/keycloak/bin/kcadm.sh set-password \
+  -r perfana-prod --username "perfana@example.com" --new-password "Perfana1!" 2>/dev/null \
+  && echo "       Test user ready: perfana@example.com / Perfana1!" \
+  || echo "       WARNING: Could not set test user password"
 
-echo "Bringing up databases that need time to start up..."
-docker-compose -f docker-compose-next-gen.yml up -d mariadb
-docker-compose -f docker-compose-next-gen.yml up -d influxdb
+# Start Perfana services
+echo "[4/8] Starting Perfana services..."
+docker compose -f "$COMPOSE_FILE" up -d perfana-api
+docker compose -f "$COMPOSE_FILE" up -d perfana-web
+docker compose -f "$COMPOSE_FILE" up -d perfana-worker
+docker compose -f "$COMPOSE_FILE" up -d perfana-grafana-sync
+docker compose -f "$COMPOSE_FILE" up -d perfana-snapshot
+docker compose -f "$COMPOSE_FILE" up -d perfana-report
 
-echo "Sleeping for $SLEEP_TIME secs to give Keycloak and databases time to start up..."
-sleep $SLEEP_TIME
+# Start observability stack
+echo "[5/8] Starting observability stack..."
+docker compose -f "$COMPOSE_FILE" up -d grafana prometheus alertmanager tempo pyroscope loki telegraf
 
-echo "Starting Grafana ..."
-docker-compose -f docker-compose-next-gen.yml up -d grafana
+# Start demo applications
+echo "[6/8] Starting demo applications..."
+docker compose -f "$COMPOSE_FILE" up -d afterburner-fe afterburner-be wiremock
 
-echo "Sleeping for $SLEEP_TIME secs to give Grafana some time to start up..."
-sleep $SLEEP_TIME
+# Start mock services and load testing
+echo "[7/8] Starting mock services and load testing..."
+docker compose -f "$COMPOSE_FILE" up -d dynatrace-saas-mock dynatrace-managed-mock
+docker compose -f "$COMPOSE_FILE" up -d loadtest jmetertest
 
-echo "Starting Next-Gen Perfana API (NestJS) ..."
-docker-compose -f docker-compose-next-gen.yml up -d perfana-api
-
-echo "Starting Next-Gen Perfana Web (Next.js) ..."
-docker-compose -f docker-compose-next-gen.yml up -d perfana-web
-
-echo "Sleeping for $SLEEP_TIME secs to give Perfana next-gen services a chance to start up..."
-sleep $SLEEP_TIME
-
-echo "Starting Perfana data processing services ..."
-docker-compose -f docker-compose-next-gen.yml up -d perfana-grafana-sync
-docker-compose -f docker-compose-next-gen.yml up -d perfana-snapshot
-docker-compose -f docker-compose-next-gen.yml up -d perfana-worker
-
-echo "Starting observability stack ..."
-docker-compose -f docker-compose-next-gen.yml up -d telegraf
-docker-compose -f docker-compose-next-gen.yml up -d prometheus
-docker-compose -f docker-compose-next-gen.yml up -d alertmanager
-docker-compose -f docker-compose-next-gen.yml up -d tempo
-docker-compose -f docker-compose-next-gen.yml up -d pyroscope
-docker-compose -f docker-compose-next-gen.yml up -d loki
-
-echo "Sleeping for $SLEEP_TIME secs to give containers a chance to start up..."
-sleep $SLEEP_TIME
-
-echo "Starting afterburner applications ..."
-docker-compose -f docker-compose-next-gen.yml up -d afterburner-fe
-docker-compose -f docker-compose-next-gen.yml up -d afterburner-be
-
-echo "Sleeping for $SLEEP_TIME secs to give afterburners a chance to start up..."
-sleep $SLEEP_TIME
-
-echo "Starting loadtest environment ..."
-docker-compose -f docker-compose-next-gen.yml up -d loadtest
-
-echo "Waiting for PostgreSQL to be ready..."
-until docker-compose -f docker-compose-next-gen.yml exec -T postgres pg_isready -U perfana -d perfana_native > /dev/null 2>&1; do
-    echo "Waiting for PostgreSQL database to start..."
-    sleep 2
+# Wait for Perfana API and create API key
+echo "[8/8] Waiting for Perfana API and creating API key..."
+echo "       Waiting for Perfana API to be ready..."
+for i in $(seq 1 60); do
+  if curl -sf http://localhost:3001/api/health > /dev/null 2>&1; then
+    echo "       Perfana API is ready."
+    break
+  fi
+  sleep 2
 done
 
-echo "Waiting for Keycloak to be ready..."
-until curl -f http://localhost:8080/health/ready > /dev/null 2>&1; do
-    echo "Waiting for Keycloak to start..."
-    sleep 2
-done
+echo "       Creating API key..."
+api_key=$(curl -sf --location 'http://localhost:3001/api/key' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "validFor": "1y",
+    "description": "demo"
+  }' | jq -r '.key.data' 2>/dev/null)
 
-echo "Waiting for Perfana API to be ready..."
-echo "Sleeping for 30 seconds to allow Perfana API to fully start..."
-sleep 30
-
-# Fetch the API key from the new NestJS API
-echo "Creating API key via new Perfana API..."
-api_key=$(curl --location 'http://localhost:3001/api/key' \
-             --header 'Content-Type: application/json' \
-             --user 'perfana:perfana' \
-             --data '{
-                 "validFor": "1y",
-                 "description": "demo"
-             }' | jq -r '.key.data')
-
-# Replace __apiKey__ in ./loadtest/pom.xml with the fetched API key
-# Cross-platform sed command using shared function
-cross_platform_sed "s/__apiKey__/$api_key/" ./loadtest/pom.xml
-
-echo "Environment Variables for Next-Gen Stack:"
-echo "=========================================="
-echo "POSTGRES_PASSWORD: $POSTGRES_PASSWORD"
-echo "PostgreSQL: localhost:5432"
-echo "Next-Gen Perfana Web: http://localhost:4002"
-echo "Next-Gen Perfana API: http://localhost:3001"
-echo "Keycloak: http://localhost:8080"
-echo "Grafana: http://localhost:3000"
-echo "=========================================="
-
-echo "Running 3 baseline load tests with SUT_VERSION=${SUT_VERSION} and GIT_SHA=${GIT_SHA}"
-./deploy-and-test.sh baseline
-./deploy-and-test.sh baseline
-./deploy-and-test.sh baseline
-echo "Next-Gen Perfana Demo Environment Ready!"
+if [ -n "$api_key" ] && [ "$api_key" != "null" ]; then
+  sed -i.bak "s/__apiKey__/$api_key/" ./loadtest/pom.xml && rm -f ./loadtest/pom.xml.bak
+  echo "       API key injected into loadtest/pom.xml"
+else
+  echo "       WARNING: Could not create API key. You may need to configure it manually."
+fi
 
 echo ""
-echo "🚀 Next-Gen Perfana Stack is now running!"
+echo "Running 3 baseline load tests..."
+./deploy-and-test-jmeter.sh baseline
+./deploy-and-test-jmeter.sh baseline
+./deploy-and-test-jmeter.sh baseline
+
 echo ""
-echo "Platform: ARM64 (Apple Silicon M1/M2) - Node.js 20.19.5"
-echo "Images: perfana/perfana-*:0.1.0"
+echo "Perfana Next-Gen Demo Environment Ready!"
 echo ""
-echo "Key Services:"
-echo "  • Perfana Web (Next.js):     http://localhost:4002"
-echo "  • Perfana API (NestJS):      http://localhost:3001"
-echo "  • Keycloak (Auth):           http://localhost:8080"
-echo "  • PostgreSQL (Database):     localhost:5432"
-echo "  • Grafana:                   http://localhost:3000"
-echo "  • Redis (Job Queue):         localhost:6379"
-echo ""
-echo "Application Services:"
-echo "  • Afterburner Frontend:      http://localhost:8090"
-echo "  • MariaDB:                   localhost:3306"
-echo "  • InfluxDB:                  http://localhost:8086"
+echo "Core Services:"
+echo "  PostgreSQL:            localhost:5432"
+echo "  Redis:                 localhost:6379"
+echo "  Keycloak:              http://localhost:8080  (admin/admin)"
+echo "  Perfana Web:           http://localhost:4000"
+echo "  Perfana API:           http://localhost:3001"
+echo "  Grafana:               http://localhost:3000  (perfana/perfana)"
 echo ""
 echo "Observability:"
-echo "  • Prometheus:                http://localhost:9090"
-echo "  • Tempo (Tracing):           http://localhost:3200"
-echo "  • Pyroscope (Profiling):     http://localhost:4040"
-echo "  • Loki (Logs):               http://localhost:3100"
-echo "  • Alertmanager:              http://localhost:9093"
+echo "  Prometheus:            http://localhost:9090"
+echo "  Alertmanager:          http://localhost:9093"
+echo "  Tempo (Tracing):       http://localhost:3200"
+echo "  Pyroscope (Profiling): http://localhost:4040"
+echo "  Loki (Logs):           http://localhost:3100"
+echo ""
+echo "Demo Applications:"
+echo "  Afterburner Frontend:  http://localhost:8090"
+echo "  MariaDB:               localhost:3306"
+echo "  InfluxDB:              http://localhost:8086"
+echo "  Wiremock:              http://localhost:8060"
+echo ""
+echo "Mock Services:"
+echo "  Dynatrace SaaS Mock:     http://localhost:8092"
+echo "  Dynatrace Managed Mock:  http://localhost:8091"
+echo ""
+echo "Commands:"
+echo "  docker compose -f $COMPOSE_FILE ps      # Check status"
+echo "  docker compose -f $COMPOSE_FILE logs -f  # View logs"
 echo ""
