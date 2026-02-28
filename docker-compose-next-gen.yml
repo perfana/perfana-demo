@@ -99,6 +99,23 @@ services:
       start_period: 60s
     restart: unless-stopped
 
+  # Database Migration Runner - runs TypeORM migrations then exits
+  perfana-migration:
+    image: perfana/perfana-migration:sha-5f668d8
+    container_name: perfana-migration
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USERNAME: perfana
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+      DB_NAME: perfana
+      DB_SSL: "false"
+    networks:
+      - perfana
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 ######################################################################################################################
 # PERFANA NEXT-GEN SERVICES
 ######################################################################################################################
@@ -360,20 +377,7 @@ services:
     # Shared memory for Chromium/Puppeteer
     shm_size: '1gb'
 
-  # Grafana Snapshot Service
-  perfana-snapshot:
-    image: perfana/perfana-snapshot:3.1.0
-    container_name: perfana-snapshot
-    environment:
-      POSTGRES_URL: "postgresql://perfana:${POSTGRES_PASSWORD:-perfana}@postgres:5432/perfana"
-      CONCURRENT_SNAPSHOTS: 1
-    networks:
-      - perfana
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-
+  
 ######################################################################################################################
 # INFRASTRUCTURE SERVICES
 ######################################################################################################################
@@ -608,24 +612,6 @@ services:
       retries: 3
       start_period: 10s
 
-  dynatrace-managed-mock:
-    image: wiremock/wiremock:3.3.1
-    container_name: dynatrace-managed-mock
-    ports:
-      - "8091:8080"
-    volumes:
-      - ./dynatrace-mock/managed/mappings:/home/wiremock/mappings:ro
-    command: ["--global-response-templating", "--verbose"]
-    networks:
-      - perfana
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/__admin/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
 ######################################################################################################################
 # SUPPORTING DATABASES
 ######################################################################################################################
@@ -702,23 +688,6 @@ services:
       - ./jmeter/plugins:/opt/apache-jmeter-5.6.3/lib/ext
     networks:
       - perfana
-
-  #######################################################################################################################
-  # BreakTest Load Agent - connects to BreakTest controller for distributed load testing
-  load-agent:
-    image: breakingit/breaktest-load-agent:latest
-    container_name: load-agent-office
-    environment:
-      CONTROLLER_HOST: controller.breaktest.app
-      CONTROLLER_PORT: 443
-      CONTROLLER_SSL: "true"
-      CONTROLLER_SSL_VERIFY: "true"
-      LOAD_AGENT_TOKEN: ${LOAD_AGENT_TOKEN}
-      LOAD_AGENT_NAME: ${LOAD_AGENT_NAME:-MyPrivateAgent}
-      LOAD_AGENT_LOCATION: ${LOAD_AGENT_LOCATION:-Office}
-    networks:
-      - perfana
-    restart: unless-stopped
 
 #######################################################################################################################
 networks:

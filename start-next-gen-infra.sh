@@ -24,11 +24,20 @@ echo "Starting Perfana Next-Gen Infrastructure..."
 echo ""
 
 # Start core infrastructure first
-echo "[1/6] Starting core databases..."
+echo "[1/7] Starting core databases..."
 docker compose -f "$COMPOSE_FILE" up -d postgres redis mariadb influxdb
 
+# Run database migrations (waits for postgres healthy, then exits)
+echo "[2/7] Running database migrations..."
+docker compose -f "$COMPOSE_FILE" up perfana-migration
+MIGRATION_EXIT=$?
+if [ $MIGRATION_EXIT -ne 0 ]; then
+  echo "WARNING: Database migration failed (exit code $MIGRATION_EXIT). Check logs:"
+  echo "  docker compose -f $COMPOSE_FILE logs perfana-migration"
+fi
+
 # Wait for postgres to be healthy before starting keycloak
-echo "[2/6] Starting authentication..."
+echo "[3/7] Starting authentication..."
 docker compose -f "$COMPOSE_FILE" up -d keycloak-theme-provider
 docker compose -f "$COMPOSE_FILE" up -d keycloak
 
@@ -49,18 +58,18 @@ docker exec perfana-keycloak /opt/keycloak/bin/kcadm.sh set-password \
   || echo "       WARNING: Could not set test user password"
 
 # Start observability stack
-echo "[3/6] Starting observability stack..."
+echo "[4/7] Starting observability stack..."
 docker compose -f "$COMPOSE_FILE" up -d grafana prometheus alertmanager tempo pyroscope loki telegraf
 
 # Start demo applications
-echo "[4/6] Starting demo applications..."
+echo "[5/7] Starting demo applications..."
 docker compose -f "$COMPOSE_FILE" up -d afterburner-fe afterburner-be wiremock
 
 # Start mock services and load testing
-echo "[5/6] Starting mock services..."
+echo "[6/7] Starting mock services..."
 docker compose -f "$COMPOSE_FILE" up -d dynatrace-saas-mock dynatrace-managed-mock
 
-echo "[6/6] Starting load testing..."
+echo "[7/7] Starting load testing..."
 docker compose -f "$COMPOSE_FILE" up -d loadtest jmetertest
 
 echo ""
