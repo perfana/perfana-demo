@@ -80,7 +80,7 @@ services:
       MYSQL_HOST: mariadb
       MYSQL_USER: root
       MYSQL_PASSWORD: perfana
-      DATABASE_TYPE: postgres
+      DATABASE_TYPE: postgresgres
       SUPABASE_URL: http://host.docker.internal:54321
       SUPABASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
     networks:
@@ -148,12 +148,12 @@ services:
     environment:
       - MONGODB_URI=mongodb://mongo1:27011,mongo2:27012,mongo3:27013/perfana?replicaSet=rs0
       - NEXT_PUBLIC_MCP_SERVER_URL=http://perfana-mcp:8888/mcp
-      - OPENAI_API_KEY=***REMOVED***
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - OPENAI_MODEL=gpt-4o-mini
       - NEXT_PUBLIC_COPILOTKIT_RUNTIME_URL=/api/copilotkit
       - PYROSCOPE_URL=http://pyroscope:4040
       - TEMPO_URL=http://tempo:3200
-      - GITHUB_TOKEN=***REMOVED***
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
     networks:
       - perfana
   ######################################################################################################################
@@ -200,6 +200,7 @@ services:
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
       - ./tempo/tempo.yaml:/etc/tempo.yaml
+      - tempo-data:/var/tempo
     ports:
       - "3200:3200"  # Tempo HTTP API
       - "14268:14268" # Jaeger ingest
@@ -277,7 +278,7 @@ services:
       "afterburner.name": "afterburner-fe"
       "afterburner.logback.loki.remotehost": "loki"
       "afterburner.logback.loki.port": "3100"
-      "management.metrics.tags.system_under_test": "MyAfterburner"
+      "management.metrics.tags.system_under_test": "PerfanaWebshop"
       "management.metrics.tags.test_environment": "acc"
       "management.metrics.tags.service": "afterburner-fe"
       "afterburner.remote.call.base_url": "http://afterburner-be:8080"
@@ -321,7 +322,7 @@ services:
       "afterburner.name": "afterburner-be"
       "afterburner.logback.loki.remotehost": "loki"
       "afterburner.logback.loki.port": "3100"
-      "management.metrics.tags.system_under_test": "MyAfterburner"
+      "management.metrics.tags.system_under_test": "PerfanaWebshop"
       "management.metrics.tags.test_environment": "acc"
       "management.metrics.tags.service": "afterburner-be"
       # "afterburner.remote.call.base_url": "http://wiremock:8080"
@@ -338,7 +339,7 @@ services:
       "afterburner.datasource.employee.username": "root"
       "afterburner.datasource.employee.password": "perfana"
       "afterburner.datasource.employee.poolMaximumActiveConnections": "5"
-      "JDK_JAVA_OPTIONS": "-javaagent:jfr-exporter.jar=influxUrl=http://influxdb:8086,influxDatabase=jfr,tag=service/afterburner-fe,tag=systemUnderTest/MyAfterburner,tag=testEnvironment/acc -XX:NativeMemoryTracking=summary"
+      "JDK_JAVA_OPTIONS": "-javaagent:jfr-exporter.jar=influxUrl=http://influxdb:8086,influxDatabase=jfr,tag=service/afterburner-fe,tag=systemUnderTest/PerfanaWebshop,tag=testEnvironment/acc -XX:NativeMemoryTracking=summary"
     restart: always
     networks:
       - perfana
@@ -471,6 +472,20 @@ services:
       tar -xzf /loadtest/loadtest-gatling.tar.gz --strip-components=1 -C /loadtest/src;
       echo Finished unpacking loadtest tar;
       tail -f /dev/null"
+    networks:
+      - perfana
+
+  #######################################################################################################################
+  jmetertest:
+    build:
+      context: ./jmeter
+      dockerfile: Dockerfile
+    environment:
+      SUT_VERSION: 1.0.0
+      GIT_SHA: 6293480
+    volumes:
+      - ./jmeter:/tests
+      - ./jmeter/plugins:/opt/apache-jmeter-5.6.3/lib/ext
     networks:
       - perfana
 

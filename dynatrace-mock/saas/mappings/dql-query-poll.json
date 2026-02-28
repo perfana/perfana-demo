@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/platform/storage/query/v1/query:poll.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "state": "SUCCEEDED",
+      "result": {
+        "records": [
+          {
+            "timestamp": "2024-01-15T10:00:00Z",
+            "value": 45.2,
+            "dt.entity.service": "SERVICE-ABC123"
+          },
+          {
+            "timestamp": "2024-01-15T10:01:00Z",
+            "value": 48.7,
+            "dt.entity.service": "SERVICE-ABC123"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -126,3 +126,19 @@ datasources:
     access: proxy
     url: http://pyroscope:4040 
     editable: true
+  - name: PostgreSQL-timescaledb
+    type: grafana-postgresql-datasource
+    url: postgres:5432
+    access: proxy
+    uid: postgres-timescaledb
+    editable: false
+    user: perfana
+    database: perfana_native
+    jsonData:
+      timescaledb: true
+      sslmode: 'disable' # or 'require', 'verify-full' depending on your setup
+      maxOpenConns: 100
+      maxIdleConns: 100
+      postgresVersion: 1200 # approximate version (e.g. 12.0)
+    secureJsonData:
+        password: 'perfana'  

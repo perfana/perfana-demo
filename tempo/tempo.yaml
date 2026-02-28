@@ -29,7 +29,7 @@ overrides:
 
 metrics_generator:
   storage:
-    path: "/tmp/tempo"
+    path: "/var/tempo/generator"
     remote_write:
       - url: "http://prometheus:9090/api/v1/write"
         
@@ -42,5 +42,7 @@ metrics_generator:
 storage:
   trace:
     backend: local
+    wal:
+      path: /var/tempo/wal
     local:
-      path: /tmp/tempo/traces
+      path: /var/tempo/blocks

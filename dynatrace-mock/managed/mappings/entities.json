@@ -1,0 +1,79 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/v2/entities.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "entities": [
+        {
+          "entityId": "SERVICE-ABC123",
+          "displayName": "api-gateway",
+          "type": "SERVICE",
+          "tags": [
+            {"key": "environment", "value": "production"},
+            {"key": "team", "value": "platform"}
+          ],
+          "properties": {
+            "serviceType": "WebService",
+            "softwareTechnologies": ["Java", "Spring Boot"]
+          }
+        },
+        {
+          "entityId": "SERVICE-DEF456",
+          "displayName": "order-service",
+          "type": "SERVICE",
+          "tags": [
+            {"key": "environment", "value": "production"},
+            {"key": "team", "value": "orders"}
+          ],
+          "properties": {
+            "serviceType": "WebService",
+            "softwareTechnologies": ["Java", "Spring Boot"]
+          }
+        },
+        {
+          "entityId": "SERVICE-GHI789",
+          "displayName": "payment-service",
+          "type": "SERVICE",
+          "tags": [
+            {"key": "environment", "value": "production"},
+            {"key": "team", "value": "payments"}
+          ],
+          "properties": {
+            "serviceType": "WebService",
+            "softwareTechnologies": ["Node.js"]
+          }
+        },
+        {
+          "entityId": "HOST-XYZ001",
+          "displayName": "web-server-01",
+          "type": "HOST",
+          "tags": [
+            {"key": "environment", "value": "production"}
+          ],
+          "properties": {
+            "osType": "LINUX"
+          }
+        },
+        {
+          "entityId": "HOST-XYZ002",
+          "displayName": "web-server-02",
+          "type": "HOST",
+          "tags": [
+            {"key": "environment", "value": "production"}
+          ],
+          "properties": {
+            "osType": "LINUX"
+          }
+        }
+      ],
+      "totalCount": 5,
+      "pageSize": 50
+    }
+  }
+}

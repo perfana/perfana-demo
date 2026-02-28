@@ -25,8 +25,8 @@
         <test-events-test-run-config-command.version>[3.0.0,3.1.0)</test-events-test-run-config-command.version>
         <test-events-command-runner.version>[3.0.0,3.1.0)</test-events-command-runner.version>
 
-        <!-- <perfanaUrl>http://host.docker.internal:3001</perfanaUrl> -->
-        <perfanaUrl>http://perfana-fe-legacy:3000</perfanaUrl>
+        <perfanaUrl>http://host.docker.internal:3001</perfanaUrl>
+        <!-- <perfanaUrl>http://perfana-api:3001</perfanaUrl> -->
 
         <!-- By default debug mode is off -->
         <debug>false</debug>
@@ -54,11 +54,11 @@
         <constantLoadTimeInSeconds>360</constantLoadTimeInSeconds>
 
         <!-- Settings for the Perfana test runs -->
-        <systemUnderTest>MyAfterburner</systemUnderTest>
+        <systemUnderTest>PerfanaWebshop</systemUnderTest>
         <sut_version>${SUT_VERSION}</sut_version>
         <tags>gatling,spring-boot-kubernetes,jfr,spanmetrics,docker</tags>
         <!-- <apiKey>cGctYm9zcyM4YTgwYTU2OS1mNmViLTQyNGEtYmZjYy01OTBjMTVhZmU3NTY=</apiKey> -->
-        <apiKey>Zm9vYmFyI2RkZjkxNWY3LTQ1MWQtNDExNC1hNGJjLWU3YmIwNDg4NDY1Ng==</apiKey>
+        <apiKey>cGVyZmFuYSM1NzM1ZjU3NC0wMTQyLTRlM2UtOTBhZi0xYzA1YTJlZmQ3Mzc=</apiKey>
         <influxUrl>http://influxdb:8086</influxUrl>
     </properties>
 
@@ -99,7 +99,7 @@
                     <jvmArgs>
                         <!-- test run id will be overridden with Perfana generated testRunId which is enabled by default -->
                         <jvmArg>-DtestRunId=${testRunId}</jvmArg>
-                        <jvmArg>-DtargetBaseUrl=http://host.docker.internal:9999</jvmArg>
+                        <jvmArg>-DtargetBaseUrl=http://afterburner-fe:8080</jvmArg>
                         <jvmArg>-DinitialUsersPerSecond=${initialUsersPerSecond}</jvmArg>
                         <jvmArg>-DtargetConcurrency=${targetConcurrency}</jvmArg>
                         <jvmArg>-DrampupTimeInSeconds=${rampupTimeInSeconds}</jvmArg>

@@ -721,8 +721,8 @@
     "list": [
       {
         "current": {
-          "text": "MyAfterburner",
-          "value": "MyAfterburner"
+          "text": "PerfanaWebshop",
+          "value": "PerfanaWebshop"
         },
         "datasource": {
           "type": "influxdb",

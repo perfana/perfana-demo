@@ -1,0 +1,79 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/platform/storage/query/v1/query:execute",
+    "headers": {
+      "Authorization": {
+        "contains": "Bearer"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "state": "SUCCEEDED",
+      "result": {
+        "records": [
+          {
+            "timestamp": "2024-01-15T10:00:00Z",
+            "value": 45.2,
+            "dt.entity.service": "SERVICE-ABC123",
+            "dt.entity.service.name": "api-gateway"
+          },
+          {
+            "timestamp": "2024-01-15T10:01:00Z",
+            "value": 48.7,
+            "dt.entity.service": "SERVICE-ABC123",
+            "dt.entity.service.name": "api-gateway"
+          },
+          {
+            "timestamp": "2024-01-15T10:02:00Z",
+            "value": 52.1,
+            "dt.entity.service": "SERVICE-ABC123",
+            "dt.entity.service.name": "api-gateway"
+          },
+          {
+            "timestamp": "2024-01-15T10:00:00Z",
+            "value": 120.5,
+            "dt.entity.service": "SERVICE-DEF456",
+            "dt.entity.service.name": "order-service"
+          },
+          {
+            "timestamp": "2024-01-15T10:01:00Z",
+            "value": 118.3,
+            "dt.entity.service": "SERVICE-DEF456",
+            "dt.entity.service.name": "order-service"
+          },
+          {
+            "timestamp": "2024-01-15T10:02:00Z",
+            "value": 125.8,
+            "dt.entity.service": "SERVICE-DEF456",
+            "dt.entity.service.name": "order-service"
+          }
+        ],
+        "types": [
+          {
+            "indexRange": [0, 5],
+            "mappings": {
+              "timestamp": {
+                "type": "timestamp"
+              },
+              "value": {
+                "type": "double"
+              },
+              "dt.entity.service": {
+                "type": "string"
+              },
+              "dt.entity.service.name": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

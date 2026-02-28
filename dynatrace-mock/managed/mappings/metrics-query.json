@@ -1,0 +1,112 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/v2/metrics/query.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "totalCount": 2,
+      "nextPageKey": null,
+      "result": [
+        {
+          "metricId": "builtin:service.response.time:avg",
+          "dataPointCountRatio": 0.5,
+          "dimensionCountRatio": 0.5,
+          "data": [
+            {
+              "dimensionMap": {
+                "dt.entity.service": "SERVICE-ABC123",
+                "dt.entity.service.name": "api-gateway"
+              },
+              "timestamps": [
+                1705312800000,
+                1705312860000,
+                1705312920000,
+                1705312980000,
+                1705313040000
+              ],
+              "values": [
+                125.4,
+                132.1,
+                128.9,
+                135.2,
+                129.8
+              ]
+            },
+            {
+              "dimensionMap": {
+                "dt.entity.service": "SERVICE-DEF456",
+                "dt.entity.service.name": "order-service"
+              },
+              "timestamps": [
+                1705312800000,
+                1705312860000,
+                1705312920000,
+                1705312980000,
+                1705313040000
+              ],
+              "values": [
+                245.8,
+                252.3,
+                248.1,
+                255.7,
+                250.2
+              ]
+            }
+          ]
+        },
+        {
+          "metricId": "builtin:service.requestCount.total:count",
+          "dataPointCountRatio": 0.5,
+          "dimensionCountRatio": 0.5,
+          "data": [
+            {
+              "dimensionMap": {
+                "dt.entity.service": "SERVICE-ABC123",
+                "dt.entity.service.name": "api-gateway"
+              },
+              "timestamps": [
+                1705312800000,
+                1705312860000,
+                1705312920000,
+                1705312980000,
+                1705313040000
+              ],
+              "values": [
+                1250,
+                1320,
+                1289,
+                1352,
+                1298
+              ]
+            },
+            {
+              "dimensionMap": {
+                "dt.entity.service": "SERVICE-DEF456",
+                "dt.entity.service.name": "order-service"
+              },
+              "timestamps": [
+                1705312800000,
+                1705312860000,
+                1705312920000,
+                1705312980000,
+                1705313040000
+              ],
+              "values": [
+                850,
+                920,
+                890,
+                935,
+                905
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

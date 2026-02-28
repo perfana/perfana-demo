@@ -1,0 +1,759 @@
+services:
+
+######################################################################################################################
+# DATABASE & AUTHENTICATION SERVICES
+######################################################################################################################
+
+  # PostgreSQL Database with TimescaleDB Extension
+  postgres:
+    image: timescale/timescaledb-ha:pg15
+    container_name: perfana-postgres
+    environment:
+      POSTGRES_DB: perfana
+      POSTGRES_USER: perfana
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/home/postgres/pgdata
+      - ./database/init:/docker-entrypoint-initdb.d/
+    networks:
+      - perfana
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U perfana -d perfana"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # Keycloak Theme Provider - init container pattern
+  # This service copies the custom theme and exits, used as a dependency for keycloak
+  keycloak-theme-provider:
+    image: perfana/perfana-keycloak-theme:0.0.9
+    container_name: perfana-keycloak-theme-provider
+    command:
+      - sh
+      - -c
+      - |
+        echo "Copying custom keycloak theme..."
+        cp -R /customTheme/* /theme
+        echo "Custom theme copied successfully"
+    volumes:
+      - keycloak-theme:/theme
+    networks:
+      - perfana
+
+  # Keycloak Authentication Server (using shared postgres database)
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: perfana-keycloak
+    environment:
+      # Database configuration - using shared postgres with separate database
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: perfana
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+      KC_DB_SCHEMA: public
+      # Keycloak configuration
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT_BACKCHANNEL: false
+      # Disable SSL requirement for all realms in development
+      KC_SPI_SSL_SSL_REQUIRED: none
+      KC_SPI_SSL_SSL_REQUIRED_FOR_REQUESTS: none
+      KC_PROXY: edge
+      KC_PROXY_HEADERS: xforwarded
+      # Admin user
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      # Performance optimization
+      KC_DB_POOL_INITIAL_SIZE: 5
+      KC_DB_POOL_MAX_SIZE: 20
+      KC_DB_POOL_MIN_SIZE: 5
+      # Enable health endpoints
+      KC_HEALTH_ENABLED: true
+    command: ["start-dev", "--health-enabled=true", "--import-realm"]
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./keycloak/realms:/opt/keycloak/data/import
+      # Mount custom theme from shared volume
+      - keycloak-theme:/opt/keycloak/themes/perfanaTheme
+    networks:
+      - perfana
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak-theme-provider:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+######################################################################################################################
+# PERFANA NEXT-GEN SERVICES
+######################################################################################################################
+
+  # Next.js Frontend
+  perfana-web:
+    image: perfana/perfana-web:sha-5f668d8
+    container_name: perfana-web
+    ports:
+      - "4000:3000"
+    networks:
+      - perfana
+    environment:
+      NODE_ENV: production
+      # Runtime overrides (server-side rendering)
+      RUNTIME_API_URL: http://perfana-api:3001/api
+      RUNTIME_KEYCLOAK_URL: http://localhost:8080
+      RUNTIME_KEYCLOAK_REALM: perfana-prod
+      RUNTIME_KEYCLOAK_CLIENT_ID: perfana-web
+      RUNTIME_USE_KEYCLOAK_AUTH: "true"
+      # Build-time public env vars (used by browser)
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api
+      NEXT_PUBLIC_KEYCLOAK_URL: http://localhost:8080
+      NEXT_PUBLIC_KEYCLOAK_REALM: perfana-prod
+      NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: perfana-web
+      NEXT_PUBLIC_USE_KEYCLOAK_AUTH: "true"
+    depends_on:
+      perfana-api:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2048M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # NestJS API Backend
+  perfana-api:
+    image: perfana/perfana-api:sha-5f668d8
+    container_name: perfana-api
+    ports:
+      - "3001:3001"
+    networks:
+      - perfana
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: "--max-old-space-size=3584"
+      LOG_LEVEL: info
+      # Health check thresholds
+      HEALTH_HEAP_THRESHOLD_MB: "1500"
+      HEALTH_RSS_THRESHOLD_MB: "3000"
+      # PostgreSQL configuration
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USERNAME: perfana
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+      DB_NAME: perfana
+      DB_SSL: "false"
+      DATABASE_URL: postgresql://perfana:${POSTGRES_PASSWORD:-perfana}@postgres:5432/perfana?sslmode=disable
+      # Redis configuration
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_URL: redis://redis:6379
+      # Keycloak configuration
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: perfana-prod
+      KEYCLOAK_CLIENT_ID: perfana-api
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-perfana-api-secret-change-in-production}
+      KEYCLOAK_ADMIN_CLIENT_ID: perfana-admin
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-perfana-admin-secret-change-in-production}
+      # Accept multiple issuers for Docker (keycloak:8080) and browser (localhost:8080) access
+      KEYCLOAK_ACCEPTED_ISSUERS: "http://keycloak:8080/realms/perfana-prod,http://localhost:8080/realms/perfana-prod"
+      KEYCLOAK_ACCEPTED_AUDIENCES: "perfana-api,perfana-web,account"
+      # Frontend and CORS
+      FRONTEND_URL: http://localhost:4000
+      CORS_ORIGIN: http://localhost:4000
+      # Encryption
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-default-encryption-key-change-in-production-32chars!}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3001/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4096M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # BullMQ Worker for Pipeline Processing
+  perfana-worker:
+    image: perfana/perfana-worker:sha-5f668d8
+    container_name: perfana-worker
+    networks:
+      - perfana
+    environment:
+      NODE_ENV: development
+      LOG_LEVEL: debug
+      # PostgreSQL configuration
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USERNAME: perfana
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+      DB_NAME: perfana
+      DB_SSL: "false"
+      DATABASE_URL: postgresql://perfana:${POSTGRES_PASSWORD:-perfana}@postgres:5432/perfana?sslmode=disable
+      # Redis configuration (BullMQ job queue)
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_URL: redis://redis:6379
+      # Grafana API configuration (for metrics collection)
+      GRAFANA_URL: http://grafana:3000
+      GRAFANA_CONCURRENCY: "30"
+      GRAFANA_BATCH_SIZE: "20"
+      # Encryption
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-default-encryption-key-change-in-production-32chars!}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -h redis ping || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4096M
+        reservations:
+          cpus: '1'
+          memory: 1024M
+
+  # Grafana Dashboard Synchronization
+  perfana-grafana-sync:
+    image: perfana/perfana-grafana-sync:sha-5f668d8
+    container_name: perfana-grafana-sync
+    networks:
+      - perfana
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: info
+      # PostgreSQL configuration
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USERNAME: perfana
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+      DB_NAME: perfana
+      DB_SSL: "false"
+      # Grafana sync configuration
+      GRAFANA_SYNC_ENABLED: "true"
+      GRAFANA_SYNC_INTERVAL_MINUTES: "5"
+      AUTO_CONFIG_ENABLED: "true"
+      SANITY_CHECK_ENABLED: "true"
+      # Grafana direct DB access (for Grafana's own MariaDB)
+      USE_GRAFANA_DB_DIRECT_ACCESS: "false"
+      MYSQL_HOST: mariadb
+      MYSQL_USER: root
+      MYSQL_PASSWORD: perfana
+      # Encryption
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-default-encryption-key-change-in-production-32chars!}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      grafana:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "node -e 'process.exit(0)' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  # PDF Report Generation Service
+  perfana-report:
+    image: perfana/perfana-report:sha-5f668d8
+    container_name: perfana-report
+    networks:
+      - perfana
+    environment:
+      NODE_ENV: production
+      PORT: "3003"
+      LOG_LEVEL: info
+      # PostgreSQL configuration
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USERNAME: perfana
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+      DB_NAME: perfana
+      DB_SSL: "false"
+      # Redis configuration
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      # PDF generation configuration
+      BROWSER_POOL_SIZE: "1"
+      PDF_TIMEOUT_MS: "90000"
+      QUEUE_CONCURRENCY: "1"
+      CHROMIUM_EXECUTABLE_PATH: "/usr/bin/chromium-browser"
+      PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium-browser"
+      PUPPETEER_ARGS: "--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --disable-gpu --disable-software-rasterizer"
+      # Encryption
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-default-encryption-key-change-in-production-32chars!}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/3003 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2048M
+        reservations:
+          cpus: '0.5'
+          memory: 1024M
+    # Shared memory for Chromium/Puppeteer
+    shm_size: '1gb'
+
+  # Grafana Snapshot Service
+  perfana-snapshot:
+    image: perfana/perfana-snapshot:3.1.0
+    container_name: perfana-snapshot
+    environment:
+      POSTGRES_URL: "postgresql://perfana:${POSTGRES_PASSWORD:-perfana}@postgres:5432/perfana"
+      CONCURRENT_SNAPSHOTS: 1
+    networks:
+      - perfana
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+######################################################################################################################
+# INFRASTRUCTURE SERVICES
+######################################################################################################################
+
+  redis:
+    image: redis:7-alpine
+    container_name: perfana-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - perfana
+    volumes:
+      - redis-storage:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  grafana:
+    image: grafana/grafana:12.3
+    container_name: perfana-grafana
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+      GF_SECURITY_ADMIN_USER: "perfana"
+      GF_SECURITY_ADMIN_PASSWORD: "perfana"
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+      GF_INSTALL_PLUGINS: "marcusolsson-json-datasource, grafana-pyroscope-app"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/provisioning/alerting:/etc/grafana/provisioning/alerting
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "3200:3200"  # Tempo HTTP API
+      - "14268:14268" # Jaeger ingest
+      - "14250:14250" # Jaeger GRPC
+      - "4317:4317"   # OpenTelemetry GRPC
+      - "4318:4318"   # OpenTelemetry HTTP
+      - "9411:9411"   # Zipkin
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  pyroscope:
+    image: grafana/pyroscope:latest
+    command: [ "server" ]
+    volumes:
+      - pyroscope-storage:/var/lib/pyroscope
+    ports:
+      - "4040:4040"     # Pyroscope HTTP API & UI
+      - "4100:4100"     # Profiling data ingest
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    user: "10001"
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  prometheus:
+    image: prom/prometheus
+    user: root
+    volumes:
+      - ./prometheus:/prometheus
+      - prometheus-storage:/data
+    command:
+      - '--config.file=/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/data'
+      - "--web.enable-remote-write-receiver"
+    ports:
+      - 9090:9090
+    networks:
+      - perfana
+
+  ######################################################################################################################
+  alertmanager:
+    image: prom/alertmanager
+    user: root
+    volumes:
+      - ./prometheus:/prometheus
+      - prometheus-storage:/data
+    command:
+      - '--config.file=/prometheus/alertmanager.yml'
+      - '--storage.path=/data'
+    ports:
+      - 9093:9093
+    networks:
+      - perfana
+
+######################################################################################################################
+# SYSTEM UNDER TEST (Afterburner demo application)
+######################################################################################################################
+
+  afterburner-fe:
+    image: perfana/afterburner:${SUT_VERSION}
+    ports:
+      - "8090:8080"
+    environment:
+      "spring.application.name": "afterburner-fe"
+      "spring.profiles.active": "logstash"
+      "afterburner.name": "afterburner-fe"
+      "afterburner.logback.loki.remotehost": "loki"
+      "afterburner.logback.loki.port": "3100"
+      "management.metrics.tags.system_under_test": "PerfanaWebshop"
+      "management.metrics.tags.test_environment": "acc"
+      "management.metrics.tags.service": "afterburner-fe"
+      "afterburner.remote.call.base_url": "http://afterburner-be:8080"
+      "afterburner.remote.call.httpclient.socket.timeout.millis": "10000"
+      "spring.zipkin.enabled": "true"
+      "spring.zipkin.base-url": "http://tempo:9411/"
+      "spring.sleuth.sampler.probability": "0.1"
+      "spring.sleuth.keys.http.headers": "perfana-test-run-id,perfana-request-name"
+      "spring.sleuth.propagation.tag.enabled": "true"
+      "spring.sleuth.propagation.tag.whitelisted-keys": "perfana-test-run-id,perfana-request-name"
+      "spring.sleuth.propagation-keys": "perfana-test-run-id,perfana-request-name"
+      "spring.sleuth.baggage-keys": "perfana-test-run-id,perfana-request-name"
+      "afterburner.mybatis.datasource.url": "jdbc:mariadb://mariadb:3306/employees"
+      "afterburner.mybatis.datasource.username": "root"
+      "afterburner.mybatis.datasource.password": "perfana"
+      "afterburner.mybatis.datasource.driver-class-name": "org.mariadb.jdbc.Driver"
+      "JDK_JAVA_OPTIONS": "-javaagent:/pyroscope.jar"
+      "PYROSCOPE_APPLICATION_NAME": "afterburner-fe"
+      "PYROSCOPE_PROFILING_INTERVAL": "13ms"
+      "PYROSCOPE_FORMAT": "jfr"
+      "PYROSCOPE_PROFILER_EVENT": "itimer"
+      "PYROSCOPE_PROFILER_ALLOC": "512k"
+      "PYROSCOPE_UPLOAD_INTERVAL": "3s"
+      "PYROSCOPE_LOG_LEVEL": "info"
+      "PYROSCOPE_SERVER_ADDRESS": "http://pyroscope:4040"
+      "PYROSCOPE_AUTH_TOKEN": "abc123"
+    restart: always
+    networks:
+      - perfana
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1024M
+
+  ######################################################################################################################
+  afterburner-be:
+    image: perfana/afterburner:${SUT_VERSION}
+    environment:
+      "spring.application.name": "afterburner-be"
+      "spring.profiles.active": "employee-db, logstash"
+      "afterburner.name": "afterburner-be"
+      "afterburner.logback.loki.remotehost": "loki"
+      "afterburner.logback.loki.port": "3100"
+      "management.metrics.tags.system_under_test": "PerfanaWebshop"
+      "management.metrics.tags.test_environment": "acc"
+      "management.metrics.tags.service": "afterburner-be"
+      "afterburner.remote.call.httpclient.socket.timeout.millis": "10000"
+      "spring.zipkin.enabled": "true"
+      "spring.zipkin.base-url": "http://tempo:9411/"
+      "spring.sleuth.sampler.probability": "0.1"
+      "spring.sleuth.keys.http.headers": "perfana-test-run-id,perfana-request-name"
+      "spring.sleuth.propagation.tag.enabled": "true"
+      "spring.sleuth.propagation.tag.whitelisted-keys": "perfana-test-run-id,perfana-request-name"
+      "spring.sleuth.propagation-keys": "perfana-test-run-id,perfana-request-name"
+      "spring.sleuth.baggage-keys": "perfana-test-run-id,perfana-request-name"
+      "afterburner.datasource.employee.jdbc-url": "jdbc:mariadb://mariadb:3306/employees"
+      "afterburner.datasource.employee.username": "root"
+      "afterburner.datasource.employee.password": "perfana"
+      "afterburner.datasource.employee.poolMaximumActiveConnections": "5"
+      "JDK_JAVA_OPTIONS": "-javaagent:jfr-exporter.jar=influxUrl=http://influxdb:8086,influxDatabase=jfr,tag=service/afterburner-fe,tag=systemUnderTest/PerfanaWebshop,tag=testEnvironment/acc -XX:NativeMemoryTracking=summary"
+    restart: always
+    networks:
+      - perfana
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1024M
+
+  ######################################################################################################################
+  wiremock:
+    image: perfana/perfana-wiremock:2.32.0-alpine
+    ports:
+      - "8060:8080"
+    networks:
+      - perfana
+
+######################################################################################################################
+# MOCK SERVICES
+######################################################################################################################
+
+  # Dynatrace Mock Services - for development without actual Dynatrace instances
+  # SaaS mock (port 8092): DQL queries via /platform/storage/query/v1/query:execute
+  # Managed mock (port 8091): Metrics API v2 via /api/v2/metrics/query
+  dynatrace-saas-mock:
+    image: wiremock/wiremock:3.3.1
+    container_name: dynatrace-saas-mock
+    ports:
+      - "8092:8080"
+    volumes:
+      - ./dynatrace-mock/saas/mappings:/home/wiremock/mappings:ro
+    command: ["--global-response-templating", "--verbose"]
+    networks:
+      - perfana
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/__admin/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  dynatrace-managed-mock:
+    image: wiremock/wiremock:3.3.1
+    container_name: dynatrace-managed-mock
+    ports:
+      - "8091:8080"
+    volumes:
+      - ./dynatrace-mock/managed/mappings:/home/wiremock/mappings:ro
+    command: ["--global-response-templating", "--verbose"]
+    networks:
+      - perfana
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/__admin/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+######################################################################################################################
+# SUPPORTING DATABASES
+######################################################################################################################
+
+  mariadb:
+    image: mariadb:10.5.5
+    environment:
+      MYSQL_ROOT_PASSWORD: perfana
+    ports:
+      - 3306:3306
+    networks:
+      - perfana
+    volumes:
+    - ./test_db:/docker-entrypoint-initdb.d
+    - ./mariadb:/etc/mysql/conf.d
+
+  ######################################################################################################################
+  influxdb:
+    image: influxdb:1.8.3
+    ports:
+      - "8086:8086"
+    volumes:
+      - "./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro"
+      - influxdb-storage:/var/lib/influxdb
+      - ./influxdb/init-influxdb.sh:/docker-entrypoint-initdb.d/init-influxdb.sh
+    networks:
+      - perfana
+    entrypoint: /entrypoint.sh influxd
+
+  ######################################################################################################################
+  telegraf:
+    image: telegraf:1.33.1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    privileged: true
+    user: telegraf:root
+    networks:
+      - perfana
+
+######################################################################################################################
+# LOAD TESTING
+######################################################################################################################
+
+  loadtest:
+    image: perfana/maven-gatling-loadtest:0.0.6
+    environment:
+      SUT_VERSION: 1.0.0
+      GIT_SHA: 6293480
+      PERFANA_URL: http://perfana-api:3001
+    volumes:
+      - ./loadtest:/loadtest
+    entrypoint: >
+      sh -c "
+      echo Unpacking loadtest tar;
+      mkdir -p /loadtest/src;
+      tar -xzf /loadtest/loadtest-gatling.tar.gz --strip-components=1 -C /loadtest/src;
+      echo Finished unpacking loadtest tar;
+      tail -f /dev/null"
+    networks:
+      - perfana
+
+  #######################################################################################################################
+  jmetertest:
+    build:
+      context: ./jmeter
+      dockerfile: Dockerfile
+    environment:
+      SUT_VERSION: 1.0.0
+      GIT_SHA: 6293480
+      PERFANA_URL: http://perfana-api:3001
+    volumes:
+      - ./jmeter:/tests
+      - ./jmeter/plugins:/opt/apache-jmeter-5.6.3/lib/ext
+    networks:
+      - perfana
+
+  #######################################################################################################################
+  # BreakTest Load Agent - connects to BreakTest controller for distributed load testing
+  load-agent:
+    image: breakingit/breaktest-load-agent:latest
+    container_name: load-agent-office
+    environment:
+      CONTROLLER_HOST: controller.breaktest.app
+      CONTROLLER_PORT: 443
+      CONTROLLER_SSL: "true"
+      CONTROLLER_SSL_VERIFY: "true"
+      LOAD_AGENT_TOKEN: ${LOAD_AGENT_TOKEN}
+      LOAD_AGENT_NAME: ${LOAD_AGENT_NAME:-MyPrivateAgent}
+      LOAD_AGENT_LOCATION: ${LOAD_AGENT_LOCATION:-Office}
+    networks:
+      - perfana
+    restart: unless-stopped
+
+#######################################################################################################################
+networks:
+  perfana:
+    driver: bridge
+
+#######################################################################################################################
+volumes:
+  # Database and authentication
+  postgres_data:
+    driver: local
+  keycloak_data:
+    driver: local
+  keycloak-theme:
+    driver: local
+  # Redis storage
+  redis-storage:
+  # Existing volumes
+  grafana-storage:
+  pyroscope-storage:
+  influxdb-storage:
+  prometheus-storage:
+  loadtest-dir:
+  unpack-loadtest-tar:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./loadtest/loadtest-gatling.tar.gz
+      o: bind
+  pom-xml-file:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./loadtest/pom.xml
+      o: bind
+  tempo-data:
+  pyroscope-data:
+  loki-data:

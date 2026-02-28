@@ -1,6 +1,30 @@
+# IDE
 .idea/
+
+# macOS
+.DS_Store
+._*
+
+# Environment files (contain secrets)
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+package-lock.json
+
+# Dynatrace agent downloads
+oneagent-temp/
+
+# Load test artifacts
 loadtest/target/
 loadtest/log/
-loadtest/src/._test
-loadtest/src/test/._resources
-.DS_Store
+jmeter.log
+
+# Backup files
+*.bak
+*-backup.*
+
+# Generated files
+*.log

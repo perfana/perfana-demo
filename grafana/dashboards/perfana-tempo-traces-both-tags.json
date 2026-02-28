@@ -223,8 +223,8 @@
       },
       {
         "current": {
-          "text": "MyAfterburner-acc-loadTest-00002",
-          "value": "MyAfterburner-acc-loadTest-00002"
+          "text": "PerfanaWebshop-acc-loadTest-00002",
+          "value": "PerfanaWebshop-acc-loadTest-00002"
         },
         "datasource": {
           "type": "tempo",
