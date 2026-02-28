@@ -14,17 +14,26 @@
 node_modules/
 package-lock.json
 
-# Dynatrace agent downloads
+# Python
+venv/
+
+# LLM models
+models/
+
+# Dynatrace agent
 oneagent-temp/
+oneagent-log/
 
 # Load test artifacts
 loadtest/target/
 loadtest/log/
-jmeter.log
+jmeter/target/
 
 # Backup files
 *.bak
 *-backup.*
+*.backup
+*.backup2
 
 # Generated files
 *.log
