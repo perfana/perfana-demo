@@ -101,7 +101,8 @@ services:
 
   # Database Migration Runner - runs TypeORM migrations then exits
   perfana-migration:
-    image: perfana/perfana-migration:sha-5f668d8
+    image: perfana/perfana-migration:sha-fcebf0f
+    platform: linux/amd64
     container_name: perfana-migration
     environment:
       DB_HOST: postgres
@@ -122,7 +123,8 @@ services:
 
   # Next.js Frontend
   perfana-web:
-    image: perfana/perfana-web:sha-5f668d8
+    image: perfana/perfana-web:sha-fcebf0f
+    platform: linux/amd64
     container_name: perfana-web
     ports:
       - "4000:3000"
@@ -130,8 +132,9 @@ services:
       - perfana
     environment:
       NODE_ENV: production
+      CSP_UPGRADE_INSECURE: "false"
       # Runtime overrides (server-side rendering)
-      RUNTIME_API_URL: http://perfana-api:3001/api
+      RUNTIME_API_URL: http://localhost:3001/api
       RUNTIME_KEYCLOAK_URL: http://localhost:8080
       RUNTIME_KEYCLOAK_REALM: perfana-prod
       RUNTIME_KEYCLOAK_CLIENT_ID: perfana-web
@@ -142,18 +145,13 @@ services:
       NEXT_PUBLIC_KEYCLOAK_REALM: perfana-prod
       NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: perfana-web
       NEXT_PUBLIC_USE_KEYCLOAK_AUTH: "true"
+      NEXT_PUBLIC_CSP_FRAME_SRC: http://localhost:3000
     depends_on:
       perfana-api:
         condition: service_started
       keycloak:
         condition: service_healthy
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     deploy:
       resources:
         limits:
@@ -165,7 +163,8 @@ services:
 
   # NestJS API Backend
   perfana-api:
-    image: perfana/perfana-api:sha-5f668d8
+    image: perfana/perfana-api:sha-fcebf0f
+    platform: linux/amd64
     container_name: perfana-api
     ports:
       - "3001:3001"
@@ -204,7 +203,9 @@ services:
       FRONTEND_URL: http://localhost:4000
       CORS_ORIGIN: http://localhost:4000
       # Encryption
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-default-encryption-key-change-in-production-32chars!}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-5b4e50551a48dcd3d31d95d1d499ab958457328ed8e92321b153a7fff2371883}
+    volumes:
+      - ./provisioning:/data/provisioning:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -214,8 +215,8 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3001/api/health || exit 1"]
-      interval: 30s
+      test: ["CMD", "/nodejs/bin/node", "-e", "const http = require('http'); http.get('http://localhost:3001/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 10s
       timeout: 10s
       retries: 3
       start_period: 30s
@@ -230,7 +231,8 @@ services:
 
   # BullMQ Worker for Pipeline Processing
   perfana-worker:
-    image: perfana/perfana-worker:sha-5f668d8
+    image: perfana/perfana-worker:sha-fcebf0f
+    platform: linux/amd64
     container_name: perfana-worker
     networks:
       - perfana
@@ -254,19 +256,13 @@ services:
       GRAFANA_CONCURRENCY: "30"
       GRAFANA_BATCH_SIZE: "20"
       # Encryption
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-default-encryption-key-change-in-production-32chars!}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-5b4e50551a48dcd3d31d95d1d499ab958457328ed8e92321b153a7fff2371883}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli -h redis ping || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     deploy:
       resources:
         limits:
@@ -278,7 +274,8 @@ services:
 
   # Grafana Dashboard Synchronization
   perfana-grafana-sync:
-    image: perfana/perfana-grafana-sync:sha-5f668d8
+    image: perfana/perfana-grafana-sync:sha-fcebf0f
+    platform: linux/amd64
     container_name: perfana-grafana-sync
     networks:
       - perfana
@@ -303,19 +300,13 @@ services:
       MYSQL_USER: root
       MYSQL_PASSWORD: perfana
       # Encryption
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-default-encryption-key-change-in-production-32chars!}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-5b4e50551a48dcd3d31d95d1d499ab958457328ed8e92321b153a7fff2371883}
     depends_on:
       postgres:
         condition: service_healthy
       grafana:
         condition: service_started
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "node -e 'process.exit(0)' || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     deploy:
       resources:
         limits:
@@ -327,7 +318,8 @@ services:
 
   # PDF Report Generation Service
   perfana-report:
-    image: perfana/perfana-report:sha-5f668d8
+    image: perfana/perfana-report:sha-fcebf0f
+    platform: linux/amd64
     container_name: perfana-report
     networks:
       - perfana
@@ -353,19 +345,13 @@ services:
       PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium-browser"
       PUPPETEER_ARGS: "--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --disable-gpu --disable-software-rasterizer"
       # Encryption
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-default-encryption-key-change-in-production-32chars!}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-5b4e50551a48dcd3d31d95d1d499ab958457328ed8e92321b153a7fff2371883}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/3003 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     deploy:
       resources:
         limits:
