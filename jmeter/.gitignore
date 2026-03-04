@@ -13,6 +13,7 @@ buildNumber.properties
 jmeter.log
 *.jtl
 *.csv
+!src/test/resources/**/*.csv
 
 # IDE
 .idea/
