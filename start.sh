@@ -54,8 +54,8 @@ done
 docker exec perfana-keycloak /opt/keycloak/bin/kcadm.sh config credentials \
   --server http://localhost:8080 --realm master --user "${KEYCLOAK_ADMIN}" --password "${KEYCLOAK_ADMIN_PASSWORD}" 2>/dev/null
 docker exec perfana-keycloak /opt/keycloak/bin/kcadm.sh set-password \
-  -r perfana-prod --username "perfana@example.com" --new-password "Perfana1!" 2>/dev/null \
-  && echo "       Test user ready: perfana@example.com / Perfana1!" \
+  -r perfana-prod --username "admin@perfana.io" --new-password "Perfana1!" 2>/dev/null \
+  && echo "       Test user ready: admin@perfana.io / Perfana1!" \
   || echo "       WARNING: Could not set test user password"
 
 # Start Perfana services

@@ -1,6 +1,9 @@
 # IDE
 .idea/
 
+# Obsidian
+.obsidian/
+
 # macOS
 .DS_Store
 ._*

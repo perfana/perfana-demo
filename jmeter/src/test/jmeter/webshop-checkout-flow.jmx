@@ -1644,7 +1644,7 @@
             </elementProp>
             <elementProp name="timescaleDBDatabase" elementType="Argument">
               <stringProp name="Argument.name">timescaleDBDatabase</stringProp>
-              <stringProp name="Argument.value">${__P(timescaleDatabase,perfana_native)}</stringProp>
+              <stringProp name="Argument.value">${__P(timescaleDatabase,perfana)}</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
             <elementProp name="timescaleDBSchema" elementType="Argument">

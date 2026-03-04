@@ -133,7 +133,7 @@ datasources:
     uid: postgres-timescaledb
     editable: false
     user: perfana
-    database: perfana_native
+    database: perfana
     jsonData:
       timescaledb: true
       sslmode: 'disable' # or 'require', 'verify-full' depending on your setup

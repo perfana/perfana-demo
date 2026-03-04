@@ -114,7 +114,7 @@
         },
         {
           "authenticator": "auth-otp-form",
-          "requirement": "CONDITIONAL",
+          "requirement": "DISABLED",
           "priority": 20,
           "userSetupAllowed": false,
           "authenticatorFlow": false

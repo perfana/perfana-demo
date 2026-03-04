@@ -133,7 +133,7 @@ docker compose restart [service-name]
 - **Keycloak issues**: Check realm import logs and health endpoint
 
 ### Health Checks
-- Perfana UI: http://localhost:4000 (perfana@example.com / Perfana1!)
+- Perfana UI: http://localhost:4000 (admin@perfana.io / Perfana1!)
 - Perfana API: http://localhost:3001/api/health
 - Keycloak: http://localhost:8080 (admin / admin)
 - Grafana: http://localhost:3000 (perfana / perfana)

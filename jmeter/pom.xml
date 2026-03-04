@@ -55,7 +55,7 @@
         <systemUnderTest>PerfanaWebshop</systemUnderTest>
         <sut_version>${SUT_VERSION}</sut_version>
         <tags>jmeter,spring-boot-kubernetes,jfr,spanmetrics,docker</tags>
-        <apiKey>cGVyZmFuYSMxNzNiZDM4NS1hZDE0LTQyOTMtOTI0Yy1jNTFiMGM1ZWJiZDM=</apiKey>
+        <apiKey>ZGVtbyMyZjk1M2QzNC03YmNmLTRlYjktYTZkYS00MzcwNDYxY2MxMDY=</apiKey>
         <influxUrl>http://influxdb:8086</influxUrl>
 
         <!-- Test file(s) to run (can be overridden via -DtestFile=filename.jmx) -->
