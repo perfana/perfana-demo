@@ -22,12 +22,6 @@
   tags:
     - neoload
   readOnly: true
-- _id: jfr-profile
-  name: jfr
-  description: Profile for jfr dashboard and metrics
-  tags:
-    - jfr
-  readOnly: true
 - _id: spring-boot-kubernetes-profile
   name: spring-boot-kubernetes
   description: Profile for Spring Boot application dashboards and metrics

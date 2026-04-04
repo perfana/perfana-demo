@@ -1,0 +1,40 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/config/v1/service/requestAttributes"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "values": [
+        {
+          "id": "perfana-test-run-id",
+          "name": "perfana-test-run-id",
+          "enabled": true,
+          "dataType": "STRING",
+          "dataSources": [
+            {
+              "source": "REQUEST_HEADER",
+              "parameterName": "perfana-test-run-id"
+            }
+          ]
+        },
+        {
+          "id": "perfana-request-name",
+          "name": "perfana-request-name",
+          "enabled": true,
+          "dataType": "STRING",
+          "dataSources": [
+            {
+              "source": "REQUEST_HEADER",
+              "parameterName": "perfana-request-name"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

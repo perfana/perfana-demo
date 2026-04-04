@@ -383,7 +383,9 @@
         "description": "Perfana administrator role",
         "composite": true,
         "composites": {
-          "realm": ["perfana-user"]
+          "realm": [
+            "perfana-user"
+          ]
         },
         "clientRole": false,
         "containerId": "perfana-prod",
@@ -730,6 +732,30 @@
           "config": {}
         }
       ]
+    },
+    {
+      "name": "groups",
+      "description": "Group membership",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "groups",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "full.path": "false",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "groups",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
     }
   ],
   "groups": [
@@ -745,7 +771,9 @@
       "name": "perfana-users",
       "path": "/perfana-users",
       "attributes": {},
-      "realmRoles": ["perfana-user"],
+      "realmRoles": [
+        "perfana-user"
+      ],
       "clientRoles": {},
       "subGroups": []
     },
@@ -753,7 +781,9 @@
       "name": "perfana-admins",
       "path": "/perfana-admins",
       "attributes": {},
-      "realmRoles": ["perfana-admin"],
+      "realmRoles": [
+        "perfana-admin"
+      ],
       "clientRoles": {},
       "subGroups": []
     }
@@ -946,8 +976,12 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "secret": "perfana-admin-secret-change-in-production",
-      "redirectUris": ["/*"],
-      "webOrigins": ["/*"],
+      "redirectUris": [
+        "/*"
+      ],
+      "webOrigins": [
+        "/*"
+      ],
       "notBefore": 0,
       "bearerOnly": false,
       "consentRequired": false,
@@ -1024,6 +1058,54 @@
         "offline_access",
         "microprofile-jwt"
       ]
+    },
+    {
+      "clientId": "grafana",
+      "name": "Grafana",
+      "description": "Grafana OAuth2 client for SSO via Keycloak",
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "grafana-client-secret",
+      "redirectUris": [
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "publicClient": false,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "post.logout.redirect.uris": "+",
+        "backchannel.logout.session.required": "true",
+        "use.refresh.tokens": "true",
+        "pkce.code.challenge.method": "S256"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": 0,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "email",
+        "groups"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
     }
   ],
   "clientScopeMappings": {},
@@ -1045,7 +1127,7 @@
     "contentSecurityPolicyReportOnly": "",
     "xContentTypeOptions": "nosniff",
     "xRobotsTag": "none",
-    "xFrameOptions": "SAMEORIGIN",
+    "xFrameOptions": "",
     "xXSSProtection": "1; mode=block",
     "contentSecurityPolicy": "frame-src 'self' http://localhost:3000 http://localhost:4000 http://localhost:4001 http://localhost:4002; frame-ancestors 'self' http://localhost:3000 http://localhost:4000 http://localhost:4001 http://localhost:4002; object-src 'none';",
     "strictTransportSecurity": "max-age=31536000; includeSubDomains"
@@ -1200,7 +1282,9 @@
         "providerId": "allowed-client-templates",
         "subType": "anonymous",
         "config": {
-          "allow-default-scopes": ["true"]
+          "allow-default-scopes": [
+            "true"
+          ]
         }
       },
       {
@@ -1225,7 +1309,9 @@
         "providerId": "allowed-client-templates",
         "subType": "authenticated",
         "config": {
-          "allow-default-scopes": ["true"]
+          "allow-default-scopes": [
+            "true"
+          ]
         }
       }
     ]
@@ -1244,8 +1330,12 @@
           "value": "Admin123!"
         }
       ],
-      "realmRoles": ["perfana-admin"],
-      "groups": ["/perfana-admins"]
+      "realmRoles": [
+        "perfana-admin"
+      ],
+      "groups": [
+        "/perfana-admins"
+      ]
     },
     {
       "username": "test",
@@ -1260,8 +1350,12 @@
           "value": "Test123!"
         }
       ],
-      "realmRoles": ["perfana-user"],
-      "groups": ["/perfana-users"]
+      "realmRoles": [
+        "perfana-user"
+      ],
+      "groups": [
+        "/perfana-users"
+      ]
     },
     {
       "username": "test2@perfana.io",
@@ -1276,15 +1370,22 @@
           "value": "Test123!"
         }
       ],
-      "realmRoles": ["perfana-user"],
-      "groups": ["/perfana-users"]
+      "realmRoles": [
+        "perfana-user"
+      ],
+      "groups": [
+        "/perfana-users"
+      ]
     },
     {
       "username": "service-account-perfana-admin",
       "enabled": true,
       "serviceAccountClientId": "perfana-admin",
       "clientRoles": {
-        "realm-management": ["query-users", "view-users"]
+        "realm-management": [
+          "query-users",
+          "view-users"
+        ]
       }
     }
   ]

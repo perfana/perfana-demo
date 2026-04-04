@@ -1,6 +1,6 @@
 - _id: gatling-influxdb-99pct-response-time
   profile: gatling
-  grafana: Default
+  grafana: Demo
   addForWorkloadsMatchingRegex: load.*
   dashboardName: Gatling
   dashboardUid: gatling-overview-influxdb
@@ -18,7 +18,7 @@
 
 - _id: gatling-response_times_50th_percentile
   profile: gatling
-  grafana: Default
+  grafana: Demo
   addForWorkloadsMatchingRegex: load.*
   dashboardName: Gatling
   dashboardUid: gatling-overview-influxdb
@@ -38,7 +38,7 @@
 
 - _id: neoload_response_times_average
   profile: neoload
-  grafana: Default
+  grafana: Demo
   addForWorkloadsMatchingRegex: load.*
   dashboardName: Neoload
   dashboardUid: neoload-overview-influxdb
@@ -60,7 +60,7 @@
 
 - _id: k6-http-99pct-response-time
   profile: k6
-  grafana: Default
+  grafana: Demo
   addForWorkloadsMatchingRegex: load.*
   dashboardName: K6 http
   dashboardUid: k6-http-overview-influxdb
@@ -82,7 +82,7 @@
 
 - _id: spring-boot-kubernetes-mimir-major-gc-duration
   profile: spring-boot-kubernetes
-  grafana: Default
+  grafana: Demo
   addForWorkloadsMatchingRegex: load.*
   dashboardName: JVM memory management G1GC
   dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
@@ -101,7 +101,7 @@
 
 - _id: spring-boot-kubernetes-mimir-minor-gc-duration
   profile: spring-boot-kubernetes
-  grafana: Default
+  grafana: Demo
   addForWorkloadsMatchingRegex: load.*
   dashboardName: JVM memory management G1GC
   dashboardUid: spring-boot-kubernetes-jvm-g1gc-mimir
@@ -120,7 +120,7 @@
 
 - _id: spring-boot-kubernetes-mimir-http-conn-pool
   profile: spring-boot-kubernetes
-  grafana: Default
+  grafana: Demo
   addForWorkloadsMatchingRegex: load.*
   dashboardName: HTTP connection pool
   dashboardUid: spring-boot-kubernetes-httpconpool-mimir
@@ -141,7 +141,7 @@
 
 - _id: spring-boot-kubernetes-hickari-cp-mimir-pending_connections
   profile: spring-boot-kubernetes
-  grafana: Default
+  grafana: Demo
   addForWorkloadsMatchingRegex: load.*
   dashboardName: Hikari Connection Pool
   dashboardUid: spring-boot-kubernetes-hickari-cp-mimir
@@ -159,7 +159,7 @@
 
 - _id: kubernetes-namespace-resources-mimir-cpu-throttling
   profile: kubernetes
-  grafana: Default
+  grafana: Demo
   addForWorkloadsMatchingRegex: load.*
   dashboardName: Kubernetes Namespace Resources
   dashboardUid: kubernetes-namespace-resources-mimir
@@ -177,7 +177,7 @@
 
 - _id: kubernetes-pod-metrics-mimir-cpu-usage-limit
   profile: kubernetes
-  grafana: Default
+  grafana: Demo
   addForWorkloadsMatchingRegex: load.*
   dashboardName: Kubernetes Pod Metrics
   dashboardUid: kubernetes-pod-metrics-mimir
@@ -196,30 +196,9 @@
       operator: pst
       value: 10
 
-- _id: jfr-exporter-influxdb-cpu-usage-limit
-  profile: jfr
-  grafana: Default
-  addForWorkloadsMatchingRegex: load.*
-  dashboardName: JFR Exporter
-  dashboardUid: jfr-exporter-influxdb
-  panel:
-    title: CPU
-    id: 2
-    type: timeseries
-    yAxesFormat: percent
-    evaluateType: avg
-    matchPattern: "^(?!.*max_machineTotal).*"
-    requirement:
-      operator: lt
-      value: 70
-    excludeRampUpTime: true
-    validateWithDefaultIfNoData: false
-    benchmark:
-      operator: pst
-      value: 10
 - _id: docker-cpu
   profile: docker
-  grafana: Default
+  grafana: Demo
   addForWorkloadsMatchingRegex: load.*
   dashboardName: Docker container metrics
   dashboardUid: docker-telegraf-influxdb

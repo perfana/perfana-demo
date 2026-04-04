@@ -56,9 +56,9 @@
         <!-- Settings for the Perfana test runs -->
         <systemUnderTest>PerfanaWebshop</systemUnderTest>
         <sut_version>${SUT_VERSION}</sut_version>
-        <tags>gatling,spring-boot-kubernetes,jfr,spanmetrics,docker</tags>
-        <!-- <apiKey>cGctYm9zcyM4YTgwYTU2OS1mNmViLTQyNGEtYmZjYy01OTBjMTVhZmU3NTY=</apiKey> -->
-        <apiKey>cGVyZmFuYSM1NzM1ZjU3NC0wMTQyLTRlM2UtOTBhZi0xYzA1YTJlZmQ3Mzc=</apiKey>
+        <tags>gatling,spring-boot-kubernetes,spanmetrics,docker</tags>
+        <!-- <apiKey>ZGVtbyNlNzVjNzQ1Mi1hYTFhLTQxMmMtODcxNC02YjVjODg0ZWEzNTA=</apiKey> -->
+        <apiKey>ZGVtbyNlNzVjNzQ1Mi1hYTFhLTQxMmMtODcxNC02YjVjODg0ZWEzNTA=</apiKey>
         <influxUrl>http://influxdb:8086</influxUrl>
     </properties>
 
@@ -132,7 +132,7 @@
                                 <name>PerfanaEvent</name>
                                 <enabled>${perfanaEnabled}</enabled>
                                 <perfanaUrl>${perfanaUrl}</perfanaUrl>
-                                <apiKey>${apiKey}</apiKey>
+                                <apiKey>ZGVtbyNlNzVjNzQ1Mi1hYTFhLTQxMmMtODcxNC02YjVjODg0ZWEzNTA=</apiKey>
                                 <assertResultsEnabled>${assertResultsEnabled}</assertResultsEnabled>
                                 <variables>
                                     <perfana-containers>perfana-demo-afterburner*</perfana-containers>

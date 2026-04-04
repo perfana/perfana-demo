@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/v2/entities.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "entities": [
+        {
+          "entityId": "HOST-123",
+          "displayName": "afterburner-be",
+          "type": "HOST",
+          "tags": [
+            {"key": "environment", "value": "acc"}
+          ],
+          "properties": {
+            "osType": "LINUX"
+          }
+        }
+      ],
+      "totalCount": 1,
+      "pageSize": 50
+    }
+  }
+}

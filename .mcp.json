@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "perfana": {
+      "command": "node",
+      "args": ["/Users/daniel/workspace/perfana/apps/mcp/dist/index.js"],
+      "env": {
+        "PERFANA_API_URL": "http://localhost:3001/api",
+        "PERFANA_API_KEY": "ZGVtbyNiZTI4YzMxOC1iMDZkLTQ3MDMtYTlmNS00MGMxMDAzZDYwNzE="
+      }
+    }
+  }
+}

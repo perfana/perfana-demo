@@ -101,7 +101,7 @@ services:
 
   # Database Migration Runner - runs TypeORM migrations then exits
   perfana-migration:
-    image: perfana/perfana-migration:sha-5aaee98
+    image: perfana/perfana-migration:sha-f292e3e
     platform: linux/amd64
     container_name: perfana-migration
     environment:
@@ -123,7 +123,7 @@ services:
 
   # Next.js Frontend
   perfana-web:
-    image: perfana/perfana-web:sha-5aaee98
+    image: perfana/perfana-web:sha-f292e3e
     platform: linux/amd64
     container_name: perfana-web
     ports:
@@ -145,7 +145,7 @@ services:
       NEXT_PUBLIC_KEYCLOAK_REALM: perfana-prod
       NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: perfana-web
       NEXT_PUBLIC_USE_KEYCLOAK_AUTH: "true"
-      NEXT_PUBLIC_CSP_FRAME_SRC: http://localhost:3000
+      NEXT_PUBLIC_CSP_FRAME_SRC: http://localhost:3000 http://localhost:8080
     depends_on:
       perfana-api:
         condition: service_started
@@ -163,7 +163,7 @@ services:
 
   # NestJS API Backend
   perfana-api:
-    image: perfana/perfana-api:sha-5aaee98
+    image: perfana/perfana-api:sha-f292e3e
     platform: linux/amd64
     container_name: perfana-api
     ports:
@@ -201,7 +201,7 @@ services:
       KEYCLOAK_ACCEPTED_AUDIENCES: "perfana-api,perfana-web,account"
       # Frontend and CORS
       FRONTEND_URL: http://localhost:4000
-      CORS_ORIGIN: http://localhost:4000
+      CORS_ALLOWED_ORIGINS: http://localhost:4000
       # Encryption
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-5b4e50551a48dcd3d31d95d1d499ab958457328ed8e92321b153a7fff2371883}
     volumes:
@@ -231,7 +231,7 @@ services:
 
   # BullMQ Worker for Pipeline Processing
   perfana-worker:
-    image: perfana/perfana-worker:sha-5aaee98
+    image: perfana/perfana-worker:sha-f292e3e
     platform: linux/amd64
     container_name: perfana-worker
     networks:
@@ -274,7 +274,7 @@ services:
 
   # Grafana Dashboard Synchronization
   perfana-grafana-sync:
-    image: perfana/perfana-grafana-sync:sha-5aaee98
+    image: perfana/perfana-grafana-sync:sha-f292e3e
     platform: linux/amd64
     container_name: perfana-grafana-sync
     networks:
@@ -318,7 +318,7 @@ services:
 
   # PDF Report Generation Service
   perfana-report:
-    image: perfana/perfana-report:sha-5aaee98
+    image: perfana/perfana-report:sha-f292e3e
     platform: linux/amd64
     container_name: perfana-report
     networks:
@@ -393,12 +393,28 @@ services:
     ports:
       - "3000:3000"
     environment:
-      GF_AUTH_ANONYMOUS_ENABLED: "true"
-      GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
       GF_SECURITY_ADMIN_USER: "perfana"
       GF_SECURITY_ADMIN_PASSWORD: "perfana"
       GF_SECURITY_ALLOW_EMBEDDING: "true"
       GF_INSTALL_PLUGINS: "marcusolsson-json-datasource, grafana-pyroscope-app"
+      # OAuth2 / Keycloak SSO
+      GF_SERVER_ROOT_URL: "http://localhost:3000"
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_AUTH_OAUTH_AUTO_LOGIN: "true"
+      GF_AUTH_GENERIC_OAUTH_ENABLED: "true"
+      GF_AUTH_GENERIC_OAUTH_NAME: "Perfana"
+      GF_AUTH_GENERIC_OAUTH_ICON: "signin"
+      GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "grafana"
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "grafana-client-secret"
+      GF_AUTH_GENERIC_OAUTH_SCOPES: "openid profile email groups"
+      GF_AUTH_GENERIC_OAUTH_EMPTY_SCOPES: "false"
+      GF_AUTH_GENERIC_OAUTH_AUTH_URL: "http://localhost:8080/realms/perfana-prod/protocol/openid-connect/auth"
+      GF_AUTH_GENERIC_OAUTH_TOKEN_URL: "http://keycloak:8080/realms/perfana-prod/protocol/openid-connect/token"
+      GF_AUTH_GENERIC_OAUTH_API_URL: "http://keycloak:8080/realms/perfana-prod/protocol/openid-connect/userinfo"
+      GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: "true"
+      GF_AUTH_GENERIC_OAUTH_USE_PKCE: "true"
+      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: "contains(groups[*], 'perfana-admins') && 'Admin' || contains(groups[*], 'perfana-users') && 'Editor' || 'Viewer'"
     volumes:
       - grafana-storage:/var/lib/grafana
       - ./grafana/grafana.ini:/etc/grafana/grafana.ini
@@ -555,7 +571,7 @@ services:
       "afterburner.datasource.employee.username": "root"
       "afterburner.datasource.employee.password": "perfana"
       "afterburner.datasource.employee.poolMaximumActiveConnections": "5"
-      "JDK_JAVA_OPTIONS": "-javaagent:jfr-exporter.jar=influxUrl=http://influxdb:8086,influxDatabase=jfr,tag=service/afterburner-fe,tag=systemUnderTest/PerfanaWebshop,tag=testEnvironment/acc -XX:NativeMemoryTracking=summary"
+      "JDK_JAVA_OPTIONS": "-XX:NativeMemoryTracking=summary"
     restart: always
     networks:
       - perfana

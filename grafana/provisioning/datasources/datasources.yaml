@@ -45,17 +45,6 @@ datasources:
     basicAuthUser: admin
     secureJsonData:
       basicAuthPassword: perfana
-  - name: influxDb-jfr
-    type: influxdb
-    url: http://influxdb:8086
-    access: proxy
-    uid: influxdb-jfr
-    editable: true
-    database: jfr
-    basicAuth: true
-    basicAuthUser: admin
-    secureJsonData:
-      basicAuthPassword: perfana
   - name: influxDb-k6
     type: influxdb
     url: http://influxdb:8086

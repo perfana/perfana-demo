@@ -104,13 +104,6 @@
   dashboardName: Kubernetes Pod Metrics
   dashboardUid: kubernetes-pod-metrics-mimir
   readOnly: true
-- _id: jfr-metrics
-  profile: jfr
-  grafana: Demo
-  dashboardName: JFR Exporter
-  dashboardUid: jfr-exporter-influxdb
-  createSeparateDashboardForVariable: service
-  readOnly: true
 - _id: spanmetrics
   profile: spanmetrics
   grafana: Demo
