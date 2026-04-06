@@ -168,6 +168,22 @@ else
 
   if [ -n "$org_id" ] && [ "$org_id" != "null" ]; then
     echo "       Demo organization ready: $org_id"
+
+    # Add current user to Demo organization as org-admin
+    user_kc_id=$(echo "$auth_token" | cut -d'.' -f2 | base64 -d 2>/dev/null | jq -r '.sub')
+    if [ -n "$user_kc_id" ] && [ "$user_kc_id" != "null" ]; then
+      is_member=$(curl -sf "http://localhost:3001/api/organizations/$org_id/members" \
+        -H "Authorization: Bearer $auth_token" | jq -r "[.[] | select(.user_id==\"$user_kc_id\")] | length" 2>/dev/null)
+
+      if [ "$is_member" = "0" ] || [ -z "$is_member" ]; then
+        curl -sf -X POST "http://localhost:3001/api/organizations/$org_id/members" \
+          -H "Authorization: Bearer $auth_token" \
+          -H 'Content-Type: application/json' \
+          -d "{\"userId\": \"$user_kc_id\", \"roles\": [\"org-admin\"]}" > /dev/null 2>&1 \
+          && echo "       User ${PERFANA_USER} added to Demo organization" \
+          || echo "       WARNING: Could not add user to Demo organization"
+      fi
+    fi
   else
     echo "       WARNING: Could not create Demo organization"
   fi
@@ -192,9 +208,6 @@ else
   else
     echo "       WARNING: Could not create API key. You may need to configure it manually."
   fi
-
-  # Switch to API key for remaining calls (JWT expires after 5 min, API key lasts 1 year)
-  auth_header="Authorization: Bearer ${api_key:-$auth_token}"
 
   # Create Grafana service account and API token
   echo "       Creating Grafana service account..."
@@ -234,11 +247,11 @@ else
   # Register Grafana instance in Perfana
   echo "       Registering Grafana instance..."
   existing_grafana=$(curl -sf 'http://localhost:3001/api/grafana-instances' \
-    -H "$auth_header" | jq -r '.[0].id' 2>/dev/null)
+    -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
 
   if [ -z "$existing_grafana" ] || [ "$existing_grafana" = "null" ]; then
     grafana_instance_id=$(curl -sf -X POST 'http://localhost:3001/api/grafana-instances' \
-      -H "$auth_header" \
+      -H "Authorization: Bearer $auth_token" \
       -H 'Content-Type: application/json' \
       -d "{
         \"label\": \"Demo\",
@@ -258,7 +271,7 @@ else
     # Instance exists - update it with the API key if we have a new token
     if [ -n "$grafana_token" ]; then
       curl -sf -X PATCH "http://localhost:3001/api/grafana-instances/$existing_grafana" \
-        -H "$auth_header" \
+        -H "Authorization: Bearer $auth_token" \
         -H 'Content-Type: application/json' \
         -d "{\"apiKey\": \"$grafana_token\"}" > /dev/null 2>&1 \
         && echo "       Grafana instance updated with API key: $existing_grafana" \
@@ -271,11 +284,11 @@ else
   # Register Tempo tracing instance
   echo "       Registering Tempo tracing instance..."
   existing_tempo=$(curl -sf 'http://localhost:3001/api/tracing-instances' \
-    -H "$auth_header" | jq -r '.[0].id' 2>/dev/null)
+    -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
 
   if [ -z "$existing_tempo" ] || [ "$existing_tempo" = "null" ]; then
     tempo_instance_id=$(curl -sf -X POST 'http://localhost:3001/api/tracing-instances' \
-      -H "$auth_header" \
+      -H "Authorization: Bearer $auth_token" \
       -H 'Content-Type: application/json' \
       -d "{
         \"label\": \"Tempo\",
@@ -298,11 +311,11 @@ else
   # Register Pyroscope profiling instance
   echo "       Registering Pyroscope profiling instance..."
   existing_pyroscope=$(curl -sf 'http://localhost:3001/api/pyroscope-instances' \
-    -H "$auth_header" | jq -r '.[0].id' 2>/dev/null)
+    -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
 
   if [ -z "$existing_pyroscope" ] || [ "$existing_pyroscope" = "null" ]; then
     pyroscope_instance_id=$(curl -sf -X POST 'http://localhost:3001/api/pyroscope-instances' \
-      -H "$auth_header" \
+      -H "Authorization: Bearer $auth_token" \
       -H 'Content-Type: application/json' \
       -d "{
         \"label\": \"Pyroscope\",
@@ -334,20 +347,27 @@ echo "Running first baseline load tests..."
 echo ""
 echo "Configuring tracing and profiling for PerfanaWebshop..."
 
-# Use API key (doesn't expire) instead of re-authenticating via Keycloak
+# Re-authenticate: the original JWT (5 min lifespan) expired during the load test
+auth_token=$(curl -sf 'http://localhost:8080/realms/perfana-prod/protocol/openid-connect/token' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=password' \
+  -d 'client_id=perfana-web' \
+  --data-urlencode "username=${PERFANA_USER}" \
+  --data-urlencode "password=${PERFANA_PASSWORD}" | jq -r '.access_token' 2>/dev/null)
+
 sut_id=$(curl -sf 'http://localhost:3001/api/systems-under-test' \
-  -H "$auth_header" | jq -r '.[0].id' 2>/dev/null)
+  -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
 
 if [ -n "$sut_id" ] && [ "$sut_id" != "null" ]; then
   tempo_id=$(curl -sf 'http://localhost:3001/api/tracing-instances' \
-    -H "$auth_header" | jq -r '.[0].id' 2>/dev/null)
+    -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
   pyroscope_id=$(curl -sf 'http://localhost:3001/api/pyroscope-instances' \
-    -H "$auth_header" | jq -r '.[0].id' 2>/dev/null)
+    -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
 
   # Configure tracing services (Tempo) for afterburner-fe
   if [ -n "$tempo_id" ] && [ "$tempo_id" != "null" ]; then
     curl -sf -X POST 'http://localhost:3001/api/tracing-services' \
-      -H "$auth_header" \
+      -H "Authorization: Bearer $auth_token" \
       -H 'Content-Type: application/json' \
       -d "{
         \"systemUnderTestId\": \"$sut_id\",
@@ -361,7 +381,7 @@ if [ -n "$sut_id" ] && [ "$sut_id" != "null" ]; then
   # Configure Pyroscope profiling for afterburner-fe
   if [ -n "$pyroscope_id" ] && [ "$pyroscope_id" != "null" ]; then
     curl -sf -X PATCH "http://localhost:3001/api/systems-under-test/$sut_id/pyroscope" \
-      -H "$auth_header" \
+      -H "Authorization: Bearer $auth_token" \
       -H 'Content-Type: application/json' \
       -d "{
         \"pyroscope_instance_id\": \"$pyroscope_id\",
@@ -443,8 +463,7 @@ fi
 if [ -n "${mcp_api_key:-}" ] && [ "${mcp_api_key:-}" != "null" ]; then
   echo "  API key created (label: perfana-mcp): ${mcp_api_key:0:20}..."
   echo ""
-  echo "  To connect Claude Code to Perfana, add the following to your"
-  echo "  project's .mcp.json file:"
+  echo "  MCP config snippet (same for Claude Code .mcp.json and Claude Desktop):"
   echo ""
   echo "  {"
   echo "    \"mcpServers\": {"
@@ -459,8 +478,14 @@ if [ -n "${mcp_api_key:-}" ] && [ "${mcp_api_key:-}" != "null" ]; then
   echo "    }"
   echo "  }"
   echo ""
-  echo "  Or run:  claude mcp add perfana -- npx -y @perfana/mcp"
-  echo "  Then set env vars PERFANA_API_URL and PERFANA_API_KEY in .mcp.json"
+  echo "  Claude Code  → add to .mcp.json in your project root"
+  echo "  Claude Desktop → add to ~/Library/Application Support/Claude/claude_desktop_config.json"
+  echo ""
+  echo "  Or run this command to add it directly to Claude Code:"
+  echo ""
+  echo "  claude mcp add perfana -e PERFANA_API_URL=http://localhost:3001/api -e PERFANA_API_KEY=$mcp_api_key -- npx -y @perfana/mcp"
+  echo ""
+  echo "  Package: npm install @perfana/mcp   (requires Node >= 18)"
 else
   echo "  WARNING: Could not create MCP API key."
   echo "  Create one manually in the Perfana UI under Settings > API Keys."
