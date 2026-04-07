@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPathPattern": "/api/v2/entities.*"
+    "urlPath": "/api/v2/entities"
   },
   "response": {
     "status": 200,
@@ -31,9 +31,35 @@
           "properties": {
             "osType": "LINUX"
           }
+        },
+        {
+          "entityId": "SERVICE-123",
+          "displayName": "afterburner-be",
+          "type": "SERVICE",
+          "tags": [
+            {"key": "environment", "value": "acc"}
+          ],
+          "properties": {
+            "serviceType": "WEB_REQUEST_SERVICE",
+            "webServiceName": "afterburner-be",
+            "webServiceNamespace": "default"
+          }
+        },
+        {
+          "entityId": "SERVICE-456",
+          "displayName": "afterburner-fe",
+          "type": "SERVICE",
+          "tags": [
+            {"key": "environment", "value": "acc"}
+          ],
+          "properties": {
+            "serviceType": "WEB_REQUEST_SERVICE",
+            "webServiceName": "afterburner-fe",
+            "webServiceNamespace": "default"
+          }
         }
       ],
-      "totalCount": 2,
+      "totalCount": 4,
       "pageSize": 50
     }
   }

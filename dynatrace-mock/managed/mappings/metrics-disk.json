@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/v2/metrics/query.*",
+    "queryParameters": {
+      "metricSelector": {
+        "contains": "disk"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{{#assign 'fe'}}{{date (parseDate request.query.from) format='epoch'}}{{/assign}}{{#assign 'te'}}{{date (parseDate request.query.to) format='epoch'}}{{/assign}}{{#assign 's'}}{{math (math te '-' fe) '/' 4}}{{/assign}}{\"totalCount\":2,\"nextPageKey\":null,\"resolution\":\"1m\",\"result\":[{\"metricId\":\"builtin:host.disk.readTime\",\"dataPointCountRatio\":0.5,\"dimensionCountRatio\":0.5,\"data\":[{\"dimensionMap\":{\"dt.entity.host\":\"HOST-123\",\"dt.entity.host.name\":\"afterburner-be\"},\"timestamps\":[{{fe}},{{math fe '+' s}},{{math fe '+' (math s '*' 2)}},{{math fe '+' (math s '*' 3)}},{{te}}],\"values\":[12.1,14.8,13.4,16.3,14.0]}]},{\"metricId\":\"builtin:host.disk.writeTime\",\"dataPointCountRatio\":0.5,\"dimensionCountRatio\":0.5,\"data\":[{\"dimensionMap\":{\"dt.entity.host\":\"HOST-123\",\"dt.entity.host.name\":\"afterburner-be\"},\"timestamps\":[{{fe}},{{math fe '+' s}},{{math fe '+' (math s '*' 2)}},{{math fe '+' (math s '*' 3)}},{{te}}],\"values\":[19.6,23.4,21.2,25.8,22.1]}]}]}"
+  }
+}

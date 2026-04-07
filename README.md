@@ -1,118 +1,131 @@
-# Perfana demo
+# Perfana Demo
 
-## Demo environment
+## Overview
 
-The Perfana demo environment can be used to try out all the features. It uses Docker compose and has a all components to emulate a live-like environment for Perfana, including an application to run a performance test.
+The Perfana demo environment lets you explore all Perfana features using Docker Compose. It provides a realistic performance testing environment including load testing, metrics, distributed tracing, continuous profiling, and automated regression detection.
 
 ## Prerequisites
 
-* [Docker](https://docs.docker.com/get-started/)
-* [Docker compose](https://docs.docker.com/compose/gettingstarted/)
-* A minimum 8Gb of RAM allocated to docker daemon, preferably more
+* [Docker](https://docs.docker.com/get-started/) with Docker Compose
+* Minimum **8 GB RAM** allocated to Docker (16 GB recommended)
+* `jq` installed (for the init script)
 
-## Getting started
+## Getting Started
 
-* Clone perfana-demo repository 
-  ```sh
-  git clone https://github.com/perfana/perfana-demo.git
-  ```
-  or download [here](https://github.com/perfana/perfana-demo/archive/master.zip)
-
-  > If you use the download option, make sure to extract the zip to a directory named `perfana-demo`!
-
-* Inside the repository root run
-  ```sh
-  ./init-demo.sh
-  ```
-
-This spins up a number of containers
-
-| Container                | Description                                       | exposed to local port |
-|:-------------------------|:--------------------------------------------------|:----------------------|
-| perfana-fe               | Perfana front end                                 | 4000                  |
-| perfana-grafana          | Perfana - Grafana integration service             | n/a                   |
-| perfana-snapshot         | Perfana snapshot service                          | n/a                   |
-| perfana-ds-api           | Perfana data science api                          | 8080                  |
-| perfana-ds-worker        | Perfana data science api                          | n/a                   |
-| perfana-ds-metric-worker | Perfana data science api                          | n/a                   |
-| mongodb                  | MongoDb replicaset to store Perfana configuration | 27011 / 27012 /27013  |
-| grafana                  | Grafana graphing dashboard                        | 3000                  |
-| influxdb                 | InfluxDb metrics datastore                        | 8086 / 2003           |
-| telegraf                 | Telegraf metrics agent                            | n/a                   |
-| prometheus               | Prometheus metrics datastore                      | 9090                  |
-| alertmanager             | Alertmanager handles alerts from Prometheus       | 9093                  |
-| afterburner-fe           | Springboot test application                       | 8090                  |
-| afterburner-be           | Springboot test application                       | n/a                   | 
-| mariadb                  | Database used by test application                 | n/a                   | 
-| jaeger                   | Distributed tracing                               | 16686                 | 
-| tempo                    | Distributed traces backend                        | 3100                  | 
-| loki                     | Loki for parsing logs                             | n/a                   | 
-| Pyrocope                 | Continuous profiling                              | 4040                  | 
-| wiremock                 | Mocking tool                                      | 8060                  | 
-
-
-To stop all containers, run
+Clone the repository:
 
 ```sh
-./stop.sh
+git clone https://github.com/perfana/perfana-demo.git
+cd perfana-demo
 ```
 
-To  start existing containers, run
+Run the initialization script (first time only):
 
 ```sh
+./init-demo.sh
+```
+
+This starts all services, runs database migrations, configures integrations (Grafana, Tempo, Pyroscope), creates API keys, and runs an initial set of baseline load tests.
+
+### Dynatrace Mock (optional)
+
+To also start WireMock-based Dynatrace API stubs (SaaS and Managed flavours), pass the `--dynatrace-mock` flag:
+
+```sh
+./init-demo.sh --dynatrace-mock
+```
+
+This starts two additional containers and automatically registers the Dynatrace instance and entity mappings (HOST + SERVICE) in Perfana.
+
+## Services
+
+| Container               | Description                              | Local port |
+|:------------------------|:-----------------------------------------|:-----------|
+| perfana-web             | Perfana UI (Next.js)                     | 4000       |
+| perfana-api             | Perfana API (NestJS)                     | 3001       |
+| perfana-worker          | Background job processor (BullMQ)        | —          |
+| perfana-grafana-sync    | Grafana dashboard sync service           | —          |
+| perfana-report          | PDF report generation                    | —          |
+| keycloak                | Authentication server                    | 8080       |
+| postgres                | TimescaleDB — Perfana data store         | 5432       |
+| redis                   | Job queue                                | 6379       |
+| grafana                 | Grafana dashboards                       | 3000       |
+| prometheus              | Metrics collection                       | 9090       |
+| alertmanager            | Alert routing                            | 9093       |
+| influxdb                | Time-series metrics (JMeter results)     | 8086       |
+| tempo                   | Distributed tracing backend              | 3200       |
+| pyroscope               | Continuous profiling                     | 4040       |
+| loki                    | Log aggregation                          | 3100       |
+| telegraf                | Docker metrics collector                 | —          |
+| afterburner-fe          | Spring Boot test application (frontend)  | 8090       |
+| afterburner-be          | Spring Boot test application (backend)   | —          |
+| mariadb                 | Database used by afterburner             | 3306       |
+| wiremock                | HTTP mock server                         | 8060       |
+| dynatrace-mock          | Dynatrace SaaS API stub (optional)       | 8061       |
+| dynatrace-managed-mock  | Dynatrace Managed API stub (optional)    | 8062       |
+
+## Day-to-day Commands
+
+```sh
+# Start all existing containers (after init)
 ./start.sh
-```
 
-To remove all containers, use
+# Start infrastructure only (for local Perfana development)
+./start-infra.sh
 
-```sh
+# Stop all containers
+./stop.sh
+
+# Remove all containers and volumes (data will be lost)
 ./clean.sh
-``` 
-
---- 
-
-> When you use the `clean.sh` script, all of the data inside the containers will be lost!
-
----
-
-
-
-### Automatically detect regressions
-
-The `start.sh` script will run 3 baseline test runs for the `afterburner` system under test while in `baseline mode`
-
-After the baseline test runs have finished, disable the `baseline mode` and try to deploy a  version of the test application with a performance issue.
-
-To deploy a version of the test application with a cpu issue, run
-
-```sh
-./deploy-and-test.sh cpu
-````
-To deploy a version of the test application with a connection pool issue, run
-
-```sh
-./deploy-and-test.sh pool
 ```
 
+## Running Load Tests
 
+```sh
+# Baseline test (establishes performance benchmarks)
+./deploy-and-test-jmeter.sh baseline
 
-## Exploring the demo environment
+# Test with CPU performance issue
+./deploy-and-test-jmeter.sh cpu
+
+# Test with connection pool issue
+./deploy-and-test-jmeter.sh pool
+
+# Test with slow backend calls issue
+./deploy-and-test-jmeter.sh backend
+```
+
+Run a baseline first, then disable baseline mode in Perfana and run one of the issue variants to trigger automatic regression detection.
+
+## Detecting Regressions
+
+1. Run `./deploy-and-test-jmeter.sh baseline` (done automatically by `init-demo.sh`)
+2. In Perfana, disable **Baseline mode** for the `afterburner` system under test
+3. Run `./deploy-and-test-jmeter.sh cpu` (or `pool` / `backend`)
+4. Perfana automatically compares against the baseline and flags regressions
+
+## Exploring the Environment
 
 ### Perfana
 
-To log into Perfana, open [http://localhost:4000](http://localhost:4000) and use `admin@perfana.io` as user with password `perfana`. If you want to log in as a non-admin user, you can try users `daniel@perfana.io` or `dylan@perfana.io`, both with password `perfana`
+URL: [http://localhost:4000](http://localhost:4000)
 
-To view Tempo traces and Pyroscope profiles for your test runs, set `Tracing service name` and `Pyroscope appliication name` to `afterburner-fe` in the `Global settings` in the `System under test setting`, found in the sidebar.
-
+| User | Password | Role |
+|:-----|:---------|:-----|
+| admin@perfana.io | Test@1234 | Admin |
+| daniel@perfana.io | perfana | User |
+| dylan@perfana.io | perfana | User |
 
 ### Grafana
 
-To log into Grafana, open [http://localhost:3000](http://localhost:3000) and use `perfana` as user with password `perfana` 
+URL: [http://localhost:3000](http://localhost:3000) — user: `perfana`, password: `perfana`
 
-### Update
+### Keycloak
 
-> The `perfana-demo` repository is updated frequently, so to get the latest and greatest pull repo and images.
+URL: [http://localhost:8080](http://localhost:8080) — user: `admin`, password: `admin`
 
+## Keeping Up to Date
 
 ```sh
 git pull && docker compose pull
@@ -120,4 +133,4 @@ git pull && docker compose pull
 
 ## Credits
 
-The database used in this demo setup is created from a subset of data from https://github.com/datacharmer/test_db
+The employee database used in this demo is derived from [datacharmer/test_db](https://github.com/datacharmer/test_db).

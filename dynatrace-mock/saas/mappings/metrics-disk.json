@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/v2/metrics/query.*",
+    "queryParameters": {
+      "metricSelector": {
+        "contains": "disk"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{{#assign 'fe'}}{{date (parseDate request.query.from) format='epoch'}}{{/assign}}{{#assign 'te'}}{{date (parseDate request.query.to) format='epoch'}}{{/assign}}{{#assign 's'}}{{math (math te '-' fe) '/' 4}}{{/assign}}{\"totalCount\":2,\"nextPageKey\":null,\"resolution\":\"1m\",\"result\":[{\"metricId\":\"builtin:host.disk.readTime\",\"dataPointCountRatio\":0.5,\"dimensionCountRatio\":0.5,\"data\":[{\"dimensionMap\":{\"dt.entity.host\":\"HOST-123\",\"dt.entity.host.name\":\"afterburner-be\"},\"timestamps\":[{{fe}},{{math fe '+' s}},{{math fe '+' (math s '*' 2)}},{{math fe '+' (math s '*' 3)}},{{te}}],\"values\":[18.3,21.7,19.5,24.2,20.8]},{\"dimensionMap\":{\"dt.entity.host\":\"HOST-456\",\"dt.entity.host.name\":\"afterburner-fe\"},\"timestamps\":[{{fe}},{{math fe '+' s}},{{math fe '+' (math s '*' 2)}},{{math fe '+' (math s '*' 3)}},{{te}}],\"values\":[6.1,7.4,6.8,8.2,7.0]}]},{\"metricId\":\"builtin:host.disk.writeTime\",\"dataPointCountRatio\":0.5,\"dimensionCountRatio\":0.5,\"data\":[{\"dimensionMap\":{\"dt.entity.host\":\"HOST-123\",\"dt.entity.host.name\":\"afterburner-be\"},\"timestamps\":[{{fe}},{{math fe '+' s}},{{math fe '+' (math s '*' 2)}},{{math fe '+' (math s '*' 3)}},{{te}}],\"values\":[28.4,33.1,30.7,35.6,31.9]},{\"dimensionMap\":{\"dt.entity.host\":\"HOST-456\",\"dt.entity.host.name\":\"afterburner-fe\"},\"timestamps\":[{{fe}},{{math fe '+' s}},{{math fe '+' (math s '*' 2)}},{{math fe '+' (math s '*' 3)}},{{te}}],\"values\":[8.2,9.5,8.9,10.3,9.1]}]}]}"
+  }
+}

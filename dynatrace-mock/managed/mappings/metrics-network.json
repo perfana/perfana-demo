@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/v2/metrics/query.*",
+    "queryParameters": {
+      "metricSelector": {
+        "contains": "net.nic"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{{#assign 'fe'}}{{date (parseDate request.query.from) format='epoch'}}{{/assign}}{{#assign 'te'}}{{date (parseDate request.query.to) format='epoch'}}{{/assign}}{{#assign 's'}}{{math (math te '-' fe) '/' 4}}{{/assign}}{\"totalCount\":2,\"nextPageKey\":null,\"resolution\":\"1m\",\"result\":[{\"metricId\":\"builtin:host.net.nic.trafficIn\",\"dataPointCountRatio\":0.5,\"dimensionCountRatio\":0.5,\"data\":[{\"dimensionMap\":{\"dt.entity.host\":\"HOST-123\",\"dt.entity.host.name\":\"afterburner-be\"},\"timestamps\":[{{fe}},{{math fe '+' s}},{{math fe '+' (math s '*' 2)}},{{math fe '+' (math s '*' 3)}},{{te}}],\"values\":[1835008,2097152,1966080,2359296,2097152]}]},{\"metricId\":\"builtin:host.net.nic.trafficOut\",\"dataPointCountRatio\":0.5,\"dimensionCountRatio\":0.5,\"data\":[{\"dimensionMap\":{\"dt.entity.host\":\"HOST-123\",\"dt.entity.host.name\":\"afterburner-be\"},\"timestamps\":[{{fe}},{{math fe '+' s}},{{math fe '+' (math s '*' 2)}},{{math fe '+' (math s '*' 3)}},{{te}}],\"values\":[3145728,3670016,3407872,4194304,3670016]}]}]}"
+  }
+}

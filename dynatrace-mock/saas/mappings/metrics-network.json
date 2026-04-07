@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/v2/metrics/query.*",
+    "queryParameters": {
+      "metricSelector": {
+        "contains": "net.nic"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{{#assign 'fe'}}{{date (parseDate request.query.from) format='epoch'}}{{/assign}}{{#assign 'te'}}{{date (parseDate request.query.to) format='epoch'}}{{/assign}}{{#assign 's'}}{{math (math te '-' fe) '/' 4}}{{/assign}}{\"totalCount\":2,\"nextPageKey\":null,\"resolution\":\"1m\",\"result\":[{\"metricId\":\"builtin:host.net.nic.trafficIn\",\"dataPointCountRatio\":0.5,\"dimensionCountRatio\":0.5,\"data\":[{\"dimensionMap\":{\"dt.entity.host\":\"HOST-123\",\"dt.entity.host.name\":\"afterburner-be\"},\"timestamps\":[{{fe}},{{math fe '+' s}},{{math fe '+' (math s '*' 2)}},{{math fe '+' (math s '*' 3)}},{{te}}],\"values\":[2621440,3145728,2883584,3407872,3014656]},{\"dimensionMap\":{\"dt.entity.host\":\"HOST-456\",\"dt.entity.host.name\":\"afterburner-fe\"},\"timestamps\":[{{fe}},{{math fe '+' s}},{{math fe '+' (math s '*' 2)}},{{math fe '+' (math s '*' 3)}},{{te}}],\"values\":[786432,917504,851968,1048576,917504]}]},{\"metricId\":\"builtin:host.net.nic.trafficOut\",\"dataPointCountRatio\":0.5,\"dimensionCountRatio\":0.5,\"data\":[{\"dimensionMap\":{\"dt.entity.host\":\"HOST-123\",\"dt.entity.host.name\":\"afterburner-be\"},\"timestamps\":[{{fe}},{{math fe '+' s}},{{math fe '+' (math s '*' 2)}},{{math fe '+' (math s '*' 3)}},{{te}}],\"values\":[4194304,5242880,4718592,5767168,5242880]},{\"dimensionMap\":{\"dt.entity.host\":\"HOST-456\",\"dt.entity.host.name\":\"afterburner-fe\"},\"timestamps\":[{{fe}},{{math fe '+' s}},{{math fe '+' (math s '*' 2)}},{{math fe '+' (math s '*' 3)}},{{te}}],\"values\":[1572864,2097152,1835008,2359296,2097152]}]}]}"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/v2/entities/HOST-[A-Z0-9]+"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "entityId": "HOST-123",
+      "displayName": "afterburner-be",
+      "type": "HOST",
+      "lastSeenTms": 1741704780000,
+      "tags": [
+        {"key": "environment", "value": "acc"}
+      ],
+      "properties": {
+        "cpuCores": 4,
+        "osType": "LINUX",
+        "osArchitecture": "X86",
+        "bitness": "64bit",
+        "monitoringMode": "FULL_STACK",
+        "hostName": "afterburner-be",
+        "ipAddresses": ["10.0.0.1"],
+        "cloudType": "AZURE",
+        "memoryTotal": 8589934592
+      }
+    }
+  }
+}

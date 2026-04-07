@@ -15,6 +15,14 @@ set -o pipefail
 set -o nounset
 
 COMPOSE_FILE="docker-compose.yml"
+ENABLE_DYNATRACE_MOCK=false
+
+# Parse flags
+for arg in "$@"; do
+  case $arg in
+    --dynatrace-mock) ENABLE_DYNATRACE_MOCK=true ;;
+  esac
+done
 
 # Set environment variables with defaults
 export SUT_VERSION=${SUT_VERSION:-2.4.3-good-baseline}
@@ -113,6 +121,11 @@ docker compose -f "$COMPOSE_FILE" up -d grafana prometheus alertmanager tempo py
 # Start demo applications
 echo "[6/8] Starting demo applications..."
 docker compose -f "$COMPOSE_FILE" up -d afterburner-fe afterburner-be wiremock
+
+if [ "$ENABLE_DYNATRACE_MOCK" = "true" ]; then
+  echo "       Starting Dynatrace mock..."
+  docker compose -f "$COMPOSE_FILE" --profile dynatrace-mock up -d dynatrace-mock
+fi
 
 # Wait for Perfana API and Grafana, configure integrations, create API key
 echo "[7/8] Waiting for services and configuring integrations..."
@@ -333,6 +346,34 @@ else
   else
     echo "       Pyroscope instance already exists: $existing_pyroscope"
   fi
+
+  # Register Dynatrace mock instance (only when --dynatrace-mock flag is set)
+  if [ "$ENABLE_DYNATRACE_MOCK" = "true" ]; then
+    echo "       Registering Dynatrace mock instance..."
+    existing_dynatrace=$(curl -sf 'http://localhost:3001/api/dynatrace' \
+      -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
+
+    if [ -z "$existing_dynatrace" ] || [ "$existing_dynatrace" = "null" ]; then
+      dynatrace_instance_id=$(curl -sf -X POST 'http://localhost:3001/api/dynatrace' \
+        -H "Authorization: Bearer $auth_token" \
+        -H 'Content-Type: application/json' \
+        -d "{
+          \"label\": \"Dynatrace Mock\",
+          \"host\": \"http://dynatrace-mock:8080\",
+          \"apiToken\": \"mock-api-token\",
+          \"dynatraceType\": \"saas\",
+          \"organizationId\": \"${org_id}\"
+        }" | jq -r '.id' 2>/dev/null)
+
+      if [ -n "$dynatrace_instance_id" ] && [ "$dynatrace_instance_id" != "null" ]; then
+        echo "       Dynatrace mock instance registered: $dynatrace_instance_id"
+      else
+        echo "       WARNING: Could not register Dynatrace mock instance"
+      fi
+    else
+      echo "       Dynatrace mock instance already exists: $existing_dynatrace"
+    fi
+  fi
 fi
 
 # Start load testing containers
@@ -393,6 +434,84 @@ if [ -n "$sut_id" ] && [ "$sut_id" != "null" ]; then
       && echo "  Pyroscope profiling configured for afterburner-fe" \
       || echo "  Pyroscope profiling could not be configured"
   fi
+
+  # Configure Dynatrace entity mappings (only when --dynatrace-mock flag is set)
+  if [ "$ENABLE_DYNATRACE_MOCK" = "true" ]; then
+    dynatrace_id=$(curl -sf 'http://localhost:3001/api/dynatrace' \
+      -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
+
+    if [ -n "$dynatrace_id" ] && [ "$dynatrace_id" != "null" ]; then
+      # Map afterburner-be host entity to the SUT
+      curl -sf -X POST 'http://localhost:3001/api/dynatrace/entities/mappings' \
+        -H "Authorization: Bearer $auth_token" \
+        -H 'Content-Type: application/json' \
+        -d "{
+          \"dynatraceConfigId\": \"$dynatrace_id\",
+          \"systemUnderTestId\": \"$sut_id\",
+          \"entityId\": \"HOST-123\",
+          \"entityDisplayName\": \"afterburner-be\",
+          \"entityType\": \"HOST\",
+          \"testEnvironment\": \"acc\",
+          \"workload\": \"loadTest\",
+          \"level\": \"sut\"
+        }" > /dev/null 2>&1 \
+        && echo "  Dynatrace entity mapped: afterburner-be (HOST-123)" \
+        || echo "  Dynatrace entity mapping already exists or could not be created: afterburner-be"
+
+      # Map afterburner-fe host entity to the SUT
+      curl -sf -X POST 'http://localhost:3001/api/dynatrace/entities/mappings' \
+        -H "Authorization: Bearer $auth_token" \
+        -H 'Content-Type: application/json' \
+        -d "{
+          \"dynatraceConfigId\": \"$dynatrace_id\",
+          \"systemUnderTestId\": \"$sut_id\",
+          \"entityId\": \"HOST-456\",
+          \"entityDisplayName\": \"afterburner-fe\",
+          \"entityType\": \"HOST\",
+          \"testEnvironment\": \"acc\",
+          \"workload\": \"loadTest\",
+          \"level\": \"sut\"
+        }" > /dev/null 2>&1 \
+        && echo "  Dynatrace entity mapped: afterburner-fe (HOST-456)" \
+        || echo "  Dynatrace entity mapping already exists or could not be created: afterburner-fe"
+
+      # Map afterburner-be service entity to the SUT
+      curl -sf -X POST 'http://localhost:3001/api/dynatrace/entities/mappings' \
+        -H "Authorization: Bearer $auth_token" \
+        -H 'Content-Type: application/json' \
+        -d "{
+          \"dynatraceConfigId\": \"$dynatrace_id\",
+          \"systemUnderTestId\": \"$sut_id\",
+          \"entityId\": \"SERVICE-123\",
+          \"entityDisplayName\": \"afterburner-be\",
+          \"entityType\": \"SERVICE\",
+          \"testEnvironment\": \"acc\",
+          \"workload\": \"loadTest\",
+          \"level\": \"sut\"
+        }" > /dev/null 2>&1 \
+        && echo "  Dynatrace entity mapped: afterburner-be (SERVICE-123)" \
+        || echo "  Dynatrace entity mapping already exists or could not be created: afterburner-be service"
+
+      # Map afterburner-fe service entity to the SUT
+      curl -sf -X POST 'http://localhost:3001/api/dynatrace/entities/mappings' \
+        -H "Authorization: Bearer $auth_token" \
+        -H 'Content-Type: application/json' \
+        -d "{
+          \"dynatraceConfigId\": \"$dynatrace_id\",
+          \"systemUnderTestId\": \"$sut_id\",
+          \"entityId\": \"SERVICE-456\",
+          \"entityDisplayName\": \"afterburner-fe\",
+          \"entityType\": \"SERVICE\",
+          \"testEnvironment\": \"acc\",
+          \"workload\": \"loadTest\",
+          \"level\": \"sut\"
+        }" > /dev/null 2>&1 \
+        && echo "  Dynatrace entity mapped: afterburner-fe (SERVICE-456)" \
+        || echo "  Dynatrace entity mapping already exists or could not be created: afterburner-fe service"
+    else
+      echo "  WARNING: Dynatrace instance not found. Entity mappings not configured."
+    fi
+  fi
 else
   echo "  WARNING: System Under Test not found. Tracing and profiling not configured."
 fi
@@ -430,6 +549,9 @@ echo "  Afterburner Frontend:  http://localhost:8090"
 echo "  MariaDB:               localhost:3306"
 echo "  InfluxDB:              http://localhost:8086"
 echo "  Wiremock:              http://localhost:8060"
+if [ "$ENABLE_DYNATRACE_MOCK" = "true" ]; then
+echo "  Dynatrace Mock:        http://localhost:8061"
+fi
 echo ""
 echo "Commands:"
 echo "  docker compose -f $COMPOSE_FILE ps      # Check status"
