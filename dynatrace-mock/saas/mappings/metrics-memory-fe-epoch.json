@@ -1,0 +1,20 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/v2/metrics/query.*",
+    "queryParameters": {
+      "metricSelector": {
+        "matches": ".*mem.*HOST-456.*|.*HOST-456.*mem.*"
+      },
+      "from": {
+        "matches": "^[0-9]+$"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "body": "{{#assign 'fe'}}{{request.query.from}}{{/assign}}{{#assign 'te'}}{{request.query.to}}{{/assign}}{{#assign 's'}}{{math (math te '-' fe) '/' 11}}{{/assign}}{\"totalCount\":1,\"nextPageKey\":null,\"resolution\":\"1m\",\"result\":[{\"metricId\":\"builtin:host.mem.usage\",\"dataPointCountRatio\":0.5,\"dimensionCountRatio\":0.5,\"data\":[{\"dimensionMap\":{\"dt.entity.host\":\"HOST-456\",\"dt.entity.host.name\":\"afterburner-fe\"},\"timestamps\":[{{fe}},{{math fe '+' s}},{{math fe '+' (math s '*' 2)}},{{math fe '+' (math s '*' 3)}},{{math fe '+' (math s '*' 4)}},{{math fe '+' (math s '*' 5)}},{{math fe '+' (math s '*' 6)}},{{math fe '+' (math s '*' 7)}},{{math fe '+' (math s '*' 8)}},{{math fe '+' (math s '*' 9)}},{{math fe '+' (math s '*' 10)}},{{te}}],\"values\":[55.3,56.1,57.2,56.5,58.0,57.4,56.8,57.9,58.2,56.9,57.1,57.6]}]}]}"
+  }
+}

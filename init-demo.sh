@@ -361,6 +361,7 @@ else
           \"label\": \"Dynatrace Mock\",
           \"host\": \"http://dynatrace-mock:8080\",
           \"apiToken\": \"mock-api-token\",
+          \"platformApiToken\": \"mock-platform-token\",
           \"dynatraceType\": \"saas\",
           \"organizationId\": \"${org_id}\"
         }" | jq -r '.id' 2>/dev/null)
