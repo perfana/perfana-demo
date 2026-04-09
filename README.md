@@ -25,7 +25,7 @@ Run the initialization script (first time only):
 ./init-demo.sh
 ```
 
-This starts all services, runs database migrations, configures integrations (Grafana, Tempo, Pyroscope), creates API keys, and runs an initial set of baseline load tests.
+This starts all services, runs database migrations, configures integrations (Grafana, Tempo, Pyroscope), creates API keys, and runs an initial set of baseline load tests. It also configures ADAPT mode automatically — see [Detecting Regressions](#detecting-regressions) below.
 
 ### Dynatrace Mock (optional)
 
@@ -100,8 +100,24 @@ Run a baseline first, then disable baseline mode in Perfana and run one of the i
 
 ## Detecting Regressions
 
-1. Run `./deploy-and-test-jmeter.sh baseline` (done automatically by `init-demo.sh`)
-2. In Perfana, disable **Baseline mode** for the `afterburner` system under test
+ADAPT is Perfana's automated regression detection engine. It operates in two modes:
+
+| Mode | Behaviour |
+|:-----|:----------|
+| **BASELINE** | Runs are auto-accepted into the control group. Use this to build up the reference dataset. |
+| **DEFAULT** | Each run is compared against the last 10 successful baseline runs. Regressions are flagged automatically. |
+
+### Automatic setup via `init-demo.sh`
+
+`init-demo.sh` handles ADAPT mode switching automatically:
+
+1. **Runs 1 & 2** — executed with ADAPT in **BASELINE** mode. Both runs are accepted into the control group and serve as the regression reference.
+2. **Run 3** — before launching the issue test (`cpu`), ADAPT is switched to **DEFAULT** mode. Perfana immediately detects the regression and raises an alert.
+
+### Manual steps (if running tests individually)
+
+1. Run `./deploy-and-test-jmeter.sh baseline` twice to build the control group
+2. In Perfana, go to **System Under Test → Config → ADAPT Settings** and switch the mode to **Default (regression)**
 3. Run `./deploy-and-test-jmeter.sh cpu` (or `pool` / `backend`)
 4. Perfana automatically compares against the baseline and flags regressions
 

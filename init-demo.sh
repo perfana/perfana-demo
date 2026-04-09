@@ -375,6 +375,164 @@ else
       echo "       Dynatrace mock instance already exists: $existing_dynatrace"
     fi
   fi
+
+  # ──────────────────────────────────────────────────────────────────────────────────────────
+  # Create the System Under Test with pre-seeded environment and workload so that all seed
+  # data (tracing, profiling, Dynatrace mappings, ADAPT mode) can be configured before the
+  # first test run starts. The load test plugin registers runs against this pre-existing SUT.
+  # ──────────────────────────────────────────────────────────────────────────────────────────
+  echo "       Creating System Under Test (PerfanaWebshop)..."
+  sut_id=$(curl -sf -X POST 'http://localhost:3001/api/systems-under-test' \
+    -H "Authorization: Bearer $auth_token" \
+    -H 'Content-Type: application/json' \
+    -d "{
+      \"name\": \"PerfanaWebshop\",
+      \"description\": \"PerfanaWebshop\",
+      \"organizationId\": \"${org_id}\",
+      \"environments\": [{
+        \"name\": \"acc\",
+        \"workloads\": [{\"name\": \"loadTest\"}]
+      }]
+    }" | jq -r '.id' 2>/dev/null)
+
+  if [ -z "$sut_id" ] || [ "$sut_id" = "null" ]; then
+    # SUT may already exist — look it up
+    sut_id=$(curl -sf 'http://localhost:3001/api/systems-under-test' \
+      -H "Authorization: Bearer $auth_token" | jq -r '.[] | select(.name=="PerfanaWebshop") | .id' 2>/dev/null)
+  fi
+
+  if [ -n "$sut_id" ] && [ "$sut_id" != "null" ]; then
+    echo "       System Under Test ready: $sut_id"
+
+    # Set ADAPT mode to BASELINE before the first run — the workload now exists
+    echo "       Setting ADAPT mode to BASELINE (control group build-up)..."
+    adapt_result=$(curl -sf -X PUT 'http://localhost:3001/api/test-runs/workload-adapt-settings' \
+      -H "Authorization: Bearer $auth_token" \
+      -H 'Content-Type: application/json' \
+      -d "{
+        \"systemUnderTestId\": \"$sut_id\",
+        \"testEnvironment\": \"acc\",
+        \"workload\": \"loadTest\",
+        \"adaptMode\": \"BASELINE\"
+      }" 2>/dev/null)
+    if echo "$adapt_result" | jq -e '.adaptMode == "BASELINE"' > /dev/null 2>&1; then
+      echo "       ADAPT mode set to BASELINE"
+    else
+      echo "       WARNING: Could not set ADAPT mode to BASELINE"
+    fi
+
+    tempo_id=$(curl -sf 'http://localhost:3001/api/tracing-instances' \
+      -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
+    pyroscope_id=$(curl -sf 'http://localhost:3001/api/pyroscope-instances' \
+      -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
+
+    # Configure tracing services (Tempo) for afterburner-fe
+    if [ -n "$tempo_id" ] && [ "$tempo_id" != "null" ]; then
+      curl -sf -X POST 'http://localhost:3001/api/tracing-services' \
+        -H "Authorization: Bearer $auth_token" \
+        -H 'Content-Type: application/json' \
+        -d "{
+          \"systemUnderTestId\": \"$sut_id\",
+          \"tracingInstanceId\": \"$tempo_id\",
+          \"serviceNames\": [\"afterburner-fe\"]
+        }" > /dev/null 2>&1 \
+        && echo "       Tracing services configured for afterburner-fe" \
+        || echo "       Tracing services already configured or could not be created"
+    fi
+
+    # Configure Pyroscope profiling for afterburner-fe
+    if [ -n "$pyroscope_id" ] && [ "$pyroscope_id" != "null" ]; then
+      curl -sf -X PATCH "http://localhost:3001/api/systems-under-test/$sut_id/pyroscope" \
+        -H "Authorization: Bearer $auth_token" \
+        -H 'Content-Type: application/json' \
+        -d "{
+          \"pyroscope_instance_id\": \"$pyroscope_id\",
+          \"pyroscope_configurations\": [
+            {\"application\": \"afterburner-fe\", \"profiler\": \"process_cpu:cpu:nanoseconds:cpu:nanoseconds\"},
+            {\"application\": \"afterburner-fe\", \"profiler\": \"memory:alloc_in_new_tlab_bytes:bytes:space:bytes\"}
+          ]
+        }" > /dev/null 2>&1 \
+        && echo "       Pyroscope profiling configured for afterburner-fe" \
+        || echo "       Pyroscope profiling could not be configured"
+    fi
+
+    # Configure Dynatrace entity mappings (only when --dynatrace-mock flag is set)
+    if [ "$ENABLE_DYNATRACE_MOCK" = "true" ]; then
+      dynatrace_id=$(curl -sf 'http://localhost:3001/api/dynatrace' \
+        -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
+
+      if [ -n "$dynatrace_id" ] && [ "$dynatrace_id" != "null" ]; then
+        curl -sf -X POST 'http://localhost:3001/api/dynatrace/entities/mappings' \
+          -H "Authorization: Bearer $auth_token" \
+          -H 'Content-Type: application/json' \
+          -d "{
+            \"dynatraceConfigId\": \"$dynatrace_id\",
+            \"systemUnderTestId\": \"$sut_id\",
+            \"entityId\": \"HOST-123\",
+            \"entityDisplayName\": \"afterburner-be\",
+            \"entityType\": \"HOST\",
+            \"testEnvironment\": \"acc\",
+            \"workload\": \"loadTest\",
+            \"level\": \"sut\"
+          }" > /dev/null 2>&1 \
+          && echo "       Dynatrace entity mapped: afterburner-be (HOST-123)" \
+          || echo "       Dynatrace entity mapping already exists or could not be created: afterburner-be"
+
+        curl -sf -X POST 'http://localhost:3001/api/dynatrace/entities/mappings' \
+          -H "Authorization: Bearer $auth_token" \
+          -H 'Content-Type: application/json' \
+          -d "{
+            \"dynatraceConfigId\": \"$dynatrace_id\",
+            \"systemUnderTestId\": \"$sut_id\",
+            \"entityId\": \"HOST-456\",
+            \"entityDisplayName\": \"afterburner-fe\",
+            \"entityType\": \"HOST\",
+            \"testEnvironment\": \"acc\",
+            \"workload\": \"loadTest\",
+            \"level\": \"sut\"
+          }" > /dev/null 2>&1 \
+          && echo "       Dynatrace entity mapped: afterburner-fe (HOST-456)" \
+          || echo "       Dynatrace entity mapping already exists or could not be created: afterburner-fe"
+
+        curl -sf -X POST 'http://localhost:3001/api/dynatrace/entities/mappings' \
+          -H "Authorization: Bearer $auth_token" \
+          -H 'Content-Type: application/json' \
+          -d "{
+            \"dynatraceConfigId\": \"$dynatrace_id\",
+            \"systemUnderTestId\": \"$sut_id\",
+            \"entityId\": \"SERVICE-123\",
+            \"entityDisplayName\": \"afterburner-be\",
+            \"entityType\": \"SERVICE\",
+            \"testEnvironment\": \"acc\",
+            \"workload\": \"loadTest\",
+            \"level\": \"sut\"
+          }" > /dev/null 2>&1 \
+          && echo "       Dynatrace entity mapped: afterburner-be (SERVICE-123)" \
+          || echo "       Dynatrace entity mapping already exists or could not be created: afterburner-be service"
+
+        curl -sf -X POST 'http://localhost:3001/api/dynatrace/entities/mappings' \
+          -H "Authorization: Bearer $auth_token" \
+          -H 'Content-Type: application/json' \
+          -d "{
+            \"dynatraceConfigId\": \"$dynatrace_id\",
+            \"systemUnderTestId\": \"$sut_id\",
+            \"entityId\": \"SERVICE-456\",
+            \"entityDisplayName\": \"afterburner-fe\",
+            \"entityType\": \"SERVICE\",
+            \"testEnvironment\": \"acc\",
+            \"workload\": \"loadTest\",
+            \"level\": \"sut\"
+          }" > /dev/null 2>&1 \
+          && echo "       Dynatrace entity mapped: afterburner-fe (SERVICE-456)" \
+          || echo "       Dynatrace entity mapping already exists or could not be created: afterburner-fe service"
+      else
+        echo "       WARNING: Dynatrace instance not found. Entity mappings not configured."
+      fi
+    fi
+  else
+    echo "       WARNING: Could not create System Under Test. Seed data not configured."
+  fi
+
 fi
 
 # Start load testing containers
@@ -382,143 +540,65 @@ echo "[8/8] Starting load testing..."
 docker compose -f "$COMPOSE_FILE" up -d loadtest jmetertest
 
 echo ""
+# ================================================================================================
+# ADAPT Mode Strategy
+# ------------------------------------------------------------------------------------------------
+# ADAPT is Perfana's automated regression detection engine. The workload-level adapt mode
+# controls how each new test run is evaluated:
+#
+#   BASELINE  — runs are auto-accepted into the control group (no regression check).
+#               Use this while building up the reference dataset.
+#   DEFAULT   — runs are compared against the last 10 successful baseline runs.
+#               Regressions in response times, throughput, or resources are flagged.
+#
+# Strategy used in this init script:
+#   1. Runs 1 & 2  → BASELINE mode  (establishes the control group)
+#   2. Run 3+      → DEFAULT mode   (regression detection active)
+#
+# The SUT, test environment, and workload are pre-created above via POST /api/systems-under-test
+# (with environments pre-seeded), so ADAPT mode and all seed data are configured before the
+# first run starts.
+# ================================================================================================
 echo "Running first baseline load tests..."
 ./deploy-and-test-jmeter.sh baseline
 
-# Configure System Under Test with tracing and profiling
-echo ""
-echo "Configuring tracing and profiling for PerfanaWebshop..."
+echo "Running second baseline load tests..."
+./deploy-and-test-jmeter.sh baseline
 
-# Re-authenticate: the original JWT (5 min lifespan) expired during the load test
-auth_token=$(curl -sf 'http://localhost:8080/realms/perfana-prod/protocol/openid-connect/token' \
+# ================================================================================================
+# Switch ADAPT mode to DEFAULT (regression detection) before running tests with injected issues.
+# In DEFAULT mode, ADAPT compares each new run against the last 10 successful baseline runs and
+# automatically flags regressions in response times, throughput, or resource utilisation.
+# ================================================================================================
+echo "Switching ADAPT mode to DEFAULT (regression detection)..."
+
+# Re-authenticate: the JWT (5 min lifespan) will have expired during the second load test
+adapt_auth_token=$(curl -sf 'http://localhost:8080/realms/perfana-prod/protocol/openid-connect/token' \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   -d 'grant_type=password' \
   -d 'client_id=perfana-web' \
   --data-urlencode "username=${PERFANA_USER}" \
   --data-urlencode "password=${PERFANA_PASSWORD}" | jq -r '.access_token' 2>/dev/null)
 
-sut_id=$(curl -sf 'http://localhost:3001/api/systems-under-test' \
-  -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
-
-if [ -n "$sut_id" ] && [ "$sut_id" != "null" ]; then
-  tempo_id=$(curl -sf 'http://localhost:3001/api/tracing-instances' \
-    -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
-  pyroscope_id=$(curl -sf 'http://localhost:3001/api/pyroscope-instances' \
-    -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
-
-  # Configure tracing services (Tempo) for afterburner-fe
-  if [ -n "$tempo_id" ] && [ "$tempo_id" != "null" ]; then
-    curl -sf -X POST 'http://localhost:3001/api/tracing-services' \
-      -H "Authorization: Bearer $auth_token" \
-      -H 'Content-Type: application/json' \
-      -d "{
-        \"systemUnderTestId\": \"$sut_id\",
-        \"tracingInstanceId\": \"$tempo_id\",
-        \"serviceNames\": [\"afterburner-fe\"]
-      }" > /dev/null 2>&1 \
-      && echo "  Tracing services configured for afterburner-fe" \
-      || echo "  Tracing services already configured or could not be created"
-  fi
-
-  # Configure Pyroscope profiling for afterburner-fe
-  if [ -n "$pyroscope_id" ] && [ "$pyroscope_id" != "null" ]; then
-    curl -sf -X PATCH "http://localhost:3001/api/systems-under-test/$sut_id/pyroscope" \
-      -H "Authorization: Bearer $auth_token" \
-      -H 'Content-Type: application/json' \
-      -d "{
-        \"pyroscope_instance_id\": \"$pyroscope_id\",
-        \"pyroscope_configurations\": [
-          {\"application\": \"afterburner-fe\", \"profiler\": \"process_cpu:cpu:nanoseconds:cpu:nanoseconds\"},
-          {\"application\": \"afterburner-fe\", \"profiler\": \"memory:alloc_in_new_tlab_bytes:bytes:space:bytes\"}
-        ]
-      }" > /dev/null 2>&1 \
-      && echo "  Pyroscope profiling configured for afterburner-fe" \
-      || echo "  Pyroscope profiling could not be configured"
-  fi
-
-  # Configure Dynatrace entity mappings (only when --dynatrace-mock flag is set)
-  if [ "$ENABLE_DYNATRACE_MOCK" = "true" ]; then
-    dynatrace_id=$(curl -sf 'http://localhost:3001/api/dynatrace' \
-      -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
-
-    if [ -n "$dynatrace_id" ] && [ "$dynatrace_id" != "null" ]; then
-      # Map afterburner-be host entity to the SUT
-      curl -sf -X POST 'http://localhost:3001/api/dynatrace/entities/mappings' \
-        -H "Authorization: Bearer $auth_token" \
-        -H 'Content-Type: application/json' \
-        -d "{
-          \"dynatraceConfigId\": \"$dynatrace_id\",
-          \"systemUnderTestId\": \"$sut_id\",
-          \"entityId\": \"HOST-123\",
-          \"entityDisplayName\": \"afterburner-be\",
-          \"entityType\": \"HOST\",
-          \"testEnvironment\": \"acc\",
-          \"workload\": \"loadTest\",
-          \"level\": \"sut\"
-        }" > /dev/null 2>&1 \
-        && echo "  Dynatrace entity mapped: afterburner-be (HOST-123)" \
-        || echo "  Dynatrace entity mapping already exists or could not be created: afterburner-be"
-
-      # Map afterburner-fe host entity to the SUT
-      curl -sf -X POST 'http://localhost:3001/api/dynatrace/entities/mappings' \
-        -H "Authorization: Bearer $auth_token" \
-        -H 'Content-Type: application/json' \
-        -d "{
-          \"dynatraceConfigId\": \"$dynatrace_id\",
-          \"systemUnderTestId\": \"$sut_id\",
-          \"entityId\": \"HOST-456\",
-          \"entityDisplayName\": \"afterburner-fe\",
-          \"entityType\": \"HOST\",
-          \"testEnvironment\": \"acc\",
-          \"workload\": \"loadTest\",
-          \"level\": \"sut\"
-        }" > /dev/null 2>&1 \
-        && echo "  Dynatrace entity mapped: afterburner-fe (HOST-456)" \
-        || echo "  Dynatrace entity mapping already exists or could not be created: afterburner-fe"
-
-      # Map afterburner-be service entity to the SUT
-      curl -sf -X POST 'http://localhost:3001/api/dynatrace/entities/mappings' \
-        -H "Authorization: Bearer $auth_token" \
-        -H 'Content-Type: application/json' \
-        -d "{
-          \"dynatraceConfigId\": \"$dynatrace_id\",
-          \"systemUnderTestId\": \"$sut_id\",
-          \"entityId\": \"SERVICE-123\",
-          \"entityDisplayName\": \"afterburner-be\",
-          \"entityType\": \"SERVICE\",
-          \"testEnvironment\": \"acc\",
-          \"workload\": \"loadTest\",
-          \"level\": \"sut\"
-        }" > /dev/null 2>&1 \
-        && echo "  Dynatrace entity mapped: afterburner-be (SERVICE-123)" \
-        || echo "  Dynatrace entity mapping already exists or could not be created: afterburner-be service"
-
-      # Map afterburner-fe service entity to the SUT
-      curl -sf -X POST 'http://localhost:3001/api/dynatrace/entities/mappings' \
-        -H "Authorization: Bearer $auth_token" \
-        -H 'Content-Type: application/json' \
-        -d "{
-          \"dynatraceConfigId\": \"$dynatrace_id\",
-          \"systemUnderTestId\": \"$sut_id\",
-          \"entityId\": \"SERVICE-456\",
-          \"entityDisplayName\": \"afterburner-fe\",
-          \"entityType\": \"SERVICE\",
-          \"testEnvironment\": \"acc\",
-          \"workload\": \"loadTest\",
-          \"level\": \"sut\"
-        }" > /dev/null 2>&1 \
-        && echo "  Dynatrace entity mapped: afterburner-fe (SERVICE-456)" \
-        || echo "  Dynatrace entity mapping already exists or could not be created: afterburner-fe service"
-    else
-      echo "  WARNING: Dynatrace instance not found. Entity mappings not configured."
-    fi
+if [ -n "$adapt_auth_token" ] && [ "$adapt_auth_token" != "null" ] \
+   && [ -n "${sut_id:-}" ] && [ "$sut_id" != "null" ]; then
+  adapt_result=$(curl -sf -X PUT 'http://localhost:3001/api/test-runs/workload-adapt-settings' \
+    -H "Authorization: Bearer $adapt_auth_token" \
+    -H 'Content-Type: application/json' \
+    -d "{
+      \"systemUnderTestId\": \"$sut_id\",
+      \"testEnvironment\": \"acc\",
+      \"workload\": \"loadTest\",
+      \"adaptMode\": \"DEFAULT\"
+    }" 2>/dev/null)
+  if echo "$adapt_result" | jq -e '.adaptMode == "DEFAULT"' > /dev/null 2>&1; then
+    echo "ADAPT mode set to DEFAULT (regression detection active)"
+  else
+    echo "WARNING: Could not set ADAPT mode to DEFAULT"
   fi
 else
-  echo "  WARNING: System Under Test not found. Tracing and profiling not configured."
+  echo "WARNING: Could not switch ADAPT mode to DEFAULT (auth or sut_id unavailable)"
 fi
-
-echo "Running second baseline load tests..."
-./deploy-and-test-jmeter.sh baseline
 
 echo "Running load tests with issue..."
 ./deploy-and-test-jmeter.sh cpu
