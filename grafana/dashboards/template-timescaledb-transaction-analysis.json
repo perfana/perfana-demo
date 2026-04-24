@@ -92,7 +92,7 @@
           "policy": "default",
           "query": "SELECT last(\"currentActiveThreads\") FROM \"virtualUsers\" WHERE time > ${__from}ms and time > now() - 5m GROUP BY (nodeName)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  min(response_time) as min\nFROM transactions\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND success is TRUE \n  AND $__timeFilter(time)\n",
+          "rawSql": "SELECT\n  min(min_rt) as min\nFROM transactions_5m\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND $__timeFilter(bucket)\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -210,7 +210,7 @@
           "policy": "default",
           "query": "SELECT last(\"currentActiveThreads\") FROM \"virtualUsers\" WHERE time > ${__from}ms and time > now() - 5m GROUP BY (nodeName)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  avg(response_time) as avg\nFROM transactions\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND success is TRUE \n  AND $__timeFilter(time)\n",
+          "rawSql": "SELECT\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as avg\nFROM transactions_5m\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND $__timeFilter(bucket)\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -328,7 +328,7 @@
           "policy": "default",
           "query": "SELECT last(\"currentActiveThreads\") FROM \"virtualUsers\" WHERE time > ${__from}ms and time > now() - 5m GROUP BY (nodeName)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  percentile_cont(0.95) WITHIN GROUP (ORDER BY response_time) AS p95\nFROM transactions\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND success IS TRUE\n  AND $__timeFilter(time);\n",
+          "rawSql": "SELECT\n  approx_percentile(0.95, rollup(pct_agg)) AS p95\nFROM transactions_5m\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND $__timeFilter(bucket);\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -448,7 +448,7 @@
           "policy": "default",
           "query": "SELECT last(\"currentActiveThreads\") FROM \"virtualUsers\" WHERE time > ${__from}ms and time > now() - 5m GROUP BY (nodeName)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  max(response_time) as max\nFROM transactions\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND success is TRUE \n  AND $__timeFilter(time)\n",
+          "rawSql": "SELECT\n  max(max_rt) as max\nFROM transactions_5m\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND $__timeFilter(bucket)\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -589,7 +589,7 @@
           "policy": "default",
           "query": "SELECT sum(\"sum\")  / 10 * 8 FROM \"requestsAggregated_10s\" WHERE time > now() - 1m and time > ${__from}ms GROUP BY time(10s), \"requestName\" fill(null)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  avg(response_size) as avg\nFROM requests_raw\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND success is TRUE \n  AND $__timeFilter(time)\n",
+          "rawSql": "SELECT\n  sum(avg_response_size * n) / NULLIF(sum(n), 0) as avg\nFROM requests_raw_5m\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND $__timeFilter(bucket)\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -701,7 +701,7 @@
           "policy": "default",
           "query": "SELECT \"responseCode\" FROM \"default\".\"requestsError\" WHERE (\"samplerName\" =~ /^$URL$/) AND $timeFilter",
           "rawQuery": true,
-          "rawSql": "SELECT\n  count(*) as count\nFROM transactions\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND $__timeFilter(time)\n",
+          "rawSql": "SELECT\n  sum(n) as count\nFROM transactions_5m\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND $__timeFilter(bucket)\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -816,7 +816,7 @@
           "policy": "default",
           "query": "SELECT \"responseCode\" FROM \"default\".\"requestsError\" WHERE (\"samplerName\" =~ /^$URL$/) AND $timeFilter",
           "rawQuery": true,
-          "rawSql": "SELECT\n  count(*) as count\nFROM transactions\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND success is FALSE \n  AND $__timeFilter(time)\n",
+          "rawSql": "SELECT\n  sum(n_err) as count\nFROM transactions_5m\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND $__timeFilter(bucket)\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1032,7 +1032,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\ntime_bucket('$__interval', time) AS time,\n  avg(response_time) as avg\nFROM transactions\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment'\n  AND transaction_name = '$transaction'\n  AND success is TRUE \n  AND $__timeFilter(time)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\ntime_bucket('$__interval', bucket) AS time,\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as avg\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment'\n  AND transaction_name = '$transaction'\n  AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
           "refId": "B",
           "sql": {
             "columns": [
@@ -1203,7 +1203,7 @@
           "policy": "default",
           "query": "SELECT (count(\"responseCode\")  / $granularity) as value FROM \"requestsRaw\" WHERE (\"success\" = 'true') AND \"samplerName\" =~ /${URL}/ AND $timeFilter GROUP BY time(${granularity}s), \"samplerName\" fill(none)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', time) AS time,\n  count(response_time)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) as total,\n  SUM(CASE WHEN success THEN 0 ELSE 1 END) / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) AS Error\nFROM transactions\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND $__timeFilter(time)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) as total,\n  sum(n_err)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) AS Error\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND transaction_name = '$transaction'\n  AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1525,7 +1525,7 @@
           "orderByTime": "ASC",
           "policy": "default",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', time) AS time,\n  sampler_name,\n  round(avg(response_size))\nFROM requests_raw\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      transaction_name='$transaction' AND\n      $__timeFilter(time)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  ROUND(sum(avg_response_size * n) / NULLIF(sum(n), 0))\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      transaction_name='$transaction' AND\n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1976,7 +1976,30 @@
   "tags": [],
   "templating": {
     "list": [
-      {
+    {
+      "current": {
+        "text": "5s",
+        "value": "5s"
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postgres-timescaledb"
+      },
+      "definition": "SELECT CASE WHEN ${__interval_ms} <= 15000 THEN '5s' WHEN ${__interval_ms} <= 300000 THEN '1m' ELSE '5m' END AS suffix",
+      "description": "CAGG resolution suffix (5s/1m/5m) picked from $__interval",
+      "hide": 2,
+      "includeAll": false,
+      "multi": false,
+      "name": "cagg_suffix",
+      "options": [],
+      "query": "SELECT CASE WHEN ${__interval_ms} <= 15000 THEN '5s' WHEN ${__interval_ms} <= 300000 THEN '1m' ELSE '5m' END AS suffix",
+      "refresh": 2,
+      "regex": "",
+      "skipUrlSync": true,
+      "sort": 0,
+      "type": "query"
+    },
+    {
         "current": {
           "text": "PerfanaWebshop",
           "value": "PerfanaWebshop"
