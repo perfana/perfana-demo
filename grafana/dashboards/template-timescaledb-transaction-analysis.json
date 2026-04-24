@@ -1981,23 +1981,33 @@
           "text": "5s",
           "value": "5s"
         },
-        "datasource": {
-          "type": "grafana-postgresql-datasource",
-          "uid": "postgres-timescaledb"
-        },
-        "definition": "SELECT CASE WHEN ${__interval_ms} <= 15000 THEN '5s' WHEN ${__interval_ms} <= 300000 THEN '1m' ELSE '5m' END AS suffix",
-        "description": "CAGG resolution suffix (5s/1m/5m) picked from $__interval",
-        "hide": 2,
+        "description": "CAGG bucket resolution. 5s = finest (near real-time). 1m/5m for wider time ranges.",
+        "hide": 0,
         "includeAll": false,
+        "label": "CAGG resolution",
         "multi": false,
         "name": "cagg_suffix",
-        "options": [],
-        "query": "SELECT CASE WHEN ${__interval_ms} <= 15000 THEN '5s' WHEN ${__interval_ms} <= 300000 THEN '1m' ELSE '5m' END AS suffix",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": true,
-        "sort": 0,
-        "type": "query"
+        "options": [
+          {
+            "selected": true,
+            "text": "5s",
+            "value": "5s"
+          },
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          }
+        ],
+        "query": "5s,1m,5m",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
       },
       {
         "current": {
