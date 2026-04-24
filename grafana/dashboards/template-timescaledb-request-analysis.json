@@ -93,7 +93,7 @@
           "policy": "default",
           "query": "SELECT last(\"currentActiveThreads\") FROM \"virtualUsers\" WHERE time > ${__from}ms and time > now() - 5m GROUP BY (nodeName)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  min(min_rt) as min\nFROM requests_raw_5m\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND sampler_name = '$sampler_name'\n  AND $__timeFilter(bucket)\n",
+          "rawSql": "SELECT\n  min(response_time) as min\nFROM requests_raw\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND sampler_name = '$sampler_name'\n  AND success is TRUE \n  AND $__timeFilter(time)\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -211,7 +211,7 @@
           "policy": "default",
           "query": "SELECT last(\"currentActiveThreads\") FROM \"virtualUsers\" WHERE time > ${__from}ms and time > now() - 5m GROUP BY (nodeName)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as avg\nFROM requests_raw_5m\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND sampler_name = '$sampler_name'\n  AND $__timeFilter(bucket)\n",
+          "rawSql": "SELECT\n  avg(response_time) as avg\nFROM requests_raw\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND sampler_name = '$sampler_name'\n  AND success is TRUE \n  AND $__timeFilter(time)\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -329,7 +329,7 @@
           "policy": "default",
           "query": "SELECT last(\"currentActiveThreads\") FROM \"virtualUsers\" WHERE time > ${__from}ms and time > now() - 5m GROUP BY (nodeName)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  approx_percentile(0.95, rollup(pct_agg)) AS p95\nFROM requests_raw_5m\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND sampler_name = '$sampler_name'\n  AND $__timeFilter(bucket);\n",
+          "rawSql": "SELECT\n  percentile_cont(0.95) WITHIN GROUP (ORDER BY response_time) AS p95\nFROM requests_raw\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND sampler_name = '$sampler_name'\n  AND success IS TRUE\n  AND $__timeFilter(time);\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -449,7 +449,7 @@
           "policy": "default",
           "query": "SELECT last(\"currentActiveThreads\") FROM \"virtualUsers\" WHERE time > ${__from}ms and time > now() - 5m GROUP BY (nodeName)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  max(max_rt) as max\nFROM requests_raw_5m\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND sampler_name = '$sampler_name'\n  AND $__timeFilter(bucket)\n",
+          "rawSql": "SELECT\n  max(response_time) as max\nFROM requests_raw\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND sampler_name = '$sampler_name'\n  AND success is TRUE \n  AND $__timeFilter(time)\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -590,7 +590,7 @@
           "policy": "default",
           "query": "SELECT sum(\"sum\")  / 10 * 8 FROM \"requestsAggregated_10s\" WHERE time > now() - 1m and time > ${__from}ms GROUP BY time(10s), \"requestName\" fill(null)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  sum(avg_response_size * n) / NULLIF(sum(n), 0) as avg\nFROM requests_raw_5m\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND sampler_name = '$sampler_name'\n  AND $__timeFilter(bucket)\n",
+          "rawSql": "SELECT\n  avg(response_size) as avg\nFROM requests_raw\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND sampler_name = '$sampler_name'\n  AND success is TRUE \n  AND $__timeFilter(time)\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1977,30 +1977,30 @@
   "tags": [],
   "templating": {
     "list": [
-    {
-      "current": {
-        "text": "5s",
-        "value": "5s"
+      {
+        "current": {
+          "text": "5s",
+          "value": "5s"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "postgres-timescaledb"
+        },
+        "definition": "SELECT CASE WHEN ${__interval_ms} <= 15000 THEN '5s' WHEN ${__interval_ms} <= 300000 THEN '1m' ELSE '5m' END AS suffix",
+        "description": "CAGG resolution suffix (5s/1m/5m) picked from $__interval",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "cagg_suffix",
+        "options": [],
+        "query": "SELECT CASE WHEN ${__interval_ms} <= 15000 THEN '5s' WHEN ${__interval_ms} <= 300000 THEN '1m' ELSE '5m' END AS suffix",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": true,
+        "sort": 0,
+        "type": "query"
       },
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "postgres-timescaledb"
-      },
-      "definition": "SELECT CASE WHEN ${__interval_ms} <= 15000 THEN '5s' WHEN ${__interval_ms} <= 300000 THEN '1m' ELSE '5m' END AS suffix",
-      "description": "CAGG resolution suffix (5s/1m/5m) picked from $__interval",
-      "hide": 2,
-      "includeAll": false,
-      "multi": false,
-      "name": "cagg_suffix",
-      "options": [],
-      "query": "SELECT CASE WHEN ${__interval_ms} <= 15000 THEN '5s' WHEN ${__interval_ms} <= 300000 THEN '1m' ELSE '5m' END AS suffix",
-      "refresh": 2,
-      "regex": "",
-      "skipUrlSync": true,
-      "sort": 0,
-      "type": "query"
-    },
-    {
+      {
         "current": {
           "text": "PerfanaWebshop",
           "value": "PerfanaWebshop"
