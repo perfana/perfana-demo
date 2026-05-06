@@ -1,0 +1,265 @@
+# Lab perfana stack — emulates 8-core / 16GB Win-2025 envelope.
+# Uses production-pinned 0.2.47.75 images. Drops grafana, mariadb,
+# afterburner, perfana-report, perfana-grafana-sync, and observability
+# extras — see spec §3.2.
+#
+# Run with:
+#   docker compose -f lab/docker-compose.stack.yml --env-file lab/.env up -d
+name: perfana-lab
+
+services:
+  postgres:
+    image: timescale/timescaledb-ha:pg16
+    container_name: perfana-lab-postgres
+    environment:
+      POSTGRES_DB: perfana
+      POSTGRES_USER: perfana
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+      POSTGRES_INITDB_ARGS: "--auth-host=md5"
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres_data:/home/postgres/pgdata
+      - ../database/init:/docker-entrypoint-initdb.d/:ro
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    command: >
+      postgres
+      -c config_file=/etc/postgresql/postgresql.conf
+      -c hba_file=/etc/postgresql/pg_hba.conf
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U perfana -d perfana"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
+        reservations:
+          memory: 4G
+    networks: [lab]
+
+  pgbouncer:
+    image: bitnami/pgbouncer:1.21.0
+    container_name: perfana-lab-pgbouncer
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRESQL_USERNAME: perfana
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+      POSTGRESQL_DATABASE: perfana
+      POSTGRESQL_HOST: postgres
+      PGBOUNCER_AUTH_TYPE: md5
+      PGBOUNCER_DATABASE: perfana
+    ports:
+      - "16432:6432"
+    volumes:
+      - ./pgbouncer/pgbouncer.ini:/bitnami/pgbouncer/conf/pgbouncer.ini:ro
+      - ./pgbouncer/userlist.txt:/bitnami/pgbouncer/conf/userlist.txt:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    networks: [lab]
+
+  redis:
+    image: redis:7-alpine
+    container_name: perfana-lab-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    networks: [lab]
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: perfana-lab-keycloak
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: perfana
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY: edge
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+    command: ["start-dev", "--health-enabled=true", "--import-realm"]
+    ports:
+      - "18080:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ../keycloak/realms:/opt/keycloak/data/import:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && printf 'GET /health/ready HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && grep -m1 '200' <&3 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 768M
+    networks: [lab]
+
+  perfana-migration:
+    image: perfana/perfana-migration:0.2.47.75
+    platform: linux/amd64
+    container_name: perfana-lab-migration
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USERNAME: perfana
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+      DB_NAME: perfana
+      DB_SSL: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [lab]
+
+  perfana-api:
+    image: perfana/perfana-api:0.2.47.75
+    platform: linux/amd64
+    container_name: perfana-lab-api
+    ports:
+      - "13001:3001"
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: "--max-old-space-size=1280"
+      LOG_LEVEL: info
+      DB_HOST: pgbouncer
+      DB_PORT: "6432"
+      DB_USERNAME: perfana
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+      DB_NAME: perfana
+      DB_SSL: "false"
+      DB_ENABLE_RLS_ROLE: "false"
+      DATABASE_URL: postgresql://perfana:${POSTGRES_PASSWORD:-perfana}@pgbouncer:6432/perfana?sslmode=disable
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_URL: redis://redis:6379
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: perfana-prod
+      KEYCLOAK_CLIENT_ID: perfana-api
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-perfana-api-secret-change-in-production}
+      KEYCLOAK_ADMIN_CLIENT_ID: perfana-admin
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-perfana-admin-secret-change-in-production}
+      KEYCLOAK_ACCEPTED_ISSUERS: "http://keycloak:8080/realms/perfana-prod,http://localhost:18080/realms/perfana-prod"
+      KEYCLOAK_ACCEPTED_AUDIENCES: "perfana-api,perfana-web,account"
+      FRONTEND_URL: http://localhost:14000
+      CORS_ALLOWED_ORIGINS: http://localhost:14000
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-5b4e50551a48dcd3d31d95d1d499ab958457328ed8e92321b153a7fff2371883}
+    depends_on:
+      pgbouncer:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      perfana-migration:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "/nodejs/bin/node", "-e", "const http = require('http'); http.get('http://localhost:3001/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1536M
+    networks: [lab]
+
+  perfana-worker:
+    image: perfana/perfana-worker:0.2.47.75
+    platform: linux/amd64
+    container_name: perfana-lab-worker
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: info
+      DB_HOST: pgbouncer
+      DB_PORT: "6432"
+      DB_USERNAME: perfana
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+      DB_NAME: perfana
+      DB_SSL: "false"
+      DATABASE_URL: postgresql://perfana:${POSTGRES_PASSWORD:-perfana}@pgbouncer:6432/perfana?sslmode=disable
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_URL: redis://redis:6379
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-5b4e50551a48dcd3d31d95d1d499ab958457328ed8e92321b153a7fff2371883}
+    depends_on:
+      pgbouncer:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      perfana-migration:
+        condition: service_completed_successfully
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1536M
+    networks: [lab]
+
+  perfana-web:
+    image: perfana/perfana-web:0.2.47.75
+    platform: linux/amd64
+    container_name: perfana-lab-web
+    ports:
+      - "14000:3000"
+    environment:
+      NODE_ENV: production
+      RUNTIME_API_URL: http://localhost:13001/api
+      RUNTIME_KEYCLOAK_URL: http://localhost:18080
+      RUNTIME_KEYCLOAK_REALM: perfana-prod
+      RUNTIME_KEYCLOAK_CLIENT_ID: perfana-web
+      RUNTIME_USE_KEYCLOAK_AUTH: "true"
+      NEXT_PUBLIC_API_URL: http://localhost:13001/api
+      NEXT_PUBLIC_KEYCLOAK_URL: http://localhost:18080
+      NEXT_PUBLIC_KEYCLOAK_REALM: perfana-prod
+      NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: perfana-web
+      NEXT_PUBLIC_USE_KEYCLOAK_AUTH: "true"
+    depends_on:
+      perfana-api:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    networks: [lab]
+
+networks:
+  lab:
+    name: perfana-lab
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  keycloak_data:
