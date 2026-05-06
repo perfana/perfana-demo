@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     implementation 'io.perfana:perfana-jmeter-timescaledb:1.0.1'
+    implementation 'com.zaxxer:HikariCP:5.1.0'
     implementation 'info.picocli:picocli:4.7.5'
     implementation 'org.slf4j:slf4j-api:2.0.9'
     implementation 'ch.qos.logback:logback-classic:1.4.14'
