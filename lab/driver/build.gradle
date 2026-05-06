@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'io.perfana:perfana-jmeter-timescaledb:1.0.0'
+    implementation 'info.picocli:picocli:4.7.5'
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'ch.qos.logback:logback-classic:1.4.14'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+}
+
+application { mainClass = 'io.perfana.lab.driver.SyntheticDriver' }
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+shadowJar {
+    archiveBaseName = 'lab-driver'
+    archiveClassifier = ''
+    archiveVersion = '0.1.0'
+    mergeServiceFiles()
+}
+
+tasks.named('test') { useJUnitPlatform() }
