@@ -1,0 +1,176 @@
+# 12 drivers, 4 SUTs × 3 drivers each.
+# Joins the perfana-lab network as external so it doesn't double-create.
+# Operator-supplied lab/driver/url-patterns.txt is mounted read-only.
+#
+# Run with:
+#   docker compose -f lab/docker-compose.drivers.yml --env-file lab/.env up -d
+#   (after stack is healthy and test-run-ids.env has been populated by seed-test-runs.sh)
+name: perfana-lab-drivers
+
+x-driver-base: &driver-base
+  image: perfana/lab-driver:0.1.0
+  restart: "no"
+  volumes:
+    - ./driver/url-patterns.txt:/url-patterns.txt:ro
+  networks: [lab]
+  deploy:
+    resources:
+      limits:
+        cpus: '0.5'
+        memory: 384M
+
+x-driver-env: &driver-env
+  DRIVER_PGBOUNCER_HOST: pgbouncer
+  DRIVER_PGBOUNCER_PORT: "6432"
+  DRIVER_DB_USER: perfana
+  DRIVER_DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+  DRIVER_DB_NAME: perfana
+  DRIVER_RPS: "${DRIVER_RPS:-1500}"
+  DRIVER_DURATION: "${DRIVER_DURATION:-PT1H}"
+  DRIVER_BATCH_SIZE: "${DRIVER_BATCH_SIZE:-1000}"
+  DRIVER_FLUSH_INTERVAL_SECONDS: "${DRIVER_FLUSH_INTERVAL_SECONDS:-1}"
+  DRIVER_HIKARI_MAX_POOL_SIZE: "${DRIVER_HIKARI_MAX_POOL_SIZE:-10}"
+  DRIVER_ERROR_RATE: "${DRIVER_ERROR_RATE:-0.01}"
+  DRIVER_SAVE_RESPONSE_BODY: "${DRIVER_SAVE_RESPONSE_BODY:-true}"
+  DRIVER_ERROR_CODE_MIX: "${DRIVER_ERROR_CODE_MIX:-500:30,502:15,503:15,504:15,408:15,429:10}"
+  DRIVER_RESPONSE_BODY_SIZE_MIX: "${DRIVER_RESPONSE_BODY_SIZE_MIX:-500:80,5000:15,50000:5}"
+  DRIVER_URL_PATTERNS: /url-patterns.txt
+  DRIVER_ENV: lab
+
+services:
+  driver-1:
+    <<: *driver-base
+    container_name: perfana-lab-driver-1
+    environment:
+      <<: *driver-env
+      DRIVER_SUT: lab-sut-a
+      DRIVER_SCENARIO: scenario-1
+      DRIVER_LOCATION: driver-1
+      DRIVER_NODE: driver-1
+      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_A}"
+
+  driver-2:
+    <<: *driver-base
+    container_name: perfana-lab-driver-2
+    environment:
+      <<: *driver-env
+      DRIVER_SUT: lab-sut-a
+      DRIVER_SCENARIO: scenario-2
+      DRIVER_LOCATION: driver-2
+      DRIVER_NODE: driver-2
+      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_A}"
+
+  driver-3:
+    <<: *driver-base
+    container_name: perfana-lab-driver-3
+    environment:
+      <<: *driver-env
+      DRIVER_SUT: lab-sut-a
+      DRIVER_SCENARIO: scenario-3
+      DRIVER_LOCATION: driver-3
+      DRIVER_NODE: driver-3
+      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_A}"
+
+  driver-4:
+    <<: *driver-base
+    container_name: perfana-lab-driver-4
+    environment:
+      <<: *driver-env
+      DRIVER_SUT: lab-sut-b
+      DRIVER_SCENARIO: scenario-4
+      DRIVER_LOCATION: driver-4
+      DRIVER_NODE: driver-4
+      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_B}"
+
+  driver-5:
+    <<: *driver-base
+    container_name: perfana-lab-driver-5
+    environment:
+      <<: *driver-env
+      DRIVER_SUT: lab-sut-b
+      DRIVER_SCENARIO: scenario-5
+      DRIVER_LOCATION: driver-5
+      DRIVER_NODE: driver-5
+      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_B}"
+
+  driver-6:
+    <<: *driver-base
+    container_name: perfana-lab-driver-6
+    environment:
+      <<: *driver-env
+      DRIVER_SUT: lab-sut-b
+      DRIVER_SCENARIO: scenario-6
+      DRIVER_LOCATION: driver-6
+      DRIVER_NODE: driver-6
+      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_B}"
+
+  driver-7:
+    <<: *driver-base
+    container_name: perfana-lab-driver-7
+    environment:
+      <<: *driver-env
+      DRIVER_SUT: lab-sut-c
+      DRIVER_SCENARIO: scenario-7
+      DRIVER_LOCATION: driver-7
+      DRIVER_NODE: driver-7
+      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_C}"
+
+  driver-8:
+    <<: *driver-base
+    container_name: perfana-lab-driver-8
+    environment:
+      <<: *driver-env
+      DRIVER_SUT: lab-sut-c
+      DRIVER_SCENARIO: scenario-8
+      DRIVER_LOCATION: driver-8
+      DRIVER_NODE: driver-8
+      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_C}"
+
+  driver-9:
+    <<: *driver-base
+    container_name: perfana-lab-driver-9
+    environment:
+      <<: *driver-env
+      DRIVER_SUT: lab-sut-c
+      DRIVER_SCENARIO: scenario-9
+      DRIVER_LOCATION: driver-9
+      DRIVER_NODE: driver-9
+      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_C}"
+
+  driver-10:
+    <<: *driver-base
+    container_name: perfana-lab-driver-10
+    environment:
+      <<: *driver-env
+      DRIVER_SUT: lab-sut-d
+      DRIVER_SCENARIO: scenario-10
+      DRIVER_LOCATION: driver-10
+      DRIVER_NODE: driver-10
+      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_D}"
+
+  driver-11:
+    <<: *driver-base
+    container_name: perfana-lab-driver-11
+    environment:
+      <<: *driver-env
+      DRIVER_SUT: lab-sut-d
+      DRIVER_SCENARIO: scenario-11
+      DRIVER_LOCATION: driver-11
+      DRIVER_NODE: driver-11
+      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_D}"
+
+  driver-12:
+    <<: *driver-base
+    container_name: perfana-lab-driver-12
+    environment:
+      <<: *driver-env
+      DRIVER_SUT: lab-sut-d
+      DRIVER_SCENARIO: scenario-12
+      DRIVER_LOCATION: driver-12
+      DRIVER_NODE: driver-12
+      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_D}"
+
+networks:
+  lab:
+    external: true
+    name: perfana-lab
