@@ -6,3 +6,4 @@ driver/.gradle/
 .api-key.env
 test-run-ids.env
 pgbouncer/userlist.txt
+build/
