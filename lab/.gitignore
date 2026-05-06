@@ -1,0 +1,8 @@
+snapshots/
+reports/20*/
+driver/build/
+driver/.gradle/
+.env
+.api-key.env
+test-run-ids.env
+pgbouncer/userlist.txt
