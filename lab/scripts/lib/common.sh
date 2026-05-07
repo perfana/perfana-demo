@@ -3,7 +3,7 @@
 #   source "$(dirname "$0")/lib/common.sh"
 set -euo pipefail
 
-LAB_DIR="${LAB_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+LAB_DIR="${LAB_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
 REPORTS_DIR="$LAB_DIR/lab/reports"
 
 log_info()  { printf '\033[0;32m[INFO]\033[0m  %s\n' "$*"; }

@@ -25,7 +25,7 @@ log_info "Run timestamp: $RUN_TS"
 
 cd "$LAB_DIR"
 set -a
-source lab/.env
+source ./lab/.env
 set +a
 
 capture_driver_logs() {
@@ -77,34 +77,38 @@ run_stage_1() {
   wait_for_postgres 120
   wait_for_api 180
 
-  log_step "Minting API key + seeding test runs"
+  log_step "Minting API key"
   ./lab/scripts/mint-api-key.sh
-  ./lab/scripts/seed-test-runs.sh
 
   log_step "Starting observability"
   ./lab/scripts/observability.sh "$STAGE_DIR" &
   OBS_PID=$!
 
-  log_step "Starting drivers"
-  set -a; source lab/.api-key.env; source lab/test-run-ids.env; set +a
-  docker compose -f lab/docker-compose.drivers.yml --env-file lab/.env up -d
+  log_step "Starting per-SUT Perfana test runs (perfana-cli)"
+  set -a; source lab/.api-key.env; set +a
+  DRIVER_TEST_RUN_ID=_ docker compose -f lab/docker-compose.drivers.yml rm -fs 2>/dev/null || true
+  mkdir -p "$STAGE_DIR/perfana-cli"
+  local CLI_PIDS=()
+  for sut in a b m d; do
+    perfana-cli run start --config "lab/perfana/sut-$sut.yaml" \
+      > "$STAGE_DIR/perfana-cli/sut-$sut.log" 2>&1 &
+    CLI_PIDS+=($!)
+  done
 
   log_step "Warmup, then verifying chunk distribution"
   sleep 90
   ./lab/scripts/verify-chunk-distribution.sh || {
     log_error "Chunk distribution check failed — aborting Stage 1"
-    docker compose -f lab/docker-compose.drivers.yml down
+    for pid in "${CLI_PIDS[@]}"; do kill "$pid" 2>/dev/null || true; done
+    DRIVER_TEST_RUN_ID=_ docker compose -f lab/docker-compose.drivers.yml down
     kill "$OBS_PID" 2>/dev/null || true
     exit 2
   }
 
-  log_step "Soak running, waiting for drivers to finish..."
-  while docker ps --filter "name=perfana-lab-driver-" --filter "status=running" -q | grep -q .; do
-    sleep 30
-    log_info "  drivers still running ($(docker ps --filter "name=perfana-lab-driver-" --filter "status=running" -q | wc -l | tr -d ' ') active)"
-  done
+  log_step "Soak running, waiting for perfana-cli runs to finish..."
+  for pid in "${CLI_PIDS[@]}"; do wait "$pid" || true; done
 
-  log_step "Drivers done, capturing logs + end-of-stage snapshots"
+  log_step "perfana-cli runs done, capturing logs + end-of-stage snapshots"
   capture_driver_logs "$STAGE_DIR"
   end_of_stage_snapshots "$STAGE_DIR"
 
@@ -113,7 +117,7 @@ run_stage_1() {
   wait "$OBS_PID" 2>/dev/null || true
 
   log_step "Removing driver containers"
-  docker compose -f lab/docker-compose.drivers.yml down
+  DRIVER_TEST_RUN_ID=_ docker compose -f lab/docker-compose.drivers.yml down
 
   log_step "Snapshotting DB"
   ./lab/scripts/snapshot-db.sh "$LAB_DIR/lab/snapshots/post-stage1-${RUN_TS}.tgz"

@@ -43,7 +43,7 @@ services:
     networks: [lab]
 
   pgbouncer:
-    image: bitnami/pgbouncer:1.21.0
+    image: bitnamilegacy/pgbouncer:1.21.0
     container_name: perfana-lab-pgbouncer
     depends_on:
       postgres:
@@ -148,14 +148,14 @@ services:
       NODE_ENV: production
       NODE_OPTIONS: "--max-old-space-size=1280"
       LOG_LEVEL: info
-      DB_HOST: pgbouncer
-      DB_PORT: "6432"
+      DB_HOST: postgres
+      DB_PORT: "5432"
       DB_USERNAME: perfana
       DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
       DB_NAME: perfana
       DB_SSL: "false"
       DB_ENABLE_RLS_ROLE: "false"
-      DATABASE_URL: postgresql://perfana:${POSTGRES_PASSWORD:-perfana}@pgbouncer:6432/perfana?sslmode=disable
+      DATABASE_URL: postgresql://perfana:${POSTGRES_PASSWORD:-perfana}@postgres:5432/perfana?sslmode=disable
       REDIS_HOST: redis
       REDIS_PORT: "6379"
       REDIS_URL: redis://redis:6379
@@ -171,8 +171,8 @@ services:
       CORS_ALLOWED_ORIGINS: http://localhost:14000
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-5b4e50551a48dcd3d31d95d1d499ab958457328ed8e92321b153a7fff2371883}
     depends_on:
-      pgbouncer:
-        condition: service_started
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
       keycloak:
@@ -199,20 +199,20 @@ services:
     environment:
       NODE_ENV: production
       LOG_LEVEL: info
-      DB_HOST: pgbouncer
-      DB_PORT: "6432"
+      DB_HOST: postgres
+      DB_PORT: "5432"
       DB_USERNAME: perfana
       DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
       DB_NAME: perfana
       DB_SSL: "false"
-      DATABASE_URL: postgresql://perfana:${POSTGRES_PASSWORD:-perfana}@pgbouncer:6432/perfana?sslmode=disable
+      DATABASE_URL: postgresql://perfana:${POSTGRES_PASSWORD:-perfana}@postgres:5432/perfana?sslmode=disable
       REDIS_HOST: redis
       REDIS_PORT: "6379"
       REDIS_URL: redis://redis:6379
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-5b4e50551a48dcd3d31d95d1d499ab958457328ed8e92321b153a7fff2371883}
     depends_on:
-      pgbouncer:
-        condition: service_started
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
       perfana-migration:

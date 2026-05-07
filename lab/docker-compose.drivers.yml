@@ -47,7 +47,7 @@ services:
       DRIVER_SCENARIO: scenario-1
       DRIVER_LOCATION: driver-1
       DRIVER_NODE: driver-1
-      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_A}"
+      DRIVER_TEST_RUN_ID: "${DRIVER_TEST_RUN_ID:?DRIVER_TEST_RUN_ID is required}"
 
   driver-2:
     <<: *driver-base
@@ -58,7 +58,7 @@ services:
       DRIVER_SCENARIO: scenario-2
       DRIVER_LOCATION: driver-2
       DRIVER_NODE: driver-2
-      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_A}"
+      DRIVER_TEST_RUN_ID: "${DRIVER_TEST_RUN_ID:?DRIVER_TEST_RUN_ID is required}"
 
   driver-3:
     <<: *driver-base
@@ -69,7 +69,7 @@ services:
       DRIVER_SCENARIO: scenario-3
       DRIVER_LOCATION: driver-3
       DRIVER_NODE: driver-3
-      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_A}"
+      DRIVER_TEST_RUN_ID: "${DRIVER_TEST_RUN_ID:?DRIVER_TEST_RUN_ID is required}"
 
   driver-4:
     <<: *driver-base
@@ -80,7 +80,7 @@ services:
       DRIVER_SCENARIO: scenario-4
       DRIVER_LOCATION: driver-4
       DRIVER_NODE: driver-4
-      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_B}"
+      DRIVER_TEST_RUN_ID: "${DRIVER_TEST_RUN_ID:?DRIVER_TEST_RUN_ID is required}"
 
   driver-5:
     <<: *driver-base
@@ -91,7 +91,7 @@ services:
       DRIVER_SCENARIO: scenario-5
       DRIVER_LOCATION: driver-5
       DRIVER_NODE: driver-5
-      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_B}"
+      DRIVER_TEST_RUN_ID: "${DRIVER_TEST_RUN_ID:?DRIVER_TEST_RUN_ID is required}"
 
   driver-6:
     <<: *driver-base
@@ -102,40 +102,40 @@ services:
       DRIVER_SCENARIO: scenario-6
       DRIVER_LOCATION: driver-6
       DRIVER_NODE: driver-6
-      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_B}"
+      DRIVER_TEST_RUN_ID: "${DRIVER_TEST_RUN_ID:?DRIVER_TEST_RUN_ID is required}"
 
   driver-7:
     <<: *driver-base
     container_name: perfana-lab-driver-7
     environment:
       <<: *driver-env
-      DRIVER_SUT: lab-sut-c
+      DRIVER_SUT: lab-sut-m
       DRIVER_SCENARIO: scenario-7
       DRIVER_LOCATION: driver-7
       DRIVER_NODE: driver-7
-      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_C}"
+      DRIVER_TEST_RUN_ID: "${DRIVER_TEST_RUN_ID:?DRIVER_TEST_RUN_ID is required}"
 
   driver-8:
     <<: *driver-base
     container_name: perfana-lab-driver-8
     environment:
       <<: *driver-env
-      DRIVER_SUT: lab-sut-c
+      DRIVER_SUT: lab-sut-m
       DRIVER_SCENARIO: scenario-8
       DRIVER_LOCATION: driver-8
       DRIVER_NODE: driver-8
-      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_C}"
+      DRIVER_TEST_RUN_ID: "${DRIVER_TEST_RUN_ID:?DRIVER_TEST_RUN_ID is required}"
 
   driver-9:
     <<: *driver-base
     container_name: perfana-lab-driver-9
     environment:
       <<: *driver-env
-      DRIVER_SUT: lab-sut-c
+      DRIVER_SUT: lab-sut-m
       DRIVER_SCENARIO: scenario-9
       DRIVER_LOCATION: driver-9
       DRIVER_NODE: driver-9
-      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_C}"
+      DRIVER_TEST_RUN_ID: "${DRIVER_TEST_RUN_ID:?DRIVER_TEST_RUN_ID is required}"
 
   driver-10:
     <<: *driver-base
@@ -146,7 +146,7 @@ services:
       DRIVER_SCENARIO: scenario-10
       DRIVER_LOCATION: driver-10
       DRIVER_NODE: driver-10
-      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_D}"
+      DRIVER_TEST_RUN_ID: "${DRIVER_TEST_RUN_ID:?DRIVER_TEST_RUN_ID is required}"
 
   driver-11:
     <<: *driver-base
@@ -157,7 +157,7 @@ services:
       DRIVER_SCENARIO: scenario-11
       DRIVER_LOCATION: driver-11
       DRIVER_NODE: driver-11
-      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_D}"
+      DRIVER_TEST_RUN_ID: "${DRIVER_TEST_RUN_ID:?DRIVER_TEST_RUN_ID is required}"
 
   driver-12:
     <<: *driver-base
@@ -168,7 +168,7 @@ services:
       DRIVER_SCENARIO: scenario-12
       DRIVER_LOCATION: driver-12
       DRIVER_NODE: driver-12
-      DRIVER_TEST_RUN_ID: "${TEST_RUN_ID_SUT_D}"
+      DRIVER_TEST_RUN_ID: "${DRIVER_TEST_RUN_ID:?DRIVER_TEST_RUN_ID is required}"
 
 networks:
   lab:

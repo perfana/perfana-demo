@@ -7,7 +7,7 @@ source "$LAB_DIR/lab/.api-key.env"
 API_URL="${API_URL:-http://localhost:13001/api}"
 TS="$(date -u +%Y%m%dT%H%M%SZ)"
 
-declare -A SUTS=( [a]=lab-sut-a [b]=lab-sut-b [c]=lab-sut-c [d]=lab-sut-d )
+declare -A SUTS=( [a]=lab-sut-a [b]=lab-sut-b [c]=lab-sut-m [d]=lab-sut-d )
 
 OUT="$LAB_DIR/lab/test-run-ids.env"
 : > "$OUT"

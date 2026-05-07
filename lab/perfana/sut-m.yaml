@@ -1,0 +1,22 @@
+perfana:
+  apiKey: "${PERFANA_API_KEY}"
+  apiUrl: "http://localhost:13001"
+  appUrl: "http://localhost:14000"
+
+test:
+  systemUnderTest: "lab-sut-m"
+  environment: "lab"
+  workload: "lab-soak"
+  analysisStartOffset: "PT30S"
+  constantLoadTime: "PT5M"
+  tags: ["lab", "stage-1", "ingest"]
+  annotations: "lab/db-stress-18k-rps stage 1 ingestion soak"
+
+events:
+  - name: drivers-sut-m
+    type: command
+    continueOnKeepAliveParticipant: true
+    commands:
+      onBeforeTest: "DRIVER_TEST_RUN_ID=__testRunId__ docker compose -f lab/docker-compose.drivers.yml --env-file lab/.env up -d driver-7 driver-8 driver-9"
+      onKeepAlive: "docker ps --filter name=perfana-lab-driver-7 --filter name=perfana-lab-driver-8 --filter name=perfana-lab-driver-9 --filter status=running -q | grep -q ."
+      onAbort: "docker compose -f lab/docker-compose.drivers.yml stop driver-7 driver-8 driver-9"
