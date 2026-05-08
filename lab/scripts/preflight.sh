@@ -23,20 +23,20 @@ log_step "Checking required files"
   ERRORS=$((ERRORS+1))
 }
 
-log_step "Checking perfana-jmeter-timescaledb in mavenLocal"
-MVN_DIR="$HOME/.m2/repository/io/perfana/perfana-jmeter-timescaledb"
-if [ ! -d "$MVN_DIR" ] || [ -z "$(ls -A "$MVN_DIR" 2>/dev/null)" ]; then
-  log_error "MISSING: $MVN_DIR/<version>"
-  log_error "  Run: cd ~/workspace/perfana-jmeter-timescaledb && ./gradlew publishToMavenLocal"
-  ERRORS=$((ERRORS+1))
-fi
-
 log_step "Checking driver image"
-docker image inspect perfana/lab-driver:0.1.0 >/dev/null 2>&1 || {
+if ! docker image inspect perfana/lab-driver:0.1.0 >/dev/null 2>&1; then
   log_error "MISSING: perfana/lab-driver:0.1.0 image"
   log_error "  Run: cd lab/driver && ./gradlew shadowJar && docker build -t perfana/lab-driver:0.1.0 -f docker/Dockerfile ."
   ERRORS=$((ERRORS+1))
-}
+
+  # Driver gradle build needs perfana-jmeter-timescaledb in mavenLocal.
+  MVN_DIR="$HOME/.m2/repository/io/perfana/perfana-jmeter-timescaledb"
+  if [ ! -d "$MVN_DIR" ] || [ -z "$(ls -A "$MVN_DIR" 2>/dev/null)" ]; then
+    log_error "MISSING: $MVN_DIR/<version> (required to build the driver image)"
+    log_error "  Run: cd ~/workspace/perfana-jmeter-timescaledb && ./gradlew publishToMavenLocal"
+    ERRORS=$((ERRORS+1))
+  fi
+fi
 
 log_step "Checking python deps for report rendering"
 python3 -c "import matplotlib, pandas" 2>/dev/null || {
