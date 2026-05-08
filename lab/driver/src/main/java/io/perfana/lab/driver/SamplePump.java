@@ -1,5 +1,6 @@
 package io.perfana.lab.driver;
 
+import io.perfana.jmeter.timescaledb.model.UrlPatternRecord;
 import io.perfana.jmeter.timescaledb.writer.TimescaleDBWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +70,13 @@ public final class SamplePump implements Runnable {
             } else {
                 writer.writeRequestRaw(factory.requestRaw(
                     config.testRunId, config.sut, config.env, config.scenario, config.location));
+            }
+            // Drain any newly-discovered URL patterns. Bounded by the number
+            // of distinct (template × substituted) combinations the driver has
+            // generated so far; rate falls off as the population stabilises.
+            UrlPatternRecord up;
+            while ((up = factory.pollPendingUrlPattern()) != null) {
+                writer.writeUrlPattern(up);
             }
             samplesEmitted.incrementAndGet();
             requestCount++;

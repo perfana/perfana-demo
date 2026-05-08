@@ -8,7 +8,7 @@ test:
   environment: "lab"
   workload: "lab-soak"
   analysisStartOffset: "PT30S"
-  constantLoadTime: "PT5M"
+  constantLoadTime: "PT1H"
   tags: ["lab", "stage-1", "ingest"]
   annotations: "lab/db-stress-18k-rps stage 1 ingestion soak"
 

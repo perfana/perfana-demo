@@ -11,10 +11,12 @@ source "$(dirname "$0")/lib/common.sh"
 
 STAGE=""
 SNAPSHOT=""
+KEEP_DB=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --stage) STAGE="$2"; shift 2;;
     --use-snapshot) SNAPSHOT="$2"; shift 2;;
+    --keep-db) KEEP_DB=1; shift;;
     *) log_error "unknown arg: $1"; exit 1;;
   esac
 done
@@ -71,14 +73,22 @@ run_stage_1() {
   log_step "Generating pgbouncer userlist"
   ./lab/scripts/mint-pgbouncer-userlist.sh perfana "${POSTGRES_PASSWORD:-perfana}" lab/pgbouncer/userlist.txt
 
-  log_step "Bringing up stack"
-  docker compose -f lab/docker-compose.stack.yml --env-file lab/.env down -v
-  docker compose -f lab/docker-compose.stack.yml --env-file lab/.env up -d
-  wait_for_postgres 120
+  if [ -z "$KEEP_DB" ]; then
+    log_step "Bringing up stack"
+    docker compose -f lab/docker-compose.stack.yml --env-file lab/.env down -v
+    docker compose -f lab/docker-compose.stack.yml --env-file lab/.env up -d
+    wait_for_postgres 120
+  else
+    log_step "Reusing existing stack (--keep-db)"
+  fi
   wait_for_api 180
 
-  log_step "Minting API key"
-  ./lab/scripts/mint-api-key.sh
+  if [ -n "$KEEP_DB" ] && [ -f lab/.api-key.env ]; then
+    log_step "Reusing existing API key (--keep-db)"
+  else
+    log_step "Minting API key"
+    ./lab/scripts/mint-api-key.sh
+  fi
 
   log_step "Starting observability"
   ./lab/scripts/observability.sh "$STAGE_DIR" &
@@ -119,8 +129,12 @@ run_stage_1() {
   log_step "Removing driver containers"
   DRIVER_TEST_RUN_ID=_ docker compose -f lab/docker-compose.drivers.yml down
 
-  log_step "Snapshotting DB"
-  ./lab/scripts/snapshot-db.sh "$LAB_DIR/lab/snapshots/post-stage1-${RUN_TS}.tgz"
+  if [ -z "$KEEP_DB" ]; then
+    log_step "Snapshotting DB"
+    ./lab/scripts/snapshot-db.sh "$LAB_DIR/lab/snapshots/post-stage1-${RUN_TS}.tgz"
+  else
+    log_step "Skipping DB snapshot (--keep-db)"
+  fi
 
   log_step "Generating report"
   python3 lab/reports/generate-report.py --stage 1 --dir "$STAGE_DIR"

@@ -11,7 +11,11 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Synthesises JMeter-shaped records with realistic distributions.
@@ -27,6 +31,11 @@ public final class RecordFactory {
     private final WeightedPicker<Integer> responseBodySizes;
     private final List<String> samplerPool;
     private final List<String> transactionPool;
+    // Hashes already emitted as UrlPatternRecord by this driver; prevents
+    // re-queuing the same (hash) every request. DB upsert handles cross-driver
+    // overlap, but suppressing duplicates here keeps the buffer small.
+    private final Set<String> seenUrlHashes = ConcurrentHashMap.newKeySet();
+    private final Queue<UrlPatternRecord> pendingUrlPatterns = new ConcurrentLinkedQueue<>();
 
     public RecordFactory(UrlPatternLoader urls,
                          Random random,
@@ -53,7 +62,9 @@ public final class RecordFactory {
         int rt = lognormalInt(4.4, 0.5, 5, 5000);
         int connect = Math.min(rt, uniform(1, 50));
         int latency = Math.max(0, rt - connect - uniform(1, 10));
-        String url = urls.nextUrl();
+        UrlPatternLoader.Selection sel = urls.nextSelection();
+        String hash = md5(sel.url());
+        recordUrlPattern(hash, sut, env, sel);
 
         return RequestRawRecord.builder()
             .time(Instant.now())
@@ -71,7 +82,7 @@ public final class RecordFactory {
             .responseConnectTime(connect)
             .responseLatency(latency)
             .responseTime(rt)
-            .urlHash(md5(url))
+            .urlHash(hash)
             .build();
     }
 
@@ -80,7 +91,9 @@ public final class RecordFactory {
         int code = errorCodes.pick();
         int rt = lognormalInt(5.5, 0.5, 5, 30_000);
         int connect = Math.min(rt, uniform(1, 100));
-        String url = urls.nextUrl();
+        UrlPatternLoader.Selection sel = urls.nextSelection();
+        String hash = md5(sel.url());
+        recordUrlPattern(hash, sut, env, sel);
 
         RequestErrorRecord.Builder b = RequestErrorRecord.builder()
             .time(Instant.now())
@@ -95,8 +108,8 @@ public final class RecordFactory {
             .responseCode(Integer.toString(code))
             .responseTime(rt)
             .connectionTime(connect)
-            .url(url)
-            .urlHash(md5(url))
+            .url(sel.url())
+            .urlHash(hash)
             .responseMessage("synthetic-error-" + code)
             .randomId(random.nextInt());
 
@@ -156,6 +169,20 @@ public final class RecordFactory {
             .originalExample(originalExample)
             .firstSeen(Instant.now())
             .build();
+    }
+
+    /** Drained by the SamplePump after each request emission. */
+    public UrlPatternRecord pollPendingUrlPattern() {
+        return pendingUrlPatterns.poll();
+    }
+
+    private void recordUrlPattern(String hash, String sut, String env, UrlPatternLoader.Selection sel) {
+        // First time this driver instance has seen this hash → queue a
+        // UrlPatternRecord for the SamplePump to flush. normalizedUrl uses the
+        // template form so the UI groups all substituted variants under one row.
+        if (seenUrlHashes.add(hash)) {
+            pendingUrlPatterns.offer(urlPattern(hash, sut, env, sel.template(), sel.url()));
+        }
     }
 
     private int uniform(int lo, int hi) {

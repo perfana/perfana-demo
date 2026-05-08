@@ -1,5 +1,5 @@
 # Lab perfana stack — emulates 8-core / 16GB Win-2025 envelope.
-# Uses production-pinned 0.2.47.75 images. Drops grafana, mariadb,
+# Uses production-pinned 0.2.47.82 images. Drops grafana, mariadb,
 # afterburner, perfana-report, perfana-grafana-sync, and observability
 # extras — see spec §3.2.
 #
@@ -123,7 +123,7 @@ services:
     networks: [lab]
 
   perfana-migration:
-    image: perfana/perfana-migration:0.2.47.75
+    image: perfana/perfana-migration:0.2.47.82
     platform: linux/amd64
     container_name: perfana-lab-migration
     environment:
@@ -139,7 +139,7 @@ services:
     networks: [lab]
 
   perfana-api:
-    image: perfana/perfana-api:0.2.47.75
+    image: perfana/perfana-api:0.2.47.82
     platform: linux/amd64
     container_name: perfana-lab-api
     ports:
@@ -193,9 +193,10 @@ services:
     networks: [lab]
 
   perfana-worker:
-    image: perfana/perfana-worker:0.2.47.75
+    image: perfana/perfana-worker:0.2.47.82
     platform: linux/amd64
     container_name: perfana-lab-worker
+    restart: unless-stopped
     environment:
       NODE_ENV: production
       LOG_LEVEL: info
@@ -225,7 +226,7 @@ services:
     networks: [lab]
 
   perfana-web:
-    image: perfana/perfana-web:0.2.47.75
+    image: perfana/perfana-web:0.2.47.82
     platform: linux/amd64
     container_name: perfana-lab-web
     ports:

@@ -1,0 +1,13 @@
+# Example URL patterns — copy to lab/driver/url-patterns.txt and customise.
+# Format: [weight] /path/with/:placeholders
+# Weight defaults to 1.0 if omitted.
+/api/customers/:id
+/api/customers/:id/orders
+/api/customers/:id/orders/:orderId
+/api/products/:productId
+/api/products/:productId/reviews
+2.0 /api/cart/checkout
+0.5 /api/admin/reports/:id
+/api/search?q=:id
+/api/auth/login
+/api/auth/refresh

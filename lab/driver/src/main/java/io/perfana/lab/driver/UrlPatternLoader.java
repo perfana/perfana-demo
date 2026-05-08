@@ -48,14 +48,30 @@ public final class UrlPatternLoader {
 
     public int size() { return templates.size(); }
 
-    public String nextUrl() {
+    /**
+     * One generated URL paired with the template it came from. The substituted
+     * URL is what becomes the requests_raw.url_hash; the template is what the
+     * UI shows in the Top-10 URLs list (so all `/api/foo/1023`, `/api/foo/1041`
+     * group under `/api/foo/:id`).
+     */
+    public record Selection(String template, String url) {}
+
+    public Selection nextSelection() {
         double r = random.nextDouble() * totalWeight;
         double acc = 0;
         for (int i = 0; i < templates.size(); i++) {
             acc += weights.get(i);
-            if (r < acc) return substitute(templates.get(i));
+            if (r < acc) {
+                String tpl = templates.get(i);
+                return new Selection(tpl, substitute(tpl));
+            }
         }
-        return substitute(templates.get(templates.size() - 1));
+        String tpl = templates.get(templates.size() - 1);
+        return new Selection(tpl, substitute(tpl));
+    }
+
+    public String nextUrl() {
+        return nextSelection().url();
     }
 
     private String substitute(String template) {
