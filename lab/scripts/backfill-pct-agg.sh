@@ -64,6 +64,11 @@ for trid in "${RUNS[@]}"; do
 
   ELAPSED=$(( $(date +%s) - T0 ))
   log_info "[$trid] pct_agg populated in ${ELAPSED}s"
+
+  # Give the JobLockService lock for this scope time to expire before the
+  # next analyze. Without this, a Redis-keepalive crash at finalization
+  # leaks the lock (perfana#294) and the next job immediately gets blocked.
+  sleep 60
 done
 
 log_info "backfill complete — all 16 control runs have pct_agg populated"
