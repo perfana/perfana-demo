@@ -101,7 +101,7 @@ fi
 # Restart jmetertest container to ensure clean state
 echo "Restarting jmetertest container..."
 docker compose -f "$COMPOSE_FILE" down jmetertest
-docker compose -f "$COMPOSE_FILE" up -d jmetertest
+docker compose -f "$COMPOSE_FILE" up -d --build jmetertest
 
 # Wait for jmetertest container to be ready
 if ! wait_for_service "jmetertest"; then
@@ -109,13 +109,20 @@ if ! wait_for_service "jmetertest"; then
     exit 1
 fi
 
-# Run JMeter tests in container
+# Create output directories
+docker compose -f "$COMPOSE_FILE" exec jmetertest mkdir -p /tests/target/results /tests/target/reports
+
+# Run JMeter tests via perfana-cli
 echo "Running JMeter load test: ${JMETER_TEST} with SUT_VERSION=${SUT_VERSION}"
-docker compose -f "$COMPOSE_FILE" exec jmetertest mvn clean verify \
-  -DSUT_VERSION=${SUT_VERSION} \
-  -DGIT_SHA=${GIT_SHA} \
-  -DtestFile="${JMETER_TEST}" \
-  "-Dannotations=${ANNOTATIONS}"
+docker compose -f "$COMPOSE_FILE" exec \
+  -e SUT_VERSION="${SUT_VERSION}" \
+  -e GIT_SHA="${GIT_SHA}" \
+  -e ANNOTATIONS="${ANNOTATIONS}" \
+  -e JMETER_TEST="${JMETER_TEST}" \
+  jmetertest perfana-cli run start \
+    --config /tests/perfana.yaml \
+    --version "${SUT_VERSION}" \
+    --annotation "${ANNOTATIONS}"
 
 EXIT_CODE=$?
 
@@ -124,16 +131,11 @@ if [ $EXIT_CODE -eq 0 ]; then
     echo "=========================================="
     echo "JMeter test completed successfully!"
     echo "=========================================="
-    echo ""
-    echo "Results available at: jmeter/target/jmeter/results/"
-    echo "View in Perfana: http://localhost:4000"
 else
     echo ""
     echo "=========================================="
     echo "JMeter test failed!"
     echo "=========================================="
-    echo ""
-    echo "Check logs in: jmeter/target/jmeter/logs/"
-fi
+  fi
 
 exit $EXIT_CODE

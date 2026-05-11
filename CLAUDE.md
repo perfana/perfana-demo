@@ -31,7 +31,7 @@ This is the Perfana demo environment - a comprehensive performance monitoring an
 - **Telegraf**: Docker metrics collection
 - **Afterburner**: Spring Boot test applications (fe: 8090, be: internal)
 - **Gatling**: Load testing framework (Kotlin-based)
-- **JMeter**: Load testing framework (Maven-based)
+- **JMeter**: Load testing framework (orchestrated by perfana-cli)
 
 ## Core Development Commands
 
@@ -86,7 +86,7 @@ docker compose restart [service-name]
 ### Load Testing Configuration
 - **loadtest/pom.xml**: Maven configuration for Gatling tests with Perfana integration
 - **loadtest/src/test/kotlin/**: Kotlin-based Gatling simulation files
-- **jmeter/pom.xml**: Maven configuration for JMeter tests
+- **jmeter/perfana.yaml**: perfana-cli configuration for JMeter tests
 - **jmeter/src/test/jmeter/**: JMeter test plans (.jmx files)
 
 ### Docker Orchestration
@@ -103,13 +103,14 @@ docker compose restart [service-name]
 ## Key Integration Points
 
 ### Perfana API Integration
-- Load tests use `perfana-java-client` to send results to Perfana
+- JMeter load tests use `perfana-cli` to orchestrate test lifecycle and send results to Perfana
+- Gatling load tests use `perfana-java-client` to send results to Perfana
 - API key authentication required (generated via /api/key endpoint)
 - Test metadata includes: systemUnderTest, version, workload, testEnvironment
 
 ### Metrics Flow
 1. Applications → Prometheus/InfluxDB → Grafana → Perfana
-2. Load test results → Perfana via events-gatling-maven-plugin or events-jmeter-maven-plugin
+2. Load test results → Perfana via events-gatling-maven-plugin (Gatling) or perfana-cli (JMeter)
 3. Performance analysis via Perfana worker pipeline
 
 ### Database
@@ -129,7 +130,7 @@ docker compose restart [service-name]
 ### Common Issues
 - **Port conflicts**: Check exposed ports in docker-compose.yml
 - **Database connectivity**: Verify PostgreSQL connection and migrations
-- **Load test failures**: Check API key configuration in pom.xml
+- **Load test failures**: Check API key configuration in perfana.yaml (JMeter) or pom.xml (Gatling)
 - **Keycloak issues**: Check realm import logs and health endpoint
 
 ### Health Checks

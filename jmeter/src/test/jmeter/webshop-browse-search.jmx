@@ -1324,7 +1324,7 @@
             </elementProp>
             <elementProp name="timescaleDBPassword" elementType="Argument">
               <stringProp name="Argument.name">timescaleDBPassword</stringProp>
-              <stringProp name="Argument.value">${__P(timescalePassword,perfana)} </stringProp>
+              <stringProp name="Argument.value">${__P(timescalePassword,perfana)}</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
             <elementProp name="timescaleDBSslMode" elementType="Argument">
@@ -1394,7 +1394,7 @@
             </elementProp>
           </collectionProp>
         </elementProp>
-        <stringProp name="classname">nl.breakingit.jmeter.JMeterTimescaleDBBackendListenerClient</stringProp>
+        <stringProp name="classname">io.perfana.jmeter.timescaledb.JMeterTimescaleDBBackendListenerClient</stringProp>
       </BackendListener>
       <hashTree/>
     </hashTree>

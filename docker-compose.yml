@@ -28,23 +28,6 @@ services:
       start_period: 10s
     restart: unless-stopped
 
-  # Keycloak Theme Provider - init container pattern
-  # This service copies the custom theme and exits, used as a dependency for keycloak
-  keycloak-theme-provider:
-    image: perfana/perfana-keycloak-theme:0.0.9
-    container_name: perfana-keycloak-theme-provider
-    command:
-      - sh
-      - -c
-      - |
-        echo "Copying custom keycloak theme..."
-        cp -R /customTheme/* /theme
-        echo "Custom theme copied successfully"
-    volumes:
-      - keycloak-theme:/theme
-    networks:
-      - perfana
-
   # Keycloak Authentication Server (using shared postgres database)
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
@@ -82,26 +65,22 @@ services:
     volumes:
       - keycloak_data:/opt/keycloak/data
       - ./keycloak/realms:/opt/keycloak/data/import
-      # Mount custom theme from shared volume
-      - keycloak-theme:/opt/keycloak/themes/perfanaTheme
     networks:
       - perfana
     depends_on:
       postgres:
         condition: service_healthy
-      keycloak-theme-provider:
-        condition: service_completed_successfully
     healthcheck:
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 || exit 1"]
-      interval: 30s
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && printf 'GET /health/ready HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && grep -m1 '200' <&3 || exit 1"]
+      interval: 15s
       timeout: 10s
-      retries: 5
-      start_period: 60s
+      retries: 12
+      start_period: 30s
     restart: unless-stopped
 
   # Database Migration Runner - runs TypeORM migrations then exits
   perfana-migration:
-    image: perfana/perfana-migration:0.2.34.0
+    image: perfana/perfana-migration:0.2.47.75
     platform: linux/amd64
     container_name: perfana-migration
     environment:
@@ -123,7 +102,7 @@ services:
 
   # Next.js Frontend
   perfana-web:
-    image: perfana/perfana-web:0.2.34.0
+    image: perfana/perfana-web:0.2.47.75
     platform: linux/amd64
     container_name: perfana-web
     ports:
@@ -163,7 +142,7 @@ services:
 
   # NestJS API Backend
   perfana-api:
-    image: perfana/perfana-api:0.2.34.0
+    image: perfana/perfana-api:0.2.47.75
     platform: linux/amd64
     container_name: perfana-api
     ports:
@@ -184,6 +163,7 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
       DB_NAME: perfana
       DB_SSL: "false"
+      DB_ENABLE_RLS_ROLE: "true"
       DATABASE_URL: postgresql://perfana:${POSTGRES_PASSWORD:-perfana}@postgres:5432/perfana?sslmode=disable
       # Redis configuration
       REDIS_HOST: redis
@@ -231,7 +211,7 @@ services:
 
   # BullMQ Worker for Pipeline Processing
   perfana-worker:
-    image: perfana/perfana-worker:0.2.34.0
+    image: perfana/perfana-worker:0.2.47.75
     platform: linux/amd64
     container_name: perfana-worker
     networks:
@@ -274,7 +254,7 @@ services:
 
   # Grafana Dashboard Synchronization
   perfana-grafana-sync:
-    image: perfana/perfana-grafana-sync:0.2.34.0
+    image: perfana/perfana-grafana-sync:0.2.47.75
     platform: linux/amd64
     container_name: perfana-grafana-sync
     networks:
@@ -318,7 +298,7 @@ services:
 
   # PDF Report Generation Service
   perfana-report:
-    image: perfana/perfana-report:0.2.34.0
+    image: perfana/perfana-report:0.2.47.75
     platform: linux/amd64
     container_name: perfana-report
     networks:
@@ -687,13 +667,16 @@ services:
     build:
       context: ./jmeter
       dockerfile: Dockerfile
+      no_cache: true
     environment:
       SUT_VERSION: 1.0.0
       GIT_SHA: 6293480
       PERFANA_URL: http://perfana-api:3001
-    volumes:
-      - ./jmeter:/tests
-      - ./jmeter/plugins:/opt/apache-jmeter-5.6.3/lib/ext
+    volumes:  
+      - ./jmeter/perfana.yaml:/tests/perfana.yaml
+      - ./jmeter/run-jmeter.sh:/tests/run-jmeter.sh
+      - ./jmeter/src/test/jmeter:/tests/src/test/jmeter
+      - ./jmeter/src/test/resources:/tests/src/test/resources
     networks:
       - perfana
 
@@ -708,8 +691,6 @@ volumes:
   postgres_data:
     driver: local
   keycloak_data:
-    driver: local
-  keycloak-theme:
     driver: local
   # Redis storage
   redis-storage:

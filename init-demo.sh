@@ -55,15 +55,15 @@ echo "[3/8] Starting authentication..."
 docker compose -f "$COMPOSE_FILE" up -d keycloak-theme-provider
 docker compose -f "$COMPOSE_FILE" up -d keycloak
 
-# Wait for Keycloak to be healthy
+# Wait for Keycloak to be healthy (health check polls /health/ready, so healthy = realm imported)
 echo "       Waiting for Keycloak..."
-for i in $(seq 1 30); do
+for i in $(seq 1 90); do
   kc_status=$(docker compose -f "$COMPOSE_FILE" ps keycloak --format "{{.Status}}" 2>/dev/null)
   if echo "$kc_status" | grep -q "healthy"; then
     break
   fi
-  if [ "$i" -eq 30 ]; then
-    echo "ERROR: Keycloak did not become healthy within 60 seconds"
+  if [ "$i" -eq 90 ]; then
+    echo "ERROR: Keycloak did not become healthy within 3 minutes"
     exit 1
   fi
   sleep 2
@@ -197,9 +197,53 @@ else
           || echo "       WARNING: Could not add user to Demo organization"
       fi
     fi
+
+    # Provisioning YAMLs ship with a placeholder org id. The provisioning
+    # service that runs on perfana-api startup happily inserts rows under
+    # that id, but RLS hides them from every real user. Rewrite the YAMLs
+    # to the real Demo org, reattach any rows that were already inserted
+    # under the placeholder, then restart perfana-api so subsequent boots
+    # are idempotent against the patched files.
+    echo "       Patching provisioning YAMLs with Demo org id..."
+    for f in ./provisioning/profiles.yaml \
+             ./provisioning/profile_benchmarks.yaml \
+             ./provisioning/profile_grafana_dashboards.yaml \
+             ./provisioning/template_ds_compare_configs.yaml; do
+      if [ -f "$f" ]; then
+        sed -i.bak "s|^organizationId:.*|organizationId: ${org_id}|" "$f" && rm -f "${f}.bak"
+      fi
+    done
+
+    docker exec perfana-postgres psql -U perfana -d perfana -v ON_ERROR_STOP=1 -c "
+        UPDATE profiles                                SET organization_id = '${org_id}'::uuid WHERE organization_id <> '${org_id}'::uuid;
+        UPDATE profile_benchmarks                      SET organization_id = '${org_id}'::uuid WHERE organization_id <> '${org_id}'::uuid;
+        UPDATE profile_grafana_dashboards              SET organization_id = '${org_id}'::uuid WHERE organization_id <> '${org_id}'::uuid;
+        UPDATE provisioned_template_ds_compare_configs SET organization_id = '${org_id}'::uuid WHERE organization_id <> '${org_id}'::uuid;
+      " > /dev/null && echo "       Provisioned rows reattached to Demo org."
+
+    echo "       Restarting perfana-api to re-run provisioning against patched YAMLs..."
+    docker compose restart perfana-api > /dev/null
+    for i in $(seq 1 60); do
+      if curl -sf http://localhost:3001/api/health > /dev/null 2>&1; then
+        echo "       Perfana API is ready."
+        break
+      fi
+      if [ "$i" -eq 60 ]; then
+        echo "       WARNING: Perfana API did not become ready within 120 seconds"
+      fi
+      sleep 2
+    done
   else
     echo "       WARNING: Could not create Demo organization"
   fi
+
+  # Re-authenticate so the JWT picks up the newly-assigned org membership
+  auth_token=$(curl -sf 'http://localhost:8080/realms/perfana-prod/protocol/openid-connect/token' \
+    -H 'Content-Type: application/x-www-form-urlencoded' \
+    -d 'grant_type=password' \
+    -d 'client_id=perfana-web' \
+    --data-urlencode "username=${PERFANA_USER}" \
+    --data-urlencode "password=${PERFANA_PASSWORD}" | jq -r '.access_token' 2>/dev/null)
 
   # Create Perfana API key early — it doesn't expire like the JWT (1y TTL)
   echo "       Creating Perfana API key..."
@@ -209,14 +253,14 @@ else
     -d '{"ttl": "1y", "description": "demo"}' | jq -r '.token' 2>/dev/null)
 
   if [ -n "$api_key" ] && [ "$api_key" != "null" ]; then
-    # Replace existing API key in both loadtest and jmeter pom.xml
+    # Replace existing API key in loadtest pom.xml and jmeter perfana.yaml
     if [ -f ./loadtest/pom.xml ]; then
       sed -i.bak "s|<apiKey>[^<]*</apiKey>|<apiKey>$api_key</apiKey>|" ./loadtest/pom.xml && rm -f ./loadtest/pom.xml.bak
       echo "       API key injected into loadtest/pom.xml"
     fi
-    if [ -f ./jmeter/pom.xml ]; then
-      sed -i.bak "s|<apiKey>[^<]*</apiKey>|<apiKey>$api_key</apiKey>|" ./jmeter/pom.xml && rm -f ./jmeter/pom.xml.bak
-      echo "       API key injected into jmeter/pom.xml"
+    if [ -f ./jmeter/perfana.yaml ]; then
+      sed -i.bak "s|apiKey:.*|apiKey: \"$api_key\"|" ./jmeter/perfana.yaml && rm -f ./jmeter/perfana.yaml.bak
+      echo "       API key injected into jmeter/perfana.yaml"
     fi
   else
     echo "       WARNING: Could not create API key. You may need to configure it manually."

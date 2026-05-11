@@ -1,0 +1,65 @@
+# Perfana CLI configuration for JMeter load tests
+# Replaces the Maven event-scheduler-maven-plugin configuration from pom.xml
+
+perfana:
+  apiKey: "PERFANA_API_KEY_PLACEHOLDER"
+  apiUrl: "http://perfana-api:3001"
+  appUrl: "http://localhost:4000"
+test:
+  systemUnderTest: "PerfanaWebshop"
+  environment: "acc"
+  workload: "loadTest"
+  version: "${SUT_VERSION}"
+  analysisStartOffset: "PT1M"
+  constantLoadTime: "PT5M"
+  tags:
+    - "jmeter"
+    - "spring-boot-kubernetes"
+    - "spanmetrics"
+    - "docker"
+  annotations: "${ANNOTATIONS}"
+  deepLinks:
+    - name: "CI Build"
+      url: "https://github.com/perfana/afterburner/actions/runs/22326947770"
+  variables:
+    - placeholder: "perfana-containers"
+      value: "perfana-demo-afterburner*"
+
+scheduler:
+  enabled: true
+  failOnError: true
+  keepAliveIntervalSeconds: 30
+
+events:
+  # JMeter load test runner
+  - name: "jmeter-load"
+    type: command
+    continueOnKeepAliveParticipant: true
+    commands:
+      onStartTest: "/tests/run-jmeter.sh __testRunId__"
+      onKeepAlive: "pgrep -f ApacheJMeter >/dev/null || exit 1"
+      onAbort: "pkill -f ApacheJMeter"
+
+  # Collect git commit hash
+  - name: "git-info"
+    type: config-collector
+    command: "echo ${GIT_SHA}"
+    output: key
+    key: "https://github.com/perfana/afterburner"
+    tags:
+      - "GitHub"
+
+  # Collect Spring Boot actuator config from frontend
+  - name: "actuator-frontend"
+    type: config-collector
+    command: "curl -sf http://afterburner-fe:8080/actuator/env | jq '[.propertySources[].properties // {} | to_entries[]] | from_entries | {\"java.runtime.version\": .\"java.runtime.version\".value, \"JDK_JAVA_OPTIONS\": .\"JDK_JAVA_OPTIONS\".value, \"afterburner.async_core_pool_size\": .\"afterburner.async_core_pool_size\".value, \"featureToggleIdentityMatrix\": .\"featureToggleIdentityMatrix\".value, \"afterburner.remote.call.httpclient.connections.max\": .\"afterburner.remote.call.httpclient.connections.max\".value} | with_entries(select(.value != null))'"
+    output: json
+    includes: 
+      - "java.runtime.version"
+      - "JDK_JAVA_OPTIONS"
+      - "afterburner.async_core_pool_size"
+      - "afterburner.remote.call.httpclient.connections.max"
+    excludes: 
+      - "featureToggleIdentityMatrix"
+    tags:
+      - "afterburner-fe"

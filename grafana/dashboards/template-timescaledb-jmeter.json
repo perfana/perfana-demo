@@ -1831,12 +1831,210 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "postgres-timescaledb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "spanNulls": false
+          },
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Passed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 39
+      },
+      "id": 70,
+      "options": {
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "min",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "default": false,
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n_ok) AS \"Passed\",\n  sum(n_err) AS \"Failed\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Requests Passed vs Failed",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "postgres-timescaledb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "spanNulls": false
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 39
+      },
+      "id": 72,
+      "options": {
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "min",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "default": false,
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS \"Error (%)\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1, 2\nORDER BY 1, 2;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Requests Error %",
+      "type": "timeseries"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 39
+        "y": 47
       },
       "id": 19,
       "panels": [],
@@ -1918,7 +2116,7 @@
         "h": 15,
         "w": 12,
         "x": 0,
-        "y": 40
+        "y": 48
       },
       "id": 17,
       "options": {
@@ -2112,7 +2310,7 @@
         "h": 15,
         "w": 12,
         "x": 12,
-        "y": 40
+        "y": 48
       },
       "id": 10,
       "options": {
@@ -2233,12 +2431,210 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "postgres-timescaledb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "spanNulls": false
+          },
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Passed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 63
+      },
+      "id": 71,
+      "options": {
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max",
+            "min"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "default": false,
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n_ok) AS \"Passed\",\n  sum(n_err) AS \"Failed\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Transactions Passed vs Failed",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "postgres-timescaledb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "spanNulls": false
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 63
+      },
+      "id": 73,
+      "options": {
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max",
+            "min"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "default": false,
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  transaction_name,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS \"Error (%)\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1, 2\nORDER BY 1, 2;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Transactions Error %",
+      "type": "timeseries"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 71
       },
       "id": 27,
       "panels": [],
@@ -2448,7 +2844,7 @@
         "h": 17,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 72
       },
       "id": 9,
       "options": {
@@ -2565,7 +2961,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 73
+        "y": 89
       },
       "id": 62,
       "panels": [],
@@ -2647,7 +3043,7 @@
         "h": 16,
         "w": 12,
         "x": 0,
-        "y": 74
+        "y": 90
       },
       "id": 60,
       "options": {
@@ -2783,7 +3179,7 @@
         "h": 16,
         "w": 12,
         "x": 12,
-        "y": 74
+        "y": 90
       },
       "id": 61,
       "options": {
@@ -2968,7 +3364,7 @@
         "h": 16,
         "w": 12,
         "x": 12,
-        "y": 90
+        "y": 106
       },
       "id": 63,
       "options": {
@@ -3085,7 +3481,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 106
+        "y": 122
       },
       "id": 32,
       "panels": [],
@@ -3186,7 +3582,7 @@
         "h": 15,
         "w": 24,
         "x": 0,
-        "y": 107
+        "y": 123
       },
       "id": 30,
       "options": {
@@ -3195,7 +3591,7 @@
         "sortBy": [
           {
             "desc": false,
-            "displayName": "transactionName"
+            "displayName": "Transaction"
           }
         ]
       },
@@ -3257,10 +3653,6 @@
       "title": "Response time table",
       "transformations": [
         {
-          "id": "merge",
-          "options": {}
-        },
-        {
           "id": "organize",
           "options": {
             "excludeByName": {
@@ -3268,14 +3660,14 @@
             },
             "includeByName": {},
             "indexByName": {
-              "Error": 7,
-              "Time": 0,
-              "Total": 5,
-              "count": 6,
-              "max": 4,
-              "mean": 3,
-              "min": 2,
-              "transactionName": 1
+              "transaction_name": 0,
+              "min_response_time": 1,
+              "avg_response_time": 2,
+              "max_response_time": 3,
+              "total": 4,
+              "passed": 5,
+              "failed": 6,
+              "error_percentage": 7
             },
             "renameByName": {
               "Error": "Error",
@@ -3294,31 +3686,6 @@
               "transaction_name": "Transaction"
             }
           }
-        },
-        {
-          "id": "calculateField",
-          "options": {
-            "alias": "Error (%)",
-            "binary": {
-              "left": {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Error"
-                }
-              },
-              "operator": "/",
-              "right": {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Total"
-                }
-              }
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
-            }
-          }
         }
       ],
       "type": "table"
@@ -3329,7 +3696,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 122
+        "y": 138
       },
       "id": 25,
       "panels": [],
@@ -3527,7 +3894,7 @@
         "h": 15,
         "w": 24,
         "x": 0,
-        "y": 123
+        "y": 139
       },
       "id": 23,
       "options": {
@@ -3606,15 +3973,15 @@
             },
             "includeByName": {},
             "indexByName": {
-              "Error": 8,
-              "Time": 0,
-              "Total": 6,
-              "count": 7,
-              "max": 5,
-              "mean": 4,
-              "min": 3,
-              "samplerName": 1,
-              "transactionName": 2
+              "sampler_name": 0,
+              "transaction_name": 1,
+              "min_response_time": 2,
+              "avg_response_time": 3,
+              "max_response_time": 4,
+              "total": 5,
+              "passed": 6,
+              "failed": 7,
+              "error_percentage": 8
             },
             "renameByName": {
               "Error": "Failed",
