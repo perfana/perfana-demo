@@ -17,6 +17,6 @@ events:
     type: command
     continueOnKeepAliveParticipant: true
     commands:
-      onBeforeTest: "DRIVER_TEST_RUN_ID=__testRunId__ docker compose -f lab/docker-compose.drivers.yml --env-file lab/.env up -d driver-1 driver-2 driver-3"
-      onKeepAlive: "docker ps --filter name=perfana-lab-driver-1 --filter name=perfana-lab-driver-2 --filter name=perfana-lab-driver-3 --filter status=running -q | grep -q ."
-      onAbort: "docker compose -f lab/docker-compose.drivers.yml stop driver-1 driver-2 driver-3"
+      onBeforeTest: "DRIVER_TEST_RUN_ID=__testRunId__ docker compose -f lab/docker-compose.drivers.yml --env-file lab/.env up -d driver-1 driver-2 driver-3 driver-4 driver-5 driver-6 driver-7 driver-8 driver-9 driver-10 driver-11 driver-12"
+      onKeepAlive: "test $(docker ps --filter status=running --format '{{.Names}}' | grep -c '^perfana-lab-driver-') -eq 12"
+      onAbort: "docker compose -f lab/docker-compose.drivers.yml stop driver-1 driver-2 driver-3 driver-4 driver-5 driver-6 driver-7 driver-8 driver-9 driver-10 driver-11 driver-12"

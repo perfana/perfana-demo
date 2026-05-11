@@ -76,7 +76,7 @@ services:
     container_name: perfana-lab-driver-4
     environment:
       <<: *driver-env
-      DRIVER_SUT: lab-sut-b
+      DRIVER_SUT: lab-sut-a
       DRIVER_SCENARIO: scenario-4
       DRIVER_LOCATION: driver-4
       DRIVER_NODE: driver-4
@@ -87,7 +87,7 @@ services:
     container_name: perfana-lab-driver-5
     environment:
       <<: *driver-env
-      DRIVER_SUT: lab-sut-b
+      DRIVER_SUT: lab-sut-a
       DRIVER_SCENARIO: scenario-5
       DRIVER_LOCATION: driver-5
       DRIVER_NODE: driver-5
@@ -98,7 +98,7 @@ services:
     container_name: perfana-lab-driver-6
     environment:
       <<: *driver-env
-      DRIVER_SUT: lab-sut-b
+      DRIVER_SUT: lab-sut-a
       DRIVER_SCENARIO: scenario-6
       DRIVER_LOCATION: driver-6
       DRIVER_NODE: driver-6
@@ -109,7 +109,7 @@ services:
     container_name: perfana-lab-driver-7
     environment:
       <<: *driver-env
-      DRIVER_SUT: lab-sut-m
+      DRIVER_SUT: lab-sut-a
       DRIVER_SCENARIO: scenario-7
       DRIVER_LOCATION: driver-7
       DRIVER_NODE: driver-7
@@ -120,7 +120,7 @@ services:
     container_name: perfana-lab-driver-8
     environment:
       <<: *driver-env
-      DRIVER_SUT: lab-sut-m
+      DRIVER_SUT: lab-sut-a
       DRIVER_SCENARIO: scenario-8
       DRIVER_LOCATION: driver-8
       DRIVER_NODE: driver-8
@@ -131,7 +131,7 @@ services:
     container_name: perfana-lab-driver-9
     environment:
       <<: *driver-env
-      DRIVER_SUT: lab-sut-m
+      DRIVER_SUT: lab-sut-a
       DRIVER_SCENARIO: scenario-9
       DRIVER_LOCATION: driver-9
       DRIVER_NODE: driver-9
@@ -142,7 +142,7 @@ services:
     container_name: perfana-lab-driver-10
     environment:
       <<: *driver-env
-      DRIVER_SUT: lab-sut-d
+      DRIVER_SUT: lab-sut-a
       DRIVER_SCENARIO: scenario-10
       DRIVER_LOCATION: driver-10
       DRIVER_NODE: driver-10
@@ -153,7 +153,7 @@ services:
     container_name: perfana-lab-driver-11
     environment:
       <<: *driver-env
-      DRIVER_SUT: lab-sut-d
+      DRIVER_SUT: lab-sut-a
       DRIVER_SCENARIO: scenario-11
       DRIVER_LOCATION: driver-11
       DRIVER_NODE: driver-11
@@ -164,7 +164,7 @@ services:
     container_name: perfana-lab-driver-12
     environment:
       <<: *driver-env
-      DRIVER_SUT: lab-sut-d
+      DRIVER_SUT: lab-sut-a
       DRIVER_SCENARIO: scenario-12
       DRIVER_LOCATION: driver-12
       DRIVER_NODE: driver-12

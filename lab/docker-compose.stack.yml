@@ -1,5 +1,5 @@
 # Lab perfana stack — emulates 8-core / 16GB Win-2025 envelope.
-# Uses production-pinned 0.2.47.84 images. Drops grafana, mariadb,
+# Uses production-pinned 0.2.47.96 images. Drops grafana, mariadb,
 # afterburner, perfana-report, perfana-grafana-sync, and observability
 # extras — see spec §3.2.
 #
@@ -123,7 +123,7 @@ services:
     networks: [lab]
 
   perfana-migration:
-    image: perfana/perfana-migration:0.2.47.84
+    image: perfana/perfana-migration:0.2.47.96
     platform: linux/amd64
     container_name: perfana-lab-migration
     environment:
@@ -139,7 +139,7 @@ services:
     networks: [lab]
 
   perfana-api:
-    image: perfana/perfana-api:0.2.47.84
+    image: perfana/perfana-api:0.2.47.96
     platform: linux/amd64
     container_name: perfana-lab-api
     ports:
@@ -154,7 +154,7 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
       DB_NAME: perfana
       DB_SSL: "false"
-      DB_ENABLE_RLS_ROLE: "false"
+      DB_ENABLE_RLS_ROLE: "true"
       DATABASE_URL: postgresql://perfana:${POSTGRES_PASSWORD:-perfana}@postgres:5432/perfana?sslmode=disable
       REDIS_HOST: redis
       REDIS_PORT: "6379"
@@ -193,12 +193,13 @@ services:
     networks: [lab]
 
   perfana-worker:
-    image: perfana/perfana-worker:0.2.47.84
+    image: perfana/perfana-worker:0.2.47.96
     platform: linux/amd64
     container_name: perfana-lab-worker
     restart: unless-stopped
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: "--max-old-space-size=4096"
       LOG_LEVEL: info
       DB_HOST: postgres
       DB_PORT: "5432"
@@ -222,11 +223,11 @@ services:
       resources:
         limits:
           cpus: '2'
-          memory: 1536M
+          memory: 5G
     networks: [lab]
 
   perfana-web:
-    image: perfana/perfana-web:0.2.47.84
+    image: perfana/perfana-web:0.2.47.96
     platform: linux/amd64
     container_name: perfana-lab-web
     ports:

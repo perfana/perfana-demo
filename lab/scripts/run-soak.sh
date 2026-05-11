@@ -99,21 +99,14 @@ run_stage_1() {
   DRIVER_TEST_RUN_ID=_ docker compose -f lab/docker-compose.drivers.yml rm -fs 2>/dev/null || true
   mkdir -p "$STAGE_DIR/perfana-cli"
   local CLI_PIDS=()
-  for sut in a b m d; do
+  for sut in a; do
     perfana-cli run start --config "lab/perfana/sut-$sut.yaml" \
       > "$STAGE_DIR/perfana-cli/sut-$sut.log" 2>&1 &
     CLI_PIDS+=($!)
   done
 
-  log_step "Warmup, then verifying chunk distribution"
+  log_step "Warmup (chunk distribution check skipped — single-SUT run)"
   sleep 90
-  ./lab/scripts/verify-chunk-distribution.sh || {
-    log_error "Chunk distribution check failed — aborting Stage 1"
-    for pid in "${CLI_PIDS[@]}"; do kill "$pid" 2>/dev/null || true; done
-    DRIVER_TEST_RUN_ID=_ docker compose -f lab/docker-compose.drivers.yml down
-    kill "$OBS_PID" 2>/dev/null || true
-    exit 2
-  }
 
   log_step "Soak running, waiting for perfana-cli runs to finish..."
   for pid in "${CLI_PIDS[@]}"; do wait "$pid" || true; done
