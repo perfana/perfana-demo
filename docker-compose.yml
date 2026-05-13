@@ -406,7 +406,7 @@ services:
 
   ######################################################################################################################
   tempo:
-    image: grafana/tempo:latest
+    image: grafana/tempo:2.7.1
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
       - ./tempo/tempo.yaml:/etc/tempo.yaml
@@ -422,7 +422,7 @@ services:
 
   ######################################################################################################################
   pyroscope:
-    image: grafana/pyroscope:latest
+    image: grafana/pyroscope:2.0.2
     command: [ "server" ]
     volumes:
       - pyroscope-storage:/var/lib/pyroscope
@@ -434,7 +434,7 @@ services:
 
   ######################################################################################################################
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.7.1
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
