@@ -1443,599 +1443,6 @@
         "x": 0,
         "y": 22
       },
-      "id": 43,
-      "panels": [],
-      "title": "Requests",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "postgres-timescaledb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMin": 0,
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "links": [
-            {
-              "targetBlank": true,
-              "title": "Requests Analysis",
-              "url": "/d/request-analysis/request-analysis?${db:queryparam}&${__url_time_range}&var-URL=${__field.labels.samplerName}&kiosk=true"
-            }
-          ],
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 16,
-        "w": 12,
-        "x": 0,
-        "y": 23
-      },
-      "id": 45,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max",
-            "min"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true,
-          "sortBy": "Mean",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "alias": "$tag_samplerName",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "postgres-timescaledb"
-          },
-          "editorMode": "code",
-          "format": "time_series",
-          "groupBy": [
-            {
-              "params": [
-                "${granularity}s"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "samplerName"
-              ],
-              "type": "tag"
-            },
-            {
-              "params": [
-                "none"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "measurement": "requestsAggregated_10s",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as \"Response times\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "meanResponseTime"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          },
-          "tags": [
-            {
-              "condition": "AND",
-              "key": "samplerName",
-              "operator": "=~",
-              "value": "/^$URL$/"
-            }
-          ]
-        }
-      ],
-      "title": "Request Response Times",
-      "transformations": [
-        {
-          "id": "renameByRegex",
-          "options": {
-            "regex": "^Response times (.*)",
-            "renamePattern": "$1"
-          }
-        }
-      ],
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "postgres-timescaledb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMin": 0,
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "decimals": 1,
-          "links": [
-            {
-              "targetBlank": true,
-              "title": "Request Analysis",
-              "url": "/d/request-analysis/request-analysis?${db:queryparam}&${__url_time_range}&var-URL=${__field.labels.samplerName}&kiosk=true"
-            }
-          ],
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "reqps"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 16,
-        "w": 12,
-        "x": 12,
-        "y": 23
-      },
-      "id": 46,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max",
-            "min",
-            "last"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true,
-          "sortBy": "Mean",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "alias": "$tag_samplerName",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "postgres-timescaledb"
-          },
-          "editorMode": "code",
-          "format": "time_series",
-          "groupBy": [
-            {
-              "params": [
-                "10s"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "samplerName"
-              ],
-              "type": "tag"
-            },
-            {
-              "params": [
-                "none"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "measurement": "requestsAggregated_10s",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT (count(\"count\")  / $granularity) as value FROM \"requestsRaw\" WHERE (\"success\" = 'true') AND $timeFilter GROUP BY time(${granularity}s), \"samplerName\" fill(null)",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  sum(n)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) as count\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "count"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "sum"
-              },
-              {
-                "params": [
-                  " / 10"
-                ],
-                "type": "math"
-              }
-            ]
-          ],
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          },
-          "tags": [
-            {
-              "key": "samplerName",
-              "operator": "=~",
-              "value": "/^$URL$/"
-            }
-          ]
-        }
-      ],
-      "title": "Requests per second",
-      "transformations": [
-        {
-          "id": "renameByRegex",
-          "options": {
-            "regex": "^count (.*)",
-            "renamePattern": "$1"
-          }
-        }
-      ],
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "default": false,
-        "type": "grafana-postgresql-datasource",
-        "uid": "postgres-timescaledb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "spanNulls": false
-          },
-          "unit": "short",
-          "color": {
-            "mode": "palette-classic"
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Passed"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Failed"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 39
-      },
-      "id": 70,
-      "options": {
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "desc"
-        },
-        "legend": {
-          "calcs": [
-            "mean",
-            "max",
-            "min",
-            "last"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true,
-          "sortBy": "Mean",
-          "sortDesc": true
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "datasource": {
-            "default": false,
-            "type": "grafana-postgresql-datasource",
-            "uid": "postgres-timescaledb"
-          },
-          "editorMode": "code",
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n_ok) AS \"Passed\",\n  sum(n_err) AS \"Failed\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Requests Passed vs Failed",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "default": false,
-        "type": "grafana-postgresql-datasource",
-        "uid": "postgres-timescaledb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "spanNulls": false
-          },
-          "unit": "percentunit",
-          "min": 0,
-          "color": {
-            "mode": "palette-classic"
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 39
-      },
-      "id": 72,
-      "options": {
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "desc"
-        },
-        "legend": {
-          "calcs": [
-            "mean",
-            "max",
-            "min",
-            "last"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true,
-          "sortBy": "Mean",
-          "sortDesc": true
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "datasource": {
-            "default": false,
-            "type": "grafana-postgresql-datasource",
-            "uid": "postgres-timescaledb"
-          },
-          "editorMode": "code",
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS \"Error (%)\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1, 2\nORDER BY 1, 2;",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Requests Error %",
-      "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 47
-      },
       "id": 19,
       "panels": [],
       "title": "Transactions",
@@ -2116,7 +1523,7 @@
         "h": 15,
         "w": 12,
         "x": 0,
-        "y": 48
+        "y": 23
       },
       "id": 17,
       "options": {
@@ -2310,7 +1717,7 @@
         "h": 15,
         "w": 12,
         "x": 12,
-        "y": 48
+        "y": 23
       },
       "id": 10,
       "options": {
@@ -2486,7 +1893,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 63
+        "y": 38
       },
       "id": 71,
       "options": {
@@ -2570,7 +1977,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 63
+        "y": 38
       },
       "id": 73,
       "options": {
@@ -2629,12 +2036,1063 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "postgres-timescaledb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "options": {
+                "NaN": {
+                  "index": 0,
+                  "text": "0%"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Error (%)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Transaction"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 501
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Transaction Analysis",
+                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?var-runId=${runId}&var-granularity=${granularity}&var-transaction=${__data.fields.Transaction}&${__url_time_range}&kiosk=true"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 15,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
+      "id": 30,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Transaction"
+          }
+        ]
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  transaction_name,\n  min(min_rt) AS min_response_time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS avg_response_time,\n  max(max_rt) AS max_response_time,\n  sum(n) AS total,\n  sum(n_ok) AS passed,\n  sum(n_err) AS failed,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS error_percentage\nFROM transactions_5m\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Transaction response time table",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "transaction_name": 0,
+              "min_response_time": 1,
+              "avg_response_time": 2,
+              "max_response_time": 3,
+              "total": 4,
+              "passed": 5,
+              "failed": 6,
+              "error_percentage": 7
+            },
+            "renameByName": {
+              "Error": "Error",
+              "Total": "Total",
+              "avg_response_time": "Avg",
+              "count": "Passed",
+              "error_percentage": "Error (%)",
+              "failed": "Failed",
+              "max": "Max",
+              "max_response_time": "Max",
+              "mean": "Average",
+              "min": "Min",
+              "min_response_time": "Min",
+              "passed": "Passed",
+              "total": "Total",
+              "transaction_name": "Transaction"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 71
+        "y": 61
+      },
+      "id": 43,
+      "panels": [],
+      "title": "Requests",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postgres-timescaledb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Requests Analysis",
+              "url": "/d/request-analysis/request-analysis?${db:queryparam}&${__url_time_range}&var-URL=${__field.labels.samplerName}&kiosk=true"
+            }
+          ],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 16,
+        "w": 12,
+        "x": 0,
+        "y": 62
+      },
+      "id": 45,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "min"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "$tag_samplerName",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "${granularity}s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "samplerName"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "none"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "requestsAggregated_10s",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as \"Response times\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "meanResponseTime"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "tags": [
+            {
+              "condition": "AND",
+              "key": "samplerName",
+              "operator": "=~",
+              "value": "/^$URL$/"
+            }
+          ]
+        }
+      ],
+      "title": "Request Response Times",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^Response times (.*)",
+            "renamePattern": "$1"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postgres-timescaledb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 1,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Request Analysis",
+              "url": "/d/request-analysis/request-analysis?${db:queryparam}&${__url_time_range}&var-URL=${__field.labels.samplerName}&kiosk=true"
+            }
+          ],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 16,
+        "w": 12,
+        "x": 12,
+        "y": 62
+      },
+      "id": 46,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "min",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "alias": "$tag_samplerName",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "groupBy": [
+            {
+              "params": [
+                "10s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "samplerName"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "none"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "requestsAggregated_10s",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT (count(\"count\")  / $granularity) as value FROM \"requestsRaw\" WHERE (\"success\" = 'true') AND $timeFilter GROUP BY time(${granularity}s), \"samplerName\" fill(null)",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  sum(n)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) as count\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "count"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              },
+              {
+                "params": [
+                  " / 10"
+                ],
+                "type": "math"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "tags": [
+            {
+              "key": "samplerName",
+              "operator": "=~",
+              "value": "/^$URL$/"
+            }
+          ]
+        }
+      ],
+      "title": "Requests per second",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^count (.*)",
+            "renamePattern": "$1"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "postgres-timescaledb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "spanNulls": false
+          },
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Passed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 78
+      },
+      "id": 70,
+      "options": {
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "min",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "default": false,
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n_ok) AS \"Passed\",\n  sum(n_err) AS \"Failed\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Requests Passed vs Failed",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "postgres-timescaledb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "spanNulls": false
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 78
+      },
+      "id": 72,
+      "options": {
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "min",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "default": false,
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS \"Error (%)\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1, 2\nORDER BY 1, 2;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Requests Error %",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postgres-timescaledb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "options": {
+                "NaN": {
+                  "index": 0,
+                  "text": "0%"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Error (%)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.width",
+                "value": 118
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Sampler"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 606
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Request Analysis",
+                    "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?var-runId=${runId}&${__url_time_range}&var-sampler=${__data.fields.sampler_name}&kiosk=true"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Transaction"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 230
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Transaction Analysis",
+                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?var-runId=${runId}&var-granularity=${granularity}&var-transaction=${__data.fields.transaction_name}\ufeff\ufeff&\ufeff\ufeff${__url_time_range}\ufeff\ufeff&kiosk=true"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Min"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 111
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 108
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Max"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 102
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 96
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Passed"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 99
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failed"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 95
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 15,
+        "w": 24,
+        "x": 0,
+        "y": 86
+      },
+      "id": 23,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Failed"
+          }
+        ]
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  sampler_name,\n  transaction_name,\n  min(min_rt) AS min_response_time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS avg_response_time,\n  max(max_rt) AS max_response_time,\n  sum(n) AS total,\n  sum(n_ok) AS passed,\n  sum(n_err) AS failed,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS error_percentage\nFROM requests_raw_5m\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Request response time table",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "sampler_name": 0,
+              "transaction_name": 1,
+              "min_response_time": 2,
+              "avg_response_time": 3,
+              "max_response_time": 4,
+              "total": 5,
+              "passed": 6,
+              "failed": 7,
+              "error_percentage": 8
+            },
+            "renameByName": {
+              "Error": "Failed",
+              "Total": "Total",
+              "avg_response_time": "Avg",
+              "count": "Passed",
+              "error_percentage": "Error (%)",
+              "failed": "Failed",
+              "max": "Max",
+              "max_response_time": "Max",
+              "mean": "Average",
+              "min": "Min",
+              "min_response_time": "Min",
+              "passed": "Passed",
+              "samplerName": "",
+              "sampler_name": "Sampler",
+              "total": "Total",
+              "transactionName": "",
+              "transaction_name": "Transaction"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 101
       },
       "id": 27,
       "panels": [],
@@ -2844,7 +3302,7 @@
         "h": 17,
         "w": 24,
         "x": 0,
-        "y": 72
+        "y": 102
       },
       "id": 9,
       "options": {
@@ -2961,7 +3419,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 89
+        "y": 119
       },
       "id": 62,
       "panels": [],
@@ -3043,7 +3501,7 @@
         "h": 16,
         "w": 12,
         "x": 0,
-        "y": 90
+        "y": 120
       },
       "id": 60,
       "options": {
@@ -3179,7 +3637,7 @@
         "h": 16,
         "w": 12,
         "x": 12,
-        "y": 90
+        "y": 120
       },
       "id": 61,
       "options": {
@@ -3364,7 +3822,7 @@
         "h": 16,
         "w": 12,
         "x": 12,
-        "y": 106
+        "y": 136
       },
       "id": 63,
       "options": {
@@ -3474,538 +3932,6 @@
         }
       ],
       "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 122
-      },
-      "id": 32,
-      "panels": [],
-      "title": "Transaction response time table",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "default": false,
-        "type": "grafana-postgresql-datasource",
-        "uid": "postgres-timescaledb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": false,
-            "footer": {
-              "reducers": []
-            },
-            "inspect": false
-          },
-          "decimals": 0,
-          "mappings": [
-            {
-              "options": {
-                "NaN": {
-                  "index": 0,
-                  "text": "0%"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Error (%)"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "percentunit"
-              },
-              {
-                "id": "decimals",
-                "value": 2
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Transaction"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 501
-              },
-              {
-                "id": "links",
-                "value": [
-                  {
-                    "targetBlank": true,
-                    "title": "Transaction Analysis",
-                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?var-runId=${runId}&var-granularity=${granularity}&var-transaction=${__data.fields.transaction_name}\ufeff\ufeff&\ufeff\ufeff${__url_time_range}\ufeff\ufeff&kiosk=true"
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 15,
-        "w": 24,
-        "x": 0,
-        "y": 123
-      },
-      "id": 30,
-      "options": {
-        "cellHeight": "sm",
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": false,
-            "displayName": "Transaction"
-          }
-        ]
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "postgres-timescaledb"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "groupBy": [
-            {
-              "params": [
-                "samplerName"
-              ],
-              "type": "tag"
-            }
-          ],
-          "measurement": "requestsRaw",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT min(\"responseTime\"), mean(\"responseTime\"), max(\"responseTime\"), count(\"responseTime\") FROM \"transactions\" WHERE \"success\" = 'true' AND $timeFilter GROUP BY \"transactionName\"",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  transaction_name,\n  min(min_rt) AS min_response_time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS avg_response_time,\n  max(max_rt) AS max_response_time,\n  sum(n) AS total,\n  sum(n_ok) AS passed,\n  sum(n_err) AS failed,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS error_percentage\nFROM transactions_5m\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
-          "refId": "A",
-          "resultFormat": "table",
-          "select": [
-            [
-              {
-                "params": [
-                  "responseTime"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          },
-          "tags": []
-        }
-      ],
-      "title": "Response time table",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true
-            },
-            "includeByName": {},
-            "indexByName": {
-              "transaction_name": 0,
-              "min_response_time": 1,
-              "avg_response_time": 2,
-              "max_response_time": 3,
-              "total": 4,
-              "passed": 5,
-              "failed": 6,
-              "error_percentage": 7
-            },
-            "renameByName": {
-              "Error": "Error",
-              "Total": "Total",
-              "avg_response_time": "Avg",
-              "count": "Passed",
-              "error_percentage": "Error (%)",
-              "failed": "Failed",
-              "max": "Max",
-              "max_response_time": "Max",
-              "mean": "Average",
-              "min": "Min",
-              "min_response_time": "Min",
-              "passed": "Passed",
-              "total": "Total",
-              "transaction_name": "Transaction"
-            }
-          }
-        }
-      ],
-      "type": "table"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 138
-      },
-      "id": 25,
-      "panels": [],
-      "title": "Request response time table",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "postgres-timescaledb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": false,
-            "footer": {
-              "reducers": []
-            },
-            "inspect": false
-          },
-          "decimals": 0,
-          "mappings": [
-            {
-              "options": {
-                "NaN": {
-                  "index": 0,
-                  "text": "0%"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Error (%)"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "percentunit"
-              },
-              {
-                "id": "decimals",
-                "value": 2
-              },
-              {
-                "id": "custom.width",
-                "value": 118
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Sampler"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 606
-              },
-              {
-                "id": "links",
-                "value": [
-                  {
-                    "targetBlank": true,
-                    "title": "Request Analysis",
-                    "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?var-runId=${runId}&${__url_time_range}&var-sampler=${__data.fields.sampler_name}&kiosk=true"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Transaction"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 230
-              },
-              {
-                "id": "links",
-                "value": [
-                  {
-                    "targetBlank": true,
-                    "title": "Transaction Analysis",
-                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?var-runId=${runId}&var-granularity=${granularity}&var-transaction=${__data.fields.transaction_name}\ufeff\ufeff&\ufeff\ufeff${__url_time_range}\ufeff\ufeff&kiosk=true"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Min"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 111
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Avg"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 108
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Max"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 102
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Total"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 96
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Passed"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 99
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Failed"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 95
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 15,
-        "w": 24,
-        "x": 0,
-        "y": 139
-      },
-      "id": 23,
-      "options": {
-        "cellHeight": "sm",
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Failed"
-          }
-        ]
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "postgres-timescaledb"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "groupBy": [
-            {
-              "params": [
-                "samplerName"
-              ],
-              "type": "tag"
-            }
-          ],
-          "hide": false,
-          "measurement": "requestsRaw",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT min(\"responseTime\"), mean(\"responseTime\"), max(\"responseTime\"), count(\"responseCode\") FROM \"requestsRaw\" WHERE \"success\"='true' AND $timeFilter GROUP BY \"transactionName\", \"samplerName\"",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  sampler_name,\n  transaction_name,\n  min(min_rt) AS min_response_time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS avg_response_time,\n  max(max_rt) AS max_response_time,\n  sum(n) AS total,\n  sum(n_ok) AS passed,\n  sum(n_err) AS failed,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS error_percentage\nFROM requests_raw_5m\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
-          "refId": "A",
-          "resultFormat": "table",
-          "select": [
-            [
-              {
-                "params": [
-                  "responseTime"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          },
-          "tags": []
-        }
-      ],
-      "title": "Response time table",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true
-            },
-            "includeByName": {},
-            "indexByName": {
-              "sampler_name": 0,
-              "transaction_name": 1,
-              "min_response_time": 2,
-              "avg_response_time": 3,
-              "max_response_time": 4,
-              "total": 5,
-              "passed": 6,
-              "failed": 7,
-              "error_percentage": 8
-            },
-            "renameByName": {
-              "Error": "Failed",
-              "Total": "Total",
-              "avg_response_time": "Avg",
-              "count": "Passed",
-              "error_percentage": "Error (%)",
-              "failed": "Failed",
-              "max": "Max",
-              "max_response_time": "Max",
-              "mean": "Average",
-              "min": "Min",
-              "min_response_time": "Min",
-              "passed": "Passed",
-              "samplerName": "",
-              "sampler_name": "Sampler",
-              "total": "Total",
-              "transactionName": "",
-              "transaction_name": "Transaction"
-            }
-          }
-        }
-      ],
-      "type": "table"
     }
   ],
   "preload": false,
