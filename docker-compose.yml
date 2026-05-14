@@ -360,7 +360,7 @@ services:
       retries: 3
 
   grafana:
-    image: grafana/grafana:12.3
+    image: grafana/grafana:12.4
     container_name: perfana-grafana
     expose:
       - "3000"
@@ -371,7 +371,6 @@ services:
       GF_SECURITY_ADMIN_USER: "perfana"
       GF_SECURITY_ADMIN_PASSWORD: "perfana"
       GF_SECURITY_ALLOW_EMBEDDING: "true"
-      GF_INSTALL_PLUGINS: "marcusolsson-json-datasource, grafana-pyroscope-app 2.0.6"
       # OAuth2 / Keycloak SSO
       GF_SERVER_ROOT_URL: "http://localhost:3000"
       GF_AUTH_DISABLE_LOGIN_FORM: "true"
