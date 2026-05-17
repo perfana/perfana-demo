@@ -40,3 +40,4 @@ jmeter/target/
 
 # Generated files
 *.log
+.gitnexus

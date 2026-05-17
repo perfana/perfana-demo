@@ -2,7 +2,7 @@
 # Replaces the Maven event-scheduler-maven-plugin configuration from pom.xml
 
 perfana:
-  apiKey: "PERFANA_API_KEY_PLACEHOLDER"
+  apiKey: "ZGVtbyMyMmZhYjA3Yi1lNGY2LTRiZjUtODQxZi1mNzE3Yzc2YTEyNGI="
   apiUrl: "http://perfana-api:3001"
   appUrl: "http://localhost:4000"
 test:

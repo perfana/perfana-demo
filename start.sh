@@ -14,6 +14,14 @@ set -o pipefail
 set -o nounset
 
 COMPOSE_FILE="docker-compose.yml"
+ENABLE_DYNATRACE_MOCK=false
+
+# Parse flags
+for arg in "$@"; do
+  case $arg in
+    --dynatrace-mock) ENABLE_DYNATRACE_MOCK=true ;;
+  esac
+done
 
 # Set environment variables with defaults
 export SUT_VERSION=${SUT_VERSION:-2.4.3-good-baseline}
@@ -69,6 +77,10 @@ docker compose -f "$COMPOSE_FILE" up -d grafana prometheus alertmanager tempo py
 # Start demo applications
 echo "[6/7] Starting demo applications..."
 docker compose -f "$COMPOSE_FILE" up -d afterburner-fe afterburner-be wiremock
+if [ "$ENABLE_DYNATRACE_MOCK" = "true" ]; then
+  echo "       Starting Dynatrace mock..."
+  docker compose -f "$COMPOSE_FILE" --profile dynatrace-mock up -d dynatrace-mock dynatrace-managed-mock
+fi
 
 # Start load testing
 echo "[7/7] Starting load testing..."
@@ -97,6 +109,10 @@ echo "  Afterburner Frontend:  http://localhost:8090"
 echo "  MariaDB:               localhost:3306"
 echo "  InfluxDB:              http://localhost:8086"
 echo "  Wiremock:              http://localhost:8060"
+if [ "$ENABLE_DYNATRACE_MOCK" = "true" ]; then
+echo "  Dynatrace Mock:        http://localhost:8061"
+echo "  Dynatrace Managed:     http://localhost:8062"
+fi
 echo ""
 echo "Commands:"
 echo "  docker compose -f $COMPOSE_FILE ps      # Check status"

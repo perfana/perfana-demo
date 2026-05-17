@@ -119,7 +119,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, avg by(le,span_name,service) (increase(traces_spanmetrics_latency_bucket{perfana_request_name=~\"$requestName\", service=~\"$service\"}[1m])))",
+          "expr": "histogram_quantile(0.95, avg by(le,span_name,service) (increase(traces_spanmetrics_latency_bucket{perfana_request_name=\"$requestName\", service=~\"$service\"}[1m])))",
           "legendFormat": "{{service}} | {{span_name}}",
           "range": true,
           "refId": "A"
@@ -221,7 +221,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by(service, span_name) (increase(traces_spanmetrics_calls_total{perfana_request_name=~\"$requestName\", service=~\"$service\"}[1m])) / 60",
+          "expr": "sum by(service, span_name) (increase(traces_spanmetrics_calls_total{perfana_request_name=\"$requestName\", service=~\"$service\"}[1m])) / 60",
           "legendFormat": "{{service}} | {{span_name}}",
           "range": true,
           "refId": "A"
@@ -318,7 +318,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.50, max by(le,span_name,service) (increase(traces_spanmetrics_latency_bucket{perfana_request_name=~\"$requestName\", service=~\"$service\"}[1m])))",
+          "expr": "histogram_quantile(0.50, max by(le,span_name,service) (increase(traces_spanmetrics_latency_bucket{perfana_request_name=\"$requestName\", service=~\"$service\"}[1m])))",
           "format": "table",
           "legendFormat": "{{service}} | {{span_name}}",
           "range": true,
@@ -330,7 +330,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, max by(le,span_name,service) (increase(traces_spanmetrics_latency_bucket{perfana_request_name=~\"$requestName\", service=~\"$service\"}[1m])))",
+          "expr": "histogram_quantile(0.95, max by(le,span_name,service) (increase(traces_spanmetrics_latency_bucket{perfana_request_name=\"$requestName\", service=~\"$service\"}[1m])))",
           "format": "table",
           "hide": false,
           "legendFormat": "{{service}} | {{span_name}}",
@@ -343,7 +343,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.99, max by(le,span_name,service) (increase(traces_spanmetrics_latency_bucket{perfana_request_name=~\"$requestName\", service=~\"$service\"}[1m])))",
+          "expr": "histogram_quantile(0.99, max by(le,span_name,service) (increase(traces_spanmetrics_latency_bucket{perfana_request_name=\"$requestName\", service=~\"$service\"}[1m])))",
           "format": "table",
           "hide": false,
           "legendFormat": "{{service}} | {{span_name}}",
@@ -508,7 +508,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by(service, span_name) (increase(traces_spanmetrics_calls_total{perfana_request_name=~\"$requestName\", service=~\"$service\"}[$__range]))",
+          "expr": "sum by(service, span_name) (increase(traces_spanmetrics_calls_total{perfana_request_name=\"$requestName\", service=~\"$service\"}[$__range]))",
           "format": "table",
           "legendFormat": "{{service}} | {{span_name}}",
           "range": true,
@@ -565,64 +565,93 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "text": "undefined",
-          "value": "undefined"
-        },
+        "current": {},
         "datasource": {
-          "type": "influxdb",
-          "uid": "influxdb-gatling"
+          "type": "grafana-postgresql-datasource",
+          "uid": "postgres-timescaledb"
         },
-        "definition": "show tag values  from requests with key=\"systemUnderTest\"",
+        "definition": "SELECT DISTINCT system_under_test FROM requests_raw ORDER BY 1",
+        "hide": 0,
         "includeAll": false,
+        "label": "System under test",
         "name": "system_under_test",
         "options": [],
-        "query": {
-          "query": "show tag values  from requests with key=\"systemUnderTest\"",
-          "refId": "InfluxVariableQueryEditor-VariableQuery"
-        },
+        "query": "SELECT DISTINCT system_under_test FROM requests_raw ORDER BY 1",
         "refresh": 1,
         "regex": "",
+        "sort": 0,
         "type": "query"
       },
       {
-        "current": {
-          "text": "undefined",
-          "value": "undefined"
-        },
+        "current": {},
         "datasource": {
-          "type": "influxdb",
-          "uid": "influxdb-gatling"
+          "type": "grafana-postgresql-datasource",
+          "uid": "postgres-timescaledb"
         },
-        "definition": "show tag values from requests with key=\"testEnvironment\" where \"systemUnderTest\" =~ /$system_under_test/",
+        "definition": "SELECT DISTINCT test_environment FROM requests_raw WHERE system_under_test = '$system_under_test' ORDER BY 1",
+        "hide": 0,
         "includeAll": false,
+        "label": "Test environment",
         "name": "test_environment",
         "options": [],
-        "query": {
-          "query": "show tag values from requests with key=\"testEnvironment\" where \"systemUnderTest\" =~ /$system_under_test/",
-          "refId": "InfluxVariableQueryEditor-VariableQuery"
-        },
+        "query": "SELECT DISTINCT test_environment FROM requests_raw WHERE system_under_test = '$system_under_test' ORDER BY 1",
         "refresh": 1,
         "regex": "",
+        "sort": 0,
         "type": "query"
       },
       {
-        "current": {
-          "text": "",
-          "value": ""
-        },
+        "current": {},
         "datasource": {
-          "type": "influxdb",
-          "uid": "influxdb-gatling"
+          "type": "grafana-postgresql-datasource",
+          "uid": "postgres-timescaledb"
         },
-        "definition": "show tag values from requests with key= \"name\" where \"systemUnderTest\" =~ /$system_under_test/ and \"testEnvironment\" =~ /$test_environment/ ",
+        "definition": "SELECT DISTINCT scenario_name FROM requests_raw WHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' ORDER BY 1",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Scenario",
+        "multi": true,
+        "name": "scenarioName",
+        "options": [],
+        "query": "SELECT DISTINCT scenario_name FROM requests_raw WHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' ORDER BY 1",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "postgres-timescaledb"
+        },
+        "definition": "SELECT DISTINCT transaction_name FROM requests_raw WHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenarioName) ORDER BY 1",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Transaction",
+        "multi": true,
+        "name": "transaction",
+        "options": [],
+        "query": "SELECT DISTINCT transaction_name FROM requests_raw WHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenarioName) ORDER BY 1",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "postgres-timescaledb"
+        },
+        "definition": "SELECT DISTINCT scenario_name || '|' || transaction_name || '|' || sampler_name FROM requests_raw WHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenarioName) AND transaction_name IN ($transaction) ORDER BY 1",
+        "hide": 0,
         "includeAll": false,
+        "label": "Request name",
+        "multi": false,
         "name": "requestName",
         "options": [],
-        "query": {
-          "query": "show tag values from requests with key= \"name\" where \"systemUnderTest\" =~ /$system_under_test/ and \"testEnvironment\" =~ /$test_environment/ ",
-          "refId": "InfluxVariableQueryEditor-VariableQuery"
-        },
+        "query": "SELECT DISTINCT scenario_name || '|' || transaction_name || '|' || sampler_name FROM requests_raw WHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenarioName) AND transaction_name IN ($transaction) ORDER BY 1",
         "refresh": 1,
         "regex": "",
         "sort": 1,

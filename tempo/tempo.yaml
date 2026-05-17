@@ -1,6 +1,10 @@
 server:
   http_listen_port: 3200
 
+query_frontend:
+  mcp_server:
+    enabled: true
+
 distributor:
   receivers:
     jaeger:

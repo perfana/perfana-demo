@@ -472,16 +472,31 @@ else
 
     # Configure tracing services (Tempo) for afterburner-fe
     if [ -n "$tempo_id" ] && [ "$tempo_id" != "null" ]; then
-      curl -sf -X POST 'http://localhost:3001/api/tracing-services' \
+      ts_http_code=$(curl -s -o /dev/null -w "%{http_code}" -X POST 'http://localhost:3001/api/tracing-services' \
         -H "Authorization: Bearer $auth_token" \
         -H 'Content-Type: application/json' \
         -d "{
           \"systemUnderTestId\": \"$sut_id\",
           \"tracingInstanceId\": \"$tempo_id\",
           \"serviceNames\": [\"afterburner-fe\"]
-        }" > /dev/null 2>&1 \
-        && echo "       Tracing services configured for afterburner-fe" \
-        || echo "       Tracing services already configured or could not be created"
+        }")
+      if [ "$ts_http_code" -ge 200 ] && [ "$ts_http_code" -lt 300 ] 2>/dev/null; then
+        echo "       Tracing services configured for afterburner-fe"
+      else
+        # The API (≤0.2.47) has a bug where TracingServicesService does not set
+        # organization_id before saving, so the RLS WITH CHECK rejects the INSERT.
+        # Fall back to a direct DB insert until a fixed API version is available.
+        docker exec perfana-postgres psql -U perfana -d perfana -v ON_ERROR_STOP=1 -c "
+          INSERT INTO tracing_services (system_under_test_id, tracing_instance_id, service_names, organization_id, created_by, updated_by)
+          SELECT '${sut_id}'::uuid, '${tempo_id}'::uuid, ARRAY['afterburner-fe'], '${org_id}'::uuid, '${user_kc_id}', '${user_kc_id}'
+          WHERE NOT EXISTS (
+            SELECT 1 FROM tracing_services
+            WHERE system_under_test_id = '${sut_id}'::uuid
+              AND tracing_instance_id  = '${tempo_id}'::uuid
+          );" > /dev/null 2>&1 \
+          && echo "       Tracing services configured for afterburner-fe" \
+          || echo "       WARNING: Could not configure tracing services (API code=$ts_http_code)"
+      fi
     fi
 
     # Configure Pyroscope profiling for afterburner-fe
@@ -736,5 +751,40 @@ if [ -n "${mcp_api_key:-}" ] && [ "${mcp_api_key:-}" != "null" ]; then
 else
   echo "  WARNING: Could not create MCP API key."
   echo "  Create one manually in the Perfana UI under Settings > API Keys."
+fi
+echo ""
+
+# Grafana MCP setup instructions
+echo "============================================"
+echo "  Grafana MCP (Model Context Protocol) Setup"
+echo "============================================"
+echo ""
+if [ -n "${grafana_token:-}" ] && [ "${grafana_token:-}" != "null" ]; then
+  echo "  MCP config snippet:"
+  echo ""
+  echo "  {"
+  echo "    \"mcpServers\": {"
+  echo "      \"grafana\": {"
+  echo "        \"type\": \"stdio\","
+  echo "        \"command\": \"uvx\","
+  echo "        \"args\": [\"mcp-grafana\"],"
+  echo "        \"env\": {"
+  echo "          \"GRAFANA_URL\": \"http://localhost:3000\","
+  echo "          \"GRAFANA_API_KEY\": \"$grafana_token\""
+  echo "        }"
+  echo "      }"
+  echo "    }"
+  echo "  }"
+  echo ""
+  echo "  Or run this command to add it directly to Claude Code:"
+  echo ""
+  echo "  claude mcp add grafana -e GRAFANA_URL=http://localhost:3000 -e GRAFANA_API_KEY=$grafana_token -- uvx mcp-grafana"
+  echo ""
+  echo "  Requirement: pip install uvx   (or: brew install uv)"
+else
+  echo "  WARNING: No Grafana API token available."
+  echo "  Create a service account token in Grafana under Administration > Service Accounts,"
+  echo "  then run:"
+  echo "  claude mcp add grafana -e GRAFANA_URL=http://localhost:3000 -e GRAFANA_API_KEY=<token> -- uvx mcp-grafana"
 fi
 echo ""
