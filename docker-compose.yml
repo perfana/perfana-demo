@@ -28,6 +28,22 @@ services:
       start_period: 10s
     restart: unless-stopped
 
+  # PgBouncer - connection pooler, proxies traffic from load generator machines
+  pgbouncer:
+    image: edoburu/pgbouncer:1.21.0-p0
+    container_name: perfana-pgbouncer
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "6432:6432"
+    volumes:
+      - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    networks:
+      - perfana
+    restart: unless-stopped
+
   # Keycloak Authentication Server (using shared postgres database)
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
