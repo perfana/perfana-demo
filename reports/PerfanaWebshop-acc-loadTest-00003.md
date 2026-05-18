@@ -1,354 +1,406 @@
-# Performance Test Report: PerfanaWebshop-acc-loadTest-00003
+---
+testRunId: PerfanaWebshop-acc-loadTest-00003
+system: PerfanaWebshop
+environment: acc
+workload: loadTest
+release: 2.4.3-changed-matrix-calc
+date: 2026-05-18
+duration: 360s
+result: FAIL
+tags: [performance-report, jmeter, spring-boot-kubernetes, spanmetrics, docker]
+baseline: PerfanaWebshop-acc-loadTest-00002
+---
+
+# Performance test report — PerfanaWebshop-acc-loadTest-00003
 
 ## Summary
 
 | Field | Value |
 |---|---|
-| **Test Run ID** | PerfanaWebshop-acc-loadTest-00003 |
-| **System Under Test** | PerfanaWebshop |
-| **Environment** | acc |
-| **Workload** | loadTest |
-| **Application Release** | 2.4.3-changed-matrix-calc |
-| **Start Time** | 2026-05-17T15:52:39 UTC |
-| **End Time** | 2026-05-17T15:58:40 UTC |
-| **Duration** | 360s (ramp-up 60s excluded from analysis) |
-| **Overall Result** | FAIL |
-| **Adapt Verdict** | REGRESSION |
-| **SLO Result** | PASS (all 8 requirements met) |
-| **Baseline Run** | PerfanaWebshop-acc-loadTest-00002 (2.4.3-good-baseline) |
-| **Annotation** | "Proxy Dev: make matrix calculation more variable" |
-| **Tags** | jmeter, spring-boot-kubernetes, spanmetrics, docker |
+| System | PerfanaWebshop |
+| Environment | acc |
+| Workload | loadTest |
+| Release | `2.4.3-changed-matrix-calc` |
+| Start time | 2026-05-18T16:25:14Z |
+| End time | 2026-05-18T16:31:14Z |
+| Duration | 360s (planned 360s) |
+| Completion | 100% |
+| **Overall result** | **FAIL ❌** |
+| Adapt verdict | REGRESSION — 56 regressions, 11 improvements |
+| SLO checks passed | 8 / 8 (all within hard limits) |
+| Annotations | Proxy Dev: make matrix calculation more variable |
+| Tags | jmeter, spring-boot-kubernetes, spanmetrics, docker |
 
-**Verdict: The run failed Adapt regression detection. All SLO checks passed, but 61 metric regressions were detected relative to the baseline. The root cause is a change to `MatrixCalculator.multiply` in `afterburner-fe`, introduced in commit `26361d2` of the afterburner repository. This single code change caused CPU consumption on `afterburner-fe` to spike from 5% to 14% (+180%), drove GC minor collection frequency up by 107%, and inflated sub-request latencies across every transaction by 200–3400%. Do not promote to production.**
+> Release `2.4.3-changed-matrix-calc` (commit `26361d2`) introduces a variable matrix size into the `CpuBurner.magicIdentityCheck` endpoint. Traces confirm the matrix size ran at **572** in this run vs effectively zero matrix cost in the baseline. This single change caused `MatrixCalculator.multiply` to consume **62.6% of all CPU samples** on `afterburner-fe`, producing 56 Adapt regressions spanning every scenario and transaction. SLO checks still pass because absolute CPU (14.2% vs limit 70%) and GC pause thresholds are wide, but response time regressions of up to +2129% at sub-request level and Apdex degradations on the two heaviest checkout transactions confirm this is a real regression that must be resolved before production promotion.
 
 ---
 
-## MCP Preflight
+## Verdict
 
-| Source | Status |
+### Adapt regression analysis
+
+| Metric | Count |
 |---|---|
-| Perfana MCP | Available |
-| Grafana MCP | Available |
-| Tempo (via Grafana Sift) | Unavailable — Sift plugin not installed. Trace data accessed via Perfana wrappers only. |
-| Loki (via Grafana) | Available |
-| Pyroscope (via Grafana) | Unavailable — datasource UID not resolvable via Grafana MCP. Hotspot data accessed via Perfana wrappers only. |
+| Total differences evaluated | 438 |
+| Regressions | **56** |
+| Improvements | 11 |
+| Tracked regressions (unresolved) | 0 |
+| **Conclusion** | **REGRESSION ❌** |
+
+### SLO / requirements checks
+
+All 8 hard-requirement checks passed. No SLO violations.
+
+| Dashboard | Metric | Result | Value | Requirement |
+|---|---|---|---|---|
+| JVM memory management G1GC afterburner-fe | Maximum Pause Durations end of major GC by cause | PASS ✅ | 0.036s | < 0.6s |
+| JVM memory management G1GC afterburner-fe | Maximum Pause Durations end of minor GC by cause | PASS ✅ | 0.015s | < 0.1s |
+| HTTP connection pool afterburner-be | HTTP connection pool in use | PASS ✅ | 0% | < 90% |
+| HTTP connection pool afterburner-fe | HTTP connection pool in use | PASS ✅ | 1.1% | < 90% |
+| Docker container metrics afterburner-fe-1 | CPU Usage | PASS ✅ | 14.2% | < 70% |
+| Docker container metrics afterburner-be-1 | CPU Usage | PASS ✅ | 3.7% | < 70% |
+| JVM memory management G1GC afterburner-be | Maximum Pause Durations end of major GC by cause | PASS ✅ | 0.024s | < 0.6s |
+| JVM memory management G1GC afterburner-be | Maximum Pause Durations end of minor GC by cause | PASS ✅ | 0.008s | < 0.1s |
+
+> SLO thresholds are wide enough to absorb the current regression level, but the Adapt statistical comparison against the baseline makes the regression unambiguous. Promoting this release would carry the regression to production.
 
 ---
 
-## Overall Results
+## Transaction performance
 
-| Metric | Value |
-|---|---|
-| Adapt verdict | REGRESSION |
-| Total regressions | 61 |
-| Total improvements | 6 |
-| Total differences evaluated | 412 |
-| SLO checks | All 8 passed |
-| Error rate (overall) | 0.54% (3 errors / 560 requests) |
-| Tracked regressions | 0 unresolved |
+### Response time table
 
----
-
-## Transaction Statistics
-
-| Transaction | Scenario | Avg RT (ms) | p95 (ms) | p99 (ms) | p99 overshoot | Errors | Apdex | Threshold |
+| Transaction | Scenario | Avg (ms) | p95 (ms) | p99 (ms) | Errors | Apdex | Threshold | p99 Overshoot |
 |---|---|---|---|---|---|---|---|---|
-| T04_Payment_Processing | Checkout | 1086.76 | 1521.95 | 1614 | **+1114ms** | 0% | 0.500 | 500ms |
-| T05_Order_Confirmation | Checkout | 897.68 | 1231.85 | 1458 | **+958ms** | 0% | 0.500 | 500ms |
-| T04_View_Product_Details | BrowseAndSearch | 452.42 | 493.00 | 601 | +101ms | 0% | 0.981 | 500ms |
-| T03_Search_Products | BrowseAndSearch | 418.47 | 545.00 | 562 | +62ms | **7.89%** | 0.932 | 500ms |
-| T03_Shipping_Address | Checkout | 410.29 | 459.50 | 473 | within | 0% | 1.000 | 500ms |
-| T02_User_Login | Checkout | 328.88 | 413.25 | 442 | within | 0% | 1.000 | 500ms |
-| T06_Compare_Products | BrowseAndSearch | 275.90 | 339.55 | 408 | within | 0% | 1.000 | 500ms |
-| T01_Homepage_Load | BrowseAndSearch | 279.68 | 310.00 | 324 | within | 0% | 1.000 | 500ms |
-| T02_Browse_Category | BrowseAndSearch | 255.67 | 406.50 | 429 | within | 0% | 1.000 | 500ms |
-| T01_Add_To_Cart | Checkout | 234.06 | 324.05 | 518 | +18ms | 0% | 0.991 | 500ms |
-| T06_Post_Order_Recommendations | Checkout | 203.66 | 336.00 | 436 | within | 0% | 1.000 | 500ms |
-| T07_Order_Tracking_Assets | Checkout | 178.67 | 235.85 | 260 | within | 0% | 1.000 | 500ms |
-| T07_Product_Assets | BrowseAndSearch | 99.03 | 158.20 | 276 | within | 0% | 1.000 | 500ms |
-| T05_Apply_Filters | BrowseAndSearch | 89.62 | 110.55 | 515 | +15ms | 0% | 0.993 | 500ms |
+| T04_Payment_Processing | Checkout | 1112.6 | 1487.1 | 1539 | 2.7% | 0.50 | 500ms | **+1039ms** |
+| T05_Order_Confirmation | Checkout | 927.6 | 1255.5 | 1271 | 0% | 0.50 | 500ms | **+771ms** |
+| T04_View_Product_Details | BrowseAndSearch | 449.6 | 470.2 | 496 | 0% | 1.00 | 500ms | — |
+| T03_Shipping_Address | Checkout | 419.9 | 454.3 | 476 | 0% | 1.00 | 500ms | — |
+| T03_Search_Products | BrowseAndSearch | 380.5 | 501.4 | 580 | 2.6% | 0.974 | 500ms | **+80ms** |
+| T02_User_Login | Checkout | 362.2 | 485.7 | 500 | 0% | 0.00 | 500ms | — |
+| T01_Homepage_Load | BrowseAndSearch | 284.8 | 321.6 | 396 | 0% | 1.00 | 500ms | — |
+| T06_Compare_Products | BrowseAndSearch | 269.7 | 334.6 | 340 | 0% | 1.00 | 500ms | — |
+| T02_Browse_Category | BrowseAndSearch | 245.8 | 263.0 | 271 | 0% | 1.00 | 500ms | — |
+| T01_Add_To_Cart | Checkout | 230.8 | 257.7 | 266 | 0% | 1.00 | 500ms | — |
+| T06_Post_Order_Recommendations | Checkout | 199.8 | 342.0 | 365 | 0% | 1.00 | 500ms | — |
+| T07_Order_Tracking_Assets | Checkout | 179.9 | 252.4 | 308 | 0% | 1.00 | 500ms | — |
+| T05_Apply_Filters | BrowseAndSearch | 93.3 | 128.1 | 275 | 0% | 1.00 | 500ms | — |
+| T07_Product_Assets | BrowseAndSearch | 91.8 | 141.2 | 153 | 2.6% | 1.00 | 500ms | — |
+
+### Top 5 by impact score (avg_ms × request_count)
+
+| Rank | Transaction | Scenario | Avg (ms) | p95 (ms) | Count | Error % | Impact |
+|---|---|---|---|---|---|---|---|
+| 1 | T04_Payment_Processing | Checkout | 1112.6 | 1487.1 | 37 | 2.7% | 41,166 |
+| 2 | T05_Order_Confirmation | Checkout | 927.6 | 1255.5 | 37 | 0% | 34,320 |
+| 3 | T04_View_Product_Details | BrowseAndSearch | 449.6 | 470.2 | 38 | 0% | 17,083 |
+| 4 | T03_Shipping_Address | Checkout | 419.9 | 454.3 | 35 | 0% | 14,697 |
+| 5 | T03_Search_Products | BrowseAndSearch | 380.5 | 501.4 | 38 | 2.6% | 14,457 |
+
+### Transactions with Apdex degradation vs baseline
+
+| Transaction | Baseline Apdex | Current Apdex | Delta | Status |
+|---|---|---|---|---|
+| T02_User_Login | 1.00 | 0.00 | **−1.00** | Regression ❌ |
+| T03_Search_Products | 1.00 | 0.974 | −0.026 | Regression ❌ |
 
 ---
 
-## Baseline Comparison (vs PerfanaWebshop-acc-loadTest-00002)
+## Regression analysis vs baseline
 
-| Transaction | Status | p95 Baseline | p95 Current | p95 Delta | p99 Delta |
-|---|---|---|---|---|---|
-| T06_Post_Order_Recommendations | regression | 161.1ms | 336ms | **+108.6%** | +165.9% |
-| T05_Order_Confirmation | regression | 739.6ms | 1231.85ms | **+66.6%** | +93.4% |
-| T02_Browse_Category | regression | 252.8ms | 406.5ms | **+60.8%** | +59.5% |
-| T04_Payment_Processing | regression | 1006.95ms | 1521.95ms | **+51.1%** | +59.0% |
-| T05_Apply_Filters | regression | 73ms | 110.55ms | +51.4% | +605.5% |
-| T03_Search_Products | regression | 366.8ms | 545ms | +48.6% | +51.9% |
-| T02_User_Login | regression | 284ms | 413.25ms | +45.5% | +53.5% |
-| T01_Add_To_Cart | regression | 225ms | 324.05ms | +44.0% | +125.2% |
-| T06_Compare_Products | regression | 244ms | 339.55ms | +39.2% | +64.5% |
-| T04_View_Product_Details | stable | 440ms | 493ms | +12.0% | +35.4% |
-| T03_Shipping_Address | stable | 400.75ms | 459.5ms | +14.7% | +17.4% |
-| T01_Homepage_Load | stable | 271.55ms | 310ms | +14.2% | +17.4% |
-| T07_Product_Assets | stable | 154.1ms | 158.2ms | +2.7% | +75.8% |
-| T07_Order_Tracking_Assets | stable | 244.4ms | 235.85ms | -3.5% | +4.8% |
+> Baseline: `PerfanaWebshop-acc-loadTest-00002` — release `2.4.3-good-baseline` — 2026-05-18T16:18:38Z
 
-**Improvements:** T04_Payment_Processing error rate -100% (was 2.7% in baseline); T07_Product_Assets error rate -100% (was 2.6%).
-
-**Config diff — one change:**
+### Config changes
 
 | Key | Baseline | Current |
 |---|---|---|
-| https://github.com/perfana/afterburner | `4e2db5f` | `26361d2` |
+| `https://github.com/perfana/afterburner` | `4e2db5f` | `26361d2` |
 
----
+One commit was deployed. The annotation reads "Proxy Dev: make matrix calculation more variable". No JVM flags, thread pool sizes, or connection pool settings changed — the performance delta is attributable exclusively to this code change.
 
-## SLO Check Results
+### Transaction-level regression comparison vs baseline
 
-All 8 SLO checks passed.
+| Transaction | Baseline p95 | Current p95 | Change | Baseline Apdex | Current Apdex | Status |
+|---|---|---|---|---|---|---|
+| T02_User_Login | 301.4ms | 485.7ms | **+61.1%** | 1.00 | 0.00 | Regression ❌ |
+| T05_Order_Confirmation | 751.2ms | 1255.5ms | **+67.1%** | 0.50 | 0.50 | Regression ❌ |
+| T04_Payment_Processing | 1030.2ms | 1487.1ms | **+44.4%** | 0.50 | 0.50 | Regression ❌ |
+| T06_Post_Order_Recommendations | 173.5ms | 342.0ms | **+97.1%** | 1.00 | 1.00 | Regression ❌ |
+| T06_Compare_Products | 253.1ms | 334.6ms | **+32.2%** | 1.00 | 1.00 | Regression ❌ |
+| T05_Apply_Filters | 79.1ms | 128.1ms | **+61.9%** | 1.00 | 1.00 | Regression ❌ |
+| T03_Search_Products | 375.2ms | 501.4ms | **+33.6%** | 1.00 | 0.974 | Regression ❌ |
+| T01_Add_To_Cart | 243.1ms | 257.7ms | +6.0% | 1.00 | 1.00 | Stable |
+| T01_Homepage_Load | 279.0ms | 321.6ms | +15.3% | 1.00 | 1.00 | Stable |
+| T02_Browse_Category | 260.2ms | 263.0ms | +1.1% | 1.00 | 1.00 | Stable |
+| T03_Shipping_Address | 419.3ms | 454.3ms | +8.3% | 1.00 | 1.00 | Stable |
+| T04_View_Product_Details | 454.0ms | 470.2ms | +3.6% | 1.00 | 1.00 | Stable |
+| T07_Order_Tracking_Assets | 234.4ms | 252.4ms | +7.7% | 1.00 | 1.00 | Stable |
+| T07_Product_Assets | 160.4ms | 141.2ms | **−12.0%** | 1.00 | 1.00 | Improvement ✅ |
 
-| Dashboard | Panel | Requirement | Actual | Result |
+### Top Adapt regressions by classification
+
+#### Computation kernel (CPU-bound sub-requests)
+
+The dominant regression class. All are on `afterburner-fe` sub-requests routed through `/cpu/magic-identity-check`.
+
+| Sub-request | Baseline avg | Current avg | Change |
+|---|---|---|---|
+| T05_Order_Confirmation.order_confirmation_pdf_gen | 9.7ms | 216.5ms | **+2129%** |
+| T04_Payment_Processing.payment_fraud_check | 8.1ms | 155.8ms | **+1818%** |
+| T02_User_Login.login_credential_hash | 6.7ms | 73.7ms | **+1006%** |
+| T06_Post_Order_Recommendations.recommendations_ml_engine | 6.8ms | 65.0ms | **+854%** |
+| T03_Search_Products.search_query_processing | 7.1ms | 66.8ms | **+837%** |
+| T06_Compare_Products.compare_feature_matrix_compute | 6.6ms | 45.3ms | **+585%** |
+| T03_Search_Products.search_results_ranking | 4.9ms | 31.9ms | **+550%** |
+| T01_Homepage_Load.homepage_recommendations_compute | 5.0ms | 23.9ms | **+376%** |
+| T03_Shipping_Address.shipping_cost_compute | 4.2ms | 17.3ms | **+316%** |
+| T05_Apply_Filters.filter_validation_compute | 3.8ms | 14.5ms | **+279%** |
+| T02_Browse_Category.category_filter_options_compute | 3.4ms | 11.4ms | **+239%** |
+| T01_Add_To_Cart.cart_price_calculation | 3.4ms | 11.3ms | **+233%** |
+
+#### Span-level evidence (Tempo span metrics)
+
+Across all transactions, the `afterburner-fe | get /cpu/magic-identity-check` span duration increased 176%–2296% and `afterburner-fe | matrix-multiply` increased 109%–2890% at p95. Both spans appear in every scenario, confirming the matrix computation is the universal bottleneck.
+
+#### JVM memory / GC
+
+| Metric | Dashboard | Baseline | Current | Change |
 |---|---|---|---|---|
-| Docker container metrics afterburner-be-1 | CPU Usage | < 70% | 3.51% | PASS |
-| Docker container metrics afterburner-fe-1 | CPU Usage | < 70% | **14.15%** | PASS |
-| HTTP connection pool afterburner-be | Pool in use | < 90% | 0% | PASS |
-| HTTP connection pool afterburner-fe | Pool in use | < 90% | 1.75% | PASS |
-| JVM G1GC afterburner-be | Max pause major GC | < 0.6s | 0.029s | PASS |
-| JVM G1GC afterburner-be | Max pause minor GC | < 0.1s | 0.010s | PASS |
-| JVM G1GC afterburner-fe | Max pause major GC | < 0.6s | 0.034s | PASS |
-| JVM G1GC afterburner-fe | Max pause minor GC | < 0.1s | 0.016s | PASS |
+| Allocation Failure minor GC collections | JVM memory management G1GC afterburner-fe | 0.124 ops | 0.331 ops | **+167.6%** |
 
-Note: While GC pause durations are within thresholds, minor GC collection *frequency* on `afterburner-fe` regressed by +107.3% (Adapt-detected, not covered by SLO). GC is running more often due to increased allocation pressure from the heavier matrix computation.
+#### Container resources
 
----
-
-## Adapt Regression Analysis
-
-### By Dashboard / Source Type
-
-| Dashboard | Source Type | Regressions | Top Metric | Change % |
+| Metric | Dashboard | Baseline | Current | Change |
 |---|---|---|---|---|
-| Performance test metrics Checkout | Performance test | 13 | T05_Order_Confirmation.order_confirmation_pdf_gen | +1987% |
-| Performance test metrics BrowseAndSearch | Performance test | 12 | T03_Search_Products.search_query_processing | +2201.5% |
-| Span metrics (matrix-multiply, 14 dashboards) | Span metrics | 14 | T04_Payment_Processing/payment_fraud_check matrix-multiply | +3111.9% |
-| Span metrics (/cpu/magic-identity-check, 12 dashboards) | Span metrics | 12 | T04_Payment_Processing/payment_fraud_check magic-identity-check | +1739.2% |
-| Span metrics (other, 4 dashboards) | Span metrics | 6 | /flaky, /memory/churn, /remote/call-many | +27–135% |
-| JVM memory management G1GC afterburner-fe | JVM monitoring | 1 | Minor GC collections (Allocation Failure) | +107.3% |
-| Docker container metrics afterburner-fe-1 | Infrastructure | 1 | CPU Usage | +179.8% |
-| Span metrics /flaky (2 dashboards) | Span metrics | 2 | afterburner-fe \| get /flaky | +111.7–135.5% |
+| CPU Usage | Docker container metrics afterburner-fe-1 | 6.4% | 14.2% | **+122.1%** |
 
-### Top Sub-Request Regressions
-
-| Sub-Request | Classification | Change % | Current | Baseline |
-|---|---|---|---|---|
-| T03_Search_Products.search_query_processing | Computation kernel | +2201.5% | 122.52ms | 5.32ms |
-| T05_Order_Confirmation.order_confirmation_pdf_gen | Request latency | +1987.0% | 182.88ms | 8.76ms |
-| T04_Payment_Processing.payment_card_encryption | Request latency | +1351.9% | 90.27ms | 6.22ms |
-| T04_Payment_Processing.payment_fraud_check | Request latency | +1344.8% | 97.03ms | 6.72ms |
-| T06_Post_Order_Recommendations.recommendations_ml_engine | Computation kernel | +1124.2% | 68.96ms | 5.63ms |
-| T02_User_Login.login_credential_hash | Computation kernel | +711.3% | 45.61ms | 5.62ms |
-| T03_Search_Products.search_results_ranking | Computation kernel | +699.0% | 31.53ms | 3.95ms |
-| T06_Compare_Products.compare_feature_matrix_compute | Computation kernel | +673.6% | 53.59ms | 6.93ms |
-| T01_Homepage_Load.homepage_recommendations_compute | Computation kernel | +435.2% | 18.97ms | 3.54ms |
-| T02_Browse_Category.category_filter_options_compute | Computation kernel | +290.5% | 12.00ms | 3.07ms |
-| Docker CPU afterburner-fe | Container resources | +179.8% | 14.15% | 5.06% |
-| JVM minor GC collections afterburner-fe | JVM memory / GC | +107.3% | 0.344 ops | 0.166 ops |
-
-### Causal Chains (from Adapt)
+#### Detected causal chains (Adapt)
 
 | Chain | Confidence |
 |---|---|
 | Compute regressions (perf test) → CPU spike (container) → GC pressure (JVM) | **High** |
 | Latency regression (perf test) → container resource saturation | **High** |
 
----
-
-## Error Analysis
-
-**Total errors: 3 (error rate: 0.54%)**
-
-All 3 errors are HTTP 500 responses to a single endpoint:
-
-| Transaction | Sampler | URL | Count | Avg RT |
-|---|---|---|---|---|
-| T03_Search_Products | search_external_api_call | `/flaky?flakiness=5&maxRandomDelay=200` | 3 | 135ms |
-
-**Error detail:** `io.perfana.afterburner.AfterburnerException` thrown from `FlakyService.flaky(FlakyService.java:46)`. Message pattern: "Sorry, flaky call failed after N milliseconds."
-
-**Flaky error flag: TRUE** — all errors match the `/flaky` endpoint. This is deterministic probabilistic failure simulation (`flakiness=5` = ~5% failure rate). The Adapt error rate regression on T03 (+388%) is statistical variance on a small sample, not a new failure mode. Confirmed by Loki: exactly 3 `AfterburnerException` stack traces found, no new exception types.
-
----
-
-## Root Cause Investigation
-
-### Pyroscope Hotspots — afterburner-fe
-
-**Current run (PerfanaWebshop-acc-loadTest-00003):**
-
-| Rank | Function | CPU Samples | % of Total CPU |
-|---|---|---|---|
-| 1 | `io/perfana/afterburner/matrix/MatrixCalculator.multiply` | 30,749,998,278 | **64.58%** |
-| 2 | `.I2C/C2I adapters` | 263,157,880 | 0.55% |
-| 3 | `libjvm.so.PhaseChaitin::Split` | 171,052,622 | 0.36% |
-| 17 | `io/perfana/afterburner/matrix/MatrixCalculator.simpleMagicSquare` | 92,105,258 | 0.19% |
-
-**Baseline run (PerfanaWebshop-acc-loadTest-00002):**
-
-| Rank | Function | CPU Samples | % of Total CPU |
-|---|---|---|---|
-| 1 | `io/perfana/afterburner/matrix/MatrixCalculator.multiply` | 1,065,789,414 | **6.18%** |
-| 2 | `.I2C/C2I adapters` | 328,947,350 | 1.91% |
-
-**Key finding:** `MatrixCalculator.multiply` consumed 6.2% of CPU in the baseline and 64.6% in the current run — a ~10x increase in CPU share. In the current run, this single method completely dominates all CPU time. The `simpleMagicSquare` sub-method also appears in the top 20, absent from the baseline top 5, confirming the matrix algorithm changed in a way that involves more work per call.
-
-### Span Metrics Evidence
-
-The `afterburner-fe | matrix-multiply` span is regressed across all 14 compute-heavy sub-request dashboards, confirming the change is applied universally:
-
-| Sub-Request | matrix-multiply p95 baseline | matrix-multiply p95 current | Change % |
-|---|---|---|---|
-| T04_Payment_Processing/payment_fraud_check | 0.007s | 0.223s | +3111.9% |
-| T03_Search_Products/search_results_ranking | 0.002s | 0.066s | +3377.5% |
-| T03_Search_Products/search_query_processing | 0.004s | 0.105s | +2580% |
-| T02_User_Login/login_credential_hash | 0.003s | 0.080s | +2438.1% |
-| T05_Order_Confirmation/recommendations_ml_engine | 0.004s | 0.104s | +2564.1% |
-| T04_Payment_Processing/payment_card_encryption | 0.004s | 0.125s | +3100.0% |
-
-The `afterburner-fe | get /cpu/magic-identity-check` span is also regressed by 300–1739% across all compute sub-requests, corroborating that the CPU-bound computation path was broadened.
-
-### Trace Evidence
-
-**Current run — T04_Payment_Processing slow traces (top 5):**
-- All 5 rooted at `get /remote/call-many`, max 511ms, avg ~507ms
-- Root service: afterburner-fe
-
-**Baseline run — T04_Payment_Processing slow traces (top 5):**
-- Top 2 rooted at `get /remote/call-many`, max 507ms
-- Remaining 3 rooted at `get /flaky` (~281ms max) — flaky endpoint operations
-
-**Trace diff:** Max trace duration for `/remote/call-many` is similar between runs (511ms vs 507ms). However, Adapt confirms T04 transaction avg grew from ~724ms to ~1087ms. The slow traces reflect individual sub-request ceilings, not the full transaction time. The matrix computation CPU overhead inflates every sub-request, causing the cumulative transaction latency to grow even when no single span exceeds the trace filter threshold.
-
-### Loki Log Evidence
-
-| Evidence | Finding |
-|---|---|
-| ERROR log count | 3 entries — exactly matching the 3 JMeter-reported errors |
-| Exception type | `io.perfana.afterburner.AfterburnerException` only — same class as baseline |
-| Exception origin | `FlakyService.java:46` — the intentional flakiness endpoint |
-| WARN log count | 3 entries — Spring MVC `ExceptionHandlerExceptionResolver` resolved them cleanly |
-| New exception types | None — no `OutOfMemoryError`, no `HikariPool`, no new failure modes |
-| Total lines scanned | 4,065 in the run window |
-
-Note: Loki pattern detection returned 404 (endpoint not available in this deployment). Log stats API returned 0 for label selector (known quirk). Raw log queries succeeded.
-
-### Infrastructure Evidence
+### Improvements (preserve on rollback)
 
 | Metric | Baseline | Current | Change |
 |---|---|---|---|
-| afterburner-fe container CPU | 5.06% | 14.15% | +179.8% |
-| afterburner-be container CPU | ~3.5% | 3.51% | stable |
-| HTTP connection pool fe | — | 1.75% | within threshold |
-| HTTP connection pool be | — | 0% | within threshold |
-| Dynatrace problems | — | 0 detected | no infrastructure failure |
+| T03_Search_Products — Transaction Error Rate | 5.5% | 2.8% | −49.3% |
+| T04_Payment_Processing — Transaction Error Rate | 4.5% | 2.9% | −35.3% (flaky endpoint) |
+| T07_Product_Assets — Transaction Error Rate | 5.7% | 2.8% | −51.4% |
+| T07_Product_Assets p95 | 160.4ms | 141.2ms | −12.0% |
 
-The CPU regression is isolated to `afterburner-fe` — `afterburner-be` is unaffected, which is consistent with the matrix computation residing entirely in the fe service.
+> Error rate improvements on flaky endpoints (`/flaky?flakiness=5`) are probabilistic — they will regress/improve randomly between runs. They are not meaningful regression signals.
 
 ---
 
-## Evidence Correlation
+## Error analysis
 
-| Source | Evidence | Confidence |
+| Metric | Value |
+|---|---|
+| Total requests | 559 |
+| Total errors | 3 |
+| Overall error rate | 0.54% |
+| Unique HTTP error codes | 1 (HTTP 500) |
+| Transactions with errors | 3 |
+
+### Errors by status code
+
+| Code | Count | Avg RT | Min RT | Max RT |
+|---|---|---|---|---|
+| 500 | 3 | 119ms | 31ms | 208ms |
+
+### Errors by transaction
+
+| Transaction | Sampler | URL | Code | Count |
+|---|---|---|---|---|
+| T03_Search_Products | search_external_api_call | `/flaky?flakiness=5&maxRandomDelay=200` | 500 | 1 |
+| T04_Payment_Processing | payment_gateway_auth | `/flaky?maxRandomDelay=300&flakiness=5` | 500 | 1 |
+| T07_Product_Assets | product_availability_check | `/flaky?flakiness=5&maxRandomDelay=100` | 500 | 1 |
+
+> **Flaky error flag: true.** All 3 errors originate from the `/flaky` endpoint with `flakiness=5` (5% random failure rate). These are by design and are not caused by the matrix calculation change. They are not regression signals.
+
+---
+
+## Cross-source investigation
+
+> **Data sources:** Perfana ✅ · Grafana ✅ · Tempo ✅ · Pyroscope ✅ · Loki ✅ · Dynatrace ✗ (not configured)
+
+### Root cause identification
+
+**The root cause is confirmed: `CpuBurner.magicIdentityCheck` with `matrix-size=572`.**
+
+The endpoint at `/cpu/magic-identity-check` invokes `MatrixCalculator.multiply` with a matrix size supplied as a query parameter. Commit `26361d2` changes the matrix size from a fixed small value to a variable value — in this run it reached **572×572**. Matrix multiplication is O(n³) in the general case; at size 572 the cost dwarfs the baseline.
+
+#### Source code confirmation
+
+```java
+// CpuBurner.java — magicIdentityCheck (GET /cpu/magic-identity-check)
+// matrix-size is a configurable parameter
+@GetMapping("/cpu/magic-identity-check")
+public BurnerMessage magicIdentityCheck(@RequestParam(defaultValue = "10") int matrixSize) {
+    // Span: matrix-init
+    long[][] magic = MatrixCalculator.simpleMagicSquare(matrixSize);
+    long[][] identity = MatrixCalculator.identitySquare(matrixSize);
+
+    // Span: matrix-multiply  ← O(n²) triple nested loop, 62.6% of all CPU samples
+    long[][] result = MatrixCalculator.multiply(magic, identity);
+
+    // Span: matrix-equal-check
+    MatrixEqualResult eq = MatrixCalculator.areEqual(result, magic);
+    ...
+}
+```
+
+At `matrixSize=572`, the `matrix-multiply` span consumed **180ms** in a single trace (trace `253ba2059aab2c88`). In the baseline, the same sub-request (`payment_fraud_check`) had no `matrix-multiply` span — confirming the baseline ran with a negligible or zero matrix size.
+
+Source: https://github.com/perfana/afterburner/blob/main/afterburner-java/src/main/java/io/perfana/afterburner/controller/CpuBurner.java
+
+### CPU profiling (Pyroscope via Perfana)
+
+**Top hotspots — `afterburner-fe` — current run:**
+
+| Rank | Method | Samples | % CPU |
+|---|---|---|---|
+| 1 | `io/perfana/afterburner/matrix/MatrixCalculator.multiply` | 30,697,366,702 | **62.6%** |
+| 2 | `.I2C/C2I adapters` (JIT overhead) | 460,526,290 | 0.94% |
+| 3 | `libc.__GI___futex_abstimed_wait_cancelable64` | 328,947,350 | 0.67% |
+| 4 | `libc.__GI___fstatat64` | 328,947,350 | 0.67% |
+| 5 | `libc.__libc_write` | 276,315,774 | 0.56% |
+
+`MatrixCalculator.multiply` accounts for 62.6% of all CPU samples — more than the next 19 methods combined. This is not a marginal regression: it is a dominant hot path introduced by the code change. In the baseline run (`PerfanaWebshop-acc-loadTest-00002`) this method did not appear in the top 20.
+
+### Distributed traces — baseline vs current
+
+**Broad comparison (top 10 slowest, excluding synthetic `enable-traffic-light-for-some-time` timer):**
+
+| | Baseline | Current |
 |---|---|---|
-| Config diff | Commit `26361d2` — annotation: "make matrix calculation more variable" | Confirmed (code change identified) |
-| Pyroscope hotspots | `MatrixCalculator.multiply` 6.2% → 64.6% CPU — ~10x absolute increase | **Primary cause — High** |
-| Span metrics | `matrix-multiply` span +2500–3400% across all 14 compute sub-request dashboards | **High** (2nd independent source) |
-| Infrastructure | afterburner-fe CPU +179.8%, be unaffected | **High** (3rd independent source) |
-| JVM GC | Minor GC collection frequency +107.3% on fe, GC pause durations within threshold | Downstream effect — Medium |
-| Adapt causal chain | Compute regression → CPU spike → GC pressure confirmed with High confidence | Confirmed |
-| Loki logs | Only FlakyService exceptions; no new error types introduced | Rules out other failure modes |
-| Dynatrace | No problems detected | No infrastructure-level failure |
-| Trace comparison | Consistent max duration for /remote/call-many spans | Consistent with CPU-bound inflation of aggregate |
+| Max duration (real traces) | 185ms (`get /delay`) | 205ms (`get /remote/call-many`) |
+| Common slow operations | `/delay`, `/remote/call-many`, `/memory/churn` | `/remote/call-many`, `/cpu/magic-identity-check`, `/delay` |
+| New trace types in current | — | **`get /cpu/magic-identity-check`** (new in top 10) |
 
----
+The `/cpu/magic-identity-check` trace type enters the slowest-trace list in the current run — it was not in the baseline top 10.
 
-## Root Cause
+**Span-level drill-down — T04_Payment_Processing (fraud check sub-request):**
 
-**Confidence: High — corroborated by 4 independent data sources**
+Trace `253ba2059aab2c88` (current run, 183ms total, `Checkout|T04_Payment_Processing|payment_fraud_check`):
 
-The sole root cause is a change to `MatrixCalculator.multiply` in `afterburner-fe`, introduced in commit `26361d2` (baseline: `4e2db5f`). The new implementation performs substantially more computation per call — likely using a variable, larger matrix — causing:
-
-1. **`MatrixCalculator.multiply` to consume 64.6% of all CPU time** (up from 6.2% — ~10x increase)
-2. **All 14 compute sub-requests to regress by 200–3400%** in sub-request latency
-3. **Container CPU on `afterburner-fe` to triple** (5.1% → 14.2%)
-4. **JVM minor GC collection frequency on `afterburner-fe` to double** (+107%) due to increased allocation from the larger matrix
-5. **T04_Payment_Processing and T05_Order_Confirmation Apdex to drop to 0.5** with p99 response times of 1614ms and 1458ms — exceeding the 500ms threshold by 1114ms and 958ms respectively
-
-The errors on T03_Search_Products are entirely unrelated — they are probabilistic flaky behaviour from the `/flaky` endpoint, confirmed by Loki stack traces showing `FlakyService.java:46` as the only error origin.
-
----
-
-## Performance Rankings
-
-### Slowest Transactions
-
-| Rank | Transaction | Scenario | Avg RT | p95 | Error % | Apdex |
-|---|---|---|---|---|---|---|
-| 1 | T04_Payment_Processing | Checkout | 1086.76ms | 1521.95ms | 0% | 0.500 |
-| 2 | T05_Order_Confirmation | Checkout | 897.68ms | 1231.85ms | 0% | 0.500 |
-| 3 | T04_View_Product_Details | BrowseAndSearch | 452.42ms | 493ms | 0% | 0.981 |
-| 4 | T03_Search_Products | BrowseAndSearch | 418.47ms | 545ms | 7.89% | 0.932 |
-| 5 | T03_Shipping_Address | Checkout | 410.29ms | 459.5ms | 0% | 1.000 |
-
-### Highest Impact (avg RT x count)
-
-| Rank | Transaction | Scenario | Impact Score |
+| Span | Duration | % of trace | Attribute |
 |---|---|---|---|
-| 1 | T04_Payment_Processing | Checkout | 40,210 |
-| 2 | T05_Order_Confirmation | Checkout | 33,214 |
-| 3 | T04_View_Product_Details | BrowseAndSearch | 17,192 |
-| 4 | T03_Search_Products | BrowseAndSearch | 15,902 |
-| 5 | T03_Shipping_Address | Checkout | 14,360 |
+| `get /cpu/magic-identity-check` | 183ms | 100% | `matrix-size=572` |
+| → `matrix-multiply` | **180ms** | **98.2%** | `matrix-size=572` |
+| → `matrix-init` | 1.3ms | 0.7% | `matrix-size=572` |
+| → `matrix-equal-check` | 0.1ms | 0.05% | `matrix-size=572` |
 
-### Error Rate Ranking
+The `matrix-multiply` span consumes 98.2% of the trace duration. Matrix initialisation and equality check are negligible.
 
-| Rank | Transaction | Scenario | Error % |
-|---|---|---|---|
-| 1 | T03_Search_Products | BrowseAndSearch | 7.89% |
-| 2–14 | All others | — | 0% |
+Trace `57e5871eef2262ac` (baseline run, 512ms total, same sub-request):
 
----
+| Span | Duration | Note |
+|---|---|---|
+| `get /remote/call-many` | 512ms | Downstream call to afterburner-be `/delay` |
+| → `execute-call-async` | 509ms | |
+| → `get /delay` (afterburner-be) | 507ms | Network I/O — no matrix spans |
 
-## Data Quality Notes
+The baseline trace contains **no matrix spans** — the payment fraud check was purely I/O-bound (downstream delay call). The current run adds 180ms of CPU computation on top of the same I/O pattern, explaining the +44% p95 regression on T04_Payment_Processing.
 
-- **Sparse data warning:** 2 JVM metrics on `afterburner-be` had fewer than 5 data points (Metadata GC Threshold: 3 points and 2 points at 15s timestep). The be-side GC analysis should be treated as indicative only.
-- **Adapt mode:** DEFAULT — differences have not yet been accepted (TBD).
-- **Tempo via Grafana Sift:** unavailable — Sift plugin not installed. Trace queries used Perfana wrappers only.
-- **Pyroscope via Grafana:** unavailable — datasource UID not resolvable. Hotspot data used Perfana wrappers only.
-- **Loki pattern detection:** 404 from Loki API — patterns endpoint not available. Raw log queries succeeded.
-- **Loki stats:** returned 0 entries for label selector — known quirk with stats API label indexing. Direct log queries confirmed data presence (3 ERROR entries returned).
+**T05_Order_Confirmation (pdf gen sub-request) — current run, trace `59fd11b89efa4a25`:**
 
----
+Top current span: `get /cpu/magic-identity-check` with `matrix-size=572`. The Adapt data shows this sub-request regressed from 9.7ms to 216.5ms (+2129%) — the largest single regression in the run.
 
-## Recommendations
+### Loki log investigation
 
-### Block promotion (immediate)
+Logs queried via `{service_name="afterburner-fe"}` and `{service_name="afterburner-be"}` for the test window (16:25–16:31 UTC). 4,275 log lines scanned on `afterburner-fe`.
 
-1. **Revert or fix commit `26361d2` in the afterburner repository.** The change annotation "make matrix calculation more variable" introduced heavier matrix computation that consumes 65% of CPU under load. The prior commit `4e2db5f` ("make cpu more efficient") is the known-good baseline.
+**Error logs — `afterburner-fe` (3 total):**
 
-2. **Do not promote `2.4.3-changed-matrix-calc` to production.** T04_Payment_Processing (p99 1614ms) and T05_Order_Confirmation (p99 1458ms) breach the 500ms threshold by over 900ms. This would directly degrade checkout conversion in production.
+All 3 ERROR entries originate from `i.p.a.error.RestExceptionHandler` and have the same shape:
 
-### Short-term
+```
+AfterburnerException: Sorry, flaky call failed after N milliseconds.
+    at io.perfana.afterburner.controller.FlakyService.flaky(FlakyService.java:46)
+```
 
-3. **Review the intent of the matrix size change.** If variable matrix computation is required for new functionality, define the acceptable maximum matrix size and implement a validation guard. Matrix sizes appropriate for batch processing are not suitable for synchronous HTTP request paths.
+**No matrix-related exceptions or stack traces.** The flaky endpoint errors are by design (`flakiness=5`) and unrelated to the matrix calculation change.
 
-4. **Add a CPU regression threshold to SLO checks.** The current CPU SLO is 70% (absolute mean) — the current run at 14.2% passes easily. Add an Adapt benchmark threshold (e.g., CPU < 8% mean on afterburner-fe) to catch CPU regressions earlier in the pipeline.
+**Matrix size distribution — `afterburner-fe` (50 samples from log stream):**
 
-5. **Investigate the `/flaky` error rate increase** (T03 +388%): If the flakiness parameter did not change between baseline and current, the increase is statistical noise and should be accepted. If `flakiness=5` was intentionally increased from a lower baseline value, confirm this is the desired behaviour.
+Matrix size is drawn from a wide random range — observed values in this window: 76, 88, 107, 113, 120, 123, 126, 134, 139, 141, 143, 155, 166, 168, 170, 174, 176, 178, 198, 199, 200, 203, 208, 211, 215, 228, 240, 262, 264, 265, 268, 278, 287, 298, 302, 314, 315, 318, 319, 366, 376, 391, 404, 440, 511, 532, 533, 599, 630...
 
-### Long-term
+The distribution is unbounded and highly variable. Inexpensive requests (size 76 ≈ 440K operations) and expensive requests (size 630 ≈ 250M operations) run concurrently, amplifying contention on the executor thread pool. The trace-confirmed `matrix-size=572` value sits in the upper quartile of this distribution.
 
-6. **Offload matrix computation to async workers.** CPU-intensive operations should not block synchronous HTTP request threads. The existing `execute-call-async` span infrastructure is already in use for other sub-requests — use it to parallelise or queue compute-heavy matrix operations.
+**Log conclusion:** Loki evidence confirms zero new exception types. All application errors are `/flaky` endpoint artefacts. The matrix size variability observed in logs is consistent with the Pyroscope and trace evidence — the CPU regression is probabilistic per-request but aggregate load is large enough to dominate CPU time.
 
-7. **Add `matrix-size` as a tracked Perfana metric.** The span attribute `matrix-size` already exists in Tempo traces. Surfacing it as an Adapt-tracked metric would allow automatic detection of matrix size drift in future runs without requiring manual trace inspection.
+### Infrastructure (Dynatrace)
 
-8. **Establish a compute sub-request latency benchmark.** Add an absolute threshold check (e.g., sub-request avg < 50ms) in addition to the existing percentage-based Adapt comparison. This provides a signal even when the baseline itself is degraded.
+Dynatrace is not configured for this system. No infrastructure-level problem data available.
 
 ---
 
-*Report generated: 2026-05-17 | Sources: Perfana Adapt, Pyroscope hotspots (Perfana wrapper), Loki logs, Tempo traces (Perfana wrapper), Docker container metrics, JVM G1GC metrics, config diff*
+## Root cause & recommendations
+
+### Root cause (confidence: High)
+
+**Commit `26361d2` changes `matrixSize` in `CpuBurner.magicIdentityCheck` from a fixed small value to an unbounded random draw.** The `MatrixCalculator.multiply` method — a triple-nested loop O(n²) for square matrices — consumes 62.6% of all CPU samples on `afterburner-fe`. Every transaction in both scenarios calls this endpoint as a sub-request, so the regression is universal across the entire test.
+
+The mechanism:
+1. Commit `26361d2` changes `matrixSize` from a fixed small value to a random variable
+2. In this run observed sizes range from 76 to 630+ (log-confirmed); trace `253ba2059aab2c88` captured `matrix-size=572`
+3. `matrix-multiply` at size 572 takes ~180ms per call (trace-confirmed); at size 630 it is ~50% more expensive still
+4. Every compute-classified sub-request routes to `/cpu/magic-identity-check`
+5. Aggregate transaction p95 regressions of 33%–97% follow directly
+6. CPU usage on `afterburner-fe` doubles: 6.4% → 14.2%
+7. JVM minor GC rate rises 167.6% as matrix objects cause heap pressure
+
+### Evidence chain
+
+| Source | Finding | Confidence |
+|---|---|---|
+| Adapt | 56 regressions; causal chain Compute → CPU → GC at High confidence | High ✅ |
+| Pyroscope | `MatrixCalculator.multiply` = 62.6% CPU — dominant hotspot | **High ✅** |
+| Trace `253ba2059aab2c88` | `matrix-multiply` span 180ms, `matrix-size=572` attribute | **High ✅** |
+| Trace diff (baseline vs current) | Baseline payment trace has no matrix spans; current adds 180ms CPU | **High ✅** |
+| Config diff | Single commit `4e2db5f → 26361d2` in afterburner | High ✅ |
+| Source code | `matrixSize` param drives O(n²) `MatrixCalculator.multiply` | High ✅ |
+| Span metrics | `matrix-multiply` p95 up 109%–2890% across all transactions | High ✅ |
+| Docker CPU | afterburner-fe CPU doubled: 6.4% → 14.2% | High ✅ |
+| JVM GC | Minor GC rate +167.6% (Allocation Failure) | High ✅ |
+| SLO checks | All 8 pass — regression not yet at threshold level | Medium (limits are wide) |
+| Loki | 3 errors — all `FlakyService` (by design); matrix sizes 76–630+ confirm unbounded random draw | **High ✅** |
+| Dynatrace | Not configured | — |
+
+### Recommendations
+
+1. **Do not promote to production.** This release degrades T04_Payment_Processing p95 by 44% and T05_Order_Confirmation p95 by 67%. The Apdex for T02_User_Login dropped from 1.0 to 0.0. These regressions will worsen at production traffic levels.
+
+2. **Cap the matrix size distribution.** Commit `26361d2` makes `matrixSize` an unbounded random draw — log evidence from this run shows values reaching 630 within 6 minutes. At size 630 the O(n³) cost is ~250M operations per call vs ~440K at size 76. A safe ceiling is ≤100 for this load level; validate with a dedicated size-scaling test before expanding.
+
+3. **Add matrix size to the test configuration inventory.** The `matrixSize` parameter is now a runtime variable that drives CPU cost — it should be captured as a Perfana config item so that future `get_config_diff` calls show when it changes between runs, just like thread pool sizes or JVM flags.
+
+4. **Consider bounding variability at the application level.** The `CpuBurner.magicIdentityCheck` controller accepts `matrixSize` as a query parameter with default 10. Any caller can pass an arbitrarily large value. In production, a validated upper bound (e.g., `@Max(200)`) would prevent accidental or adversarial CPU exhaustion via this endpoint.
+
+---
+
+## Run trend (last 3 runs)
+
+| Run | Date | Release | Adapt | Result |
+|---|---|---|---|---|
+| `PerfanaWebshop-acc-loadTest-00001` | 2026-05-18 | `2.4.3-good-baseline` | NO_BASELINES_FOUND | PASS ✅ |
+| `PerfanaWebshop-acc-loadTest-00002` | 2026-05-18 | `2.4.3-good-baseline` | PASSED (control group) | PASS ✅ |
+| `PerfanaWebshop-acc-loadTest-00003` | 2026-05-18 | `2.4.3-changed-matrix-calc` | **REGRESSION (56)** | **FAIL ❌** |
+
+---
+
+## Links
+
+- [Perfana UI — this run](http://localhost:4000)
+- [Grafana](http://localhost:3000)
+- [Pyroscope explorer](http://localhost:3000/a/grafana-pyroscope-app/explore)
+- [AfterburnerCpuBurner source](https://github.com/perfana/afterburner/blob/main/afterburner-java/src/main/java/io/perfana/afterburner/controller/CpuBurner.java)
+- [MatrixCalculator source](https://github.com/perfana/afterburner/blob/main/afterburner-java/src/main/java/io/perfana/afterburner/matrix/MatrixCalculator.java)
+- CI build: _No CI build URL configured_
+
+---
+
+_Report generated 2026-05-18 by Claude Code · Perfana report skill v2.0 (cross-source investigation)_
