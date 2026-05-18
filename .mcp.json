@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "perfana": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@perfana/mcp"],
+      "env": {
+        "PERFANA_API_URL": "http://localhost:3001/api",
+        "PERFANA_API_KEY": "PERFANA_API_KEY_PLACEHOLDER"
+      }
+    },
+    "grafana": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-grafana"],
+      "env": {
+        "GRAFANA_URL": "http://localhost:3000",
+        "GRAFANA_API_KEY": "GRAFANA_API_KEY_PLACEHOLDER"
+      }
+    },
+    "gitnexus": {
+      "type": "stdio",
+      "command": "gitnexus",
+      "args": ["mcp"]
+    }
+  }
+}
