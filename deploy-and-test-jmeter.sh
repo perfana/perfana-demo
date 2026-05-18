@@ -3,7 +3,7 @@ set -o pipefail
 set -o nounset
 
 if [ $# -ne 1 ]; then
-  echo "Supply one option: 'baseline', 'cpu', 'backend' or 'pool'."
+  echo "Supply one option: 'baseline', 'cpu', 'backend', 'pool', or 'custom'."
   exit 1
 fi
 
@@ -57,9 +57,22 @@ while (( "$#" )); do
       restart_afterburner
       break
     ;;
+    custom)
+      if [ -z "${SUT_VERSION:-}" ]; then
+        echo "Error: SUT_VERSION must be set when using 'custom'." >&2
+        echo "Example: SUT_VERSION=abc1234-jdk21 ./deploy-and-test-jmeter.sh custom" >&2
+        exit 1
+      fi
+      echo "Deploying and testing custom build: ${SUT_VERSION}"
+      export GIT_SHA="${GIT_SHA:-$(git -C "${AFTERBURNER_PATH:-$HOME/workspace/afterburner}" rev-parse --short HEAD 2>/dev/null || echo "unknown")}"
+      export ANNOTATIONS="${ANNOTATIONS:-Local dev build: ${SUT_VERSION}}"
+      export JMETER_TEST="${JMETER_TEST:-webshop-*.jmx}"
+      restart_afterburner
+      break
+    ;;
     *)
       echo "Error: Unsupported parameter '$1'" >&2
-      echo "Valid options are: 'baseline', 'cpu', 'backend' and 'pool'."
+      echo "Valid options are: 'baseline', 'cpu', 'backend', 'pool', and 'custom'."
       exit 1
       shift
       break
