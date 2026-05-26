@@ -38,7 +38,7 @@ echo ""
 
 # Start core infrastructure first
 echo "[1/8] Starting core databases..."
-docker compose -f "$COMPOSE_FILE" up -d postgres redis mariadb influxdb
+docker compose -f "$COMPOSE_FILE" up -d postgres redis mariadb influxdb pgbouncer
 
 # Run database migrations (waits for postgres healthy, then exits)
 echo "[2/8] Running database migrations..."
@@ -246,11 +246,23 @@ else
     --data-urlencode "password=${PERFANA_PASSWORD}" | jq -r '.access_token' 2>/dev/null)
 
   # Create Perfana API key early — it doesn't expire like the JWT (1y TTL)
+  # If a "demo" key already exists (e.g. re-running init-demo.sh on the same DB),
+  # delete it first so we can get the fresh plaintext token back.
   echo "       Creating Perfana API key..."
+  _existing_key_id=$(curl -sf "http://localhost:3001/api/api-keys?organizationId=${org_id}" \
+    -H "Authorization: Bearer $auth_token" \
+    | jq -r '.[] | select(.description == "demo") | .id // empty' 2>/dev/null | head -1)
+  if [ -n "$_existing_key_id" ] && [ "$_existing_key_id" != "null" ]; then
+    echo "       Found existing demo API key ($_existing_key_id) — deleting to rotate..."
+    curl -sf -X DELETE "http://localhost:3001/api/api-keys/$_existing_key_id" \
+      -H "Authorization: Bearer $auth_token" >/dev/null 2>&1 \
+      && echo "       Deleted stale demo API key" \
+      || echo "       WARNING: Could not delete stale API key; creation may fail with 409"
+  fi
   api_key=$(curl -sf 'http://localhost:3001/api/api-keys' \
     -H 'Content-Type: application/json' \
     -H "Authorization: Bearer $auth_token" \
-    -d '{"ttl": "1y", "description": "demo"}' | jq -r '.token' 2>/dev/null)
+    -d '{"ttl": "1y", "description": "demo"}' | jq -r '.token // empty' 2>/dev/null)
 
   if [ -n "$api_key" ] && [ "$api_key" != "null" ]; then
     # Replace existing API key in loadtest pom.xml and jmeter perfana.yaml
@@ -671,6 +683,7 @@ echo "  Password:              ${PERFANA_PASSWORD}"
 echo ""
 echo "Core Services:"
 echo "  PostgreSQL:            localhost:5432"
+echo "  PgBouncer:             localhost:6432"
 echo "  Redis:                 localhost:6379"
 echo "  Keycloak:              http://localhost:8080  (${KEYCLOAK_ADMIN}/${KEYCLOAK_ADMIN_PASSWORD})"
 echo "  Perfana Web:           http://localhost:4000"
