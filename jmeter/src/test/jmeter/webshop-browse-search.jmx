@@ -1299,12 +1299,12 @@
           <collectionProp name="Arguments.arguments">
             <elementProp name="timescaleDBHost" elementType="Argument">
               <stringProp name="Argument.name">timescaleDBHost</stringProp>
-              <stringProp name="Argument.value">${__P(timescaleHost,perfana-postgres)}</stringProp>
+              <stringProp name="Argument.value">${__P(timescaleHost,perfana-pgbouncer)}</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
             <elementProp name="timescaleDBPort" elementType="Argument">
               <stringProp name="Argument.name">timescaleDBPort</stringProp>
-              <stringProp name="Argument.value">${__P(timescalePort,5432)}</stringProp>
+              <stringProp name="Argument.value">${__P(timescalePort,6432)}</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
             <elementProp name="timescaleDBDatabase" elementType="Argument">

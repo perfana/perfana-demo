@@ -25,7 +25,7 @@ echo ""
 
 # Start core infrastructure first
 echo "[1/6] Starting core databases..."
-docker compose -f "$COMPOSE_FILE" up -d postgres redis mariadb influxdb
+docker compose -f "$COMPOSE_FILE" up -d postgres redis mariadb influxdb pgbouncer
 
 # Run database migrations (waits for postgres healthy, then exits)
 echo "[2/6] Running database migrations..."
@@ -74,6 +74,7 @@ echo "Infrastructure started!"
 echo ""
 echo "Core Services:"
 echo "  PostgreSQL:            localhost:5432"
+echo "  PgBouncer:             localhost:6432"
 echo "  Redis:                 localhost:6379"
 echo "  Keycloak:              http://localhost:8080  (admin/admin)"
 echo "  Grafana:               http://localhost:3000  (perfana/perfana)"

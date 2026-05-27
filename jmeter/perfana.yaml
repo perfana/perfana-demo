@@ -2,7 +2,7 @@
 # Replaces the Maven event-scheduler-maven-plugin configuration from pom.xml
 
 perfana:
-  apiKey: "ZGVtbyMyMmZhYjA3Yi1lNGY2LTRiZjUtODQxZi1mNzE3Yzc2YTEyNGI="
+  apiKey: "PERFANA_API_KEY_PLACEHOLDER"
   apiUrl: "http://perfana-api:3001"
   appUrl: "http://localhost:4000"
 test:
@@ -11,6 +11,7 @@ test:
   workload: "loadTest"
   version: "${SUT_VERSION}"
   analysisStartOffset: "PT1M"
+  analysisEndOffset: "PT30S"
   constantLoadTime: "PT5M"
   tags:
     - "jmeter"

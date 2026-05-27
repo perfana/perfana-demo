@@ -27,6 +27,9 @@ models/
 oneagent-temp/
 oneagent-log/
 
+# pgbouncer — regenerate with scripts/mint-pgbouncer-userlist.sh when using non-default password
+pgbouncer/userlist.txt
+
 # Load test artifacts
 loadtest/target/
 loadtest/log/
@@ -41,3 +44,4 @@ jmeter/target/
 # Generated files
 *.log
 .gitnexus
+.gstack/
