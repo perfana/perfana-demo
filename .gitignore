@@ -8,10 +8,11 @@
 .DS_Store
 ._*
 
-# Environment files (contain secrets)
+# Environment files and local MCP config (contain secrets)
 .env
 .env.*
 !.env.example
+.mcp.json
 
 # Node
 node_modules/
