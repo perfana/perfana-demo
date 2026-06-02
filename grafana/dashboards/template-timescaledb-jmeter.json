@@ -2152,7 +2152,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  transaction_name,\n  min(min_rt) AS min_response_time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS avg_response_time,\n  max(max_rt) AS max_response_time,\n  sum(n) AS total,\n  sum(n_ok) AS passed,\n  sum(n_err) AS failed,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS error_percentage\nFROM transactions_5m\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  transaction_name,\n  min(min_rt) AS min_response_time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS avg_response_time,\n  max(max_rt) AS max_response_time,\n  sum(n) AS total,\n  sum(n_ok) AS passed,\n  sum(n_err) AS failed,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS error_percentage\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -3021,7 +3021,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  sampler_name,\n  transaction_name,\n  min(min_rt) AS min_response_time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS avg_response_time,\n  max(max_rt) AS max_response_time,\n  sum(n) AS total,\n  sum(n_ok) AS passed,\n  sum(n_err) AS failed,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS error_percentage\nFROM requests_raw_5m\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "rawSql": "SELECT\n  sampler_name,\n  transaction_name,\n  min(min_rt) AS min_response_time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS avg_response_time,\n  max(max_rt) AS max_response_time,\n  sum(n) AS total,\n  sum(n_ok) AS passed,\n  sum(n_err) AS failed,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS error_percentage\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -3955,6 +3955,7 @@
         "label": "CAGG resolution",
         "multi": false,
         "name": "cagg_suffix",
+        "allowCustomValue": false,
         "options": [
           {
             "selected": true,
@@ -3974,7 +3975,7 @@
         ],
         "query": "5s,1m,5m",
         "queryValue": "",
-        "skipUrlSync": false,
+        "skipUrlSync": true,
         "type": "custom"
       },
       {
