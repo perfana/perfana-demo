@@ -8,6 +8,6 @@ contactPoints:
         type: webhook
         settings:
           httpMethod: POST
-          url: http://perfana-fe:3000/api/grafana-alerts
+          url: ${PERFANA_ALERTS_WEBHOOK_URL}
           username: perfana
           password: perfana

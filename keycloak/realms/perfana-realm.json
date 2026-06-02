@@ -1338,46 +1338,6 @@
       ]
     },
     {
-      "username": "test",
-      "email": "test@perfana.io",
-      "emailVerified": true,
-      "firstName": "Test",
-      "lastName": "User",
-      "enabled": true,
-      "credentials": [
-        {
-          "type": "password",
-          "value": "Test123!"
-        }
-      ],
-      "realmRoles": [
-        "perfana-user"
-      ],
-      "groups": [
-        "/perfana-users"
-      ]
-    },
-    {
-      "username": "test2@perfana.io",
-      "email": "test2@perfana.io",
-      "emailVerified": true,
-      "firstName": "Test2",
-      "lastName": "User",
-      "enabled": true,
-      "credentials": [
-        {
-          "type": "password",
-          "value": "Test123!"
-        }
-      ],
-      "realmRoles": [
-        "perfana-user"
-      ],
-      "groups": [
-        "/perfana-users"
-      ]
-    },
-    {
       "username": "service-account-perfana-admin",
       "enabled": true,
       "serviceAccountClientId": "perfana-admin",

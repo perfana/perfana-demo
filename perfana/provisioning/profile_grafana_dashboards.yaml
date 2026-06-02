@@ -1,0 +1,8 @@
+organizationId: 4834151e-a1bf-413b-b443-7c7db9953bcd
+items:
+  - _id: jmeter-timescaledb
+    profile: jmeter
+    grafana: Demo
+    dashboardName: JMeter TimescaleDB Dashboard
+    dashboardUid: jmeter-timescaledb-dashboard
+    readOnly: true

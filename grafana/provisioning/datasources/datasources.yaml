@@ -1,133 +1,26 @@
+# ==================================================================================================
+# Grafana data sources
+# --------------------------------------------------------------------------------------------------
+# Only Perfana's own TimescaleDB is provisioned. Its UID ("postgres-timescaledb")
+# is stable because the dashboards in ./grafana/dashboards reference it by UID -
+# do not rename it. Add other data sources from the Grafana UI if needed.
+# ==================================================================================================
 apiVersion: 1
+
 datasources:
-  - name: perfana-JSON-API
-    type: marcusolsson-json-datasource
-    url: http://perfana-fe:3000
-    access: proxy
-    uid: perfana-json-api
-    basicAuth: true
-    editable: false
-    basicAuthUser: admin@perfana.io
-    secureJsonData:
-      basicAuthPassword: perfana
-  - name: Prometheus
-    type: prometheus
-    url: http://prometheus:9090
-    access: proxy
-    uid: prometheus
-    editable: true
-  - name: Loki
-    type: loki
-    url: http://loki:3100
-    access: proxy
-    uid: loki
-    editable: true
-    basicAuth: true
-  - name: influxDb-gatling
-    type: influxdb
-    url: http://influxdb:8086
-    access: proxy
-    uid: influxdb-gatling
-    editable: true
-    database: gatling3
-    basicAuth: true
-    basicAuthUser: admin
-    secureJsonData:
-      basicAuthPassword: perfana
-  - name: influxDb-jmeter
-    type: influxdb
-    url: http://influxdb:8086
-    access: proxy
-    uid: influxdb-jmeter
-    editable: true
-    database: jmeter
-    basicAuth: true
-    basicAuthUser: admin
-    secureJsonData:
-      basicAuthPassword: perfana
-  - name: influxDb-k6
-    type: influxdb
-    url: http://influxdb:8086
-    access: proxy
-    uid: influxdb-k6
-    editable: true
-    database: k6
-    basicAuth: true
-    basicAuthUser: admin
-    secureJsonData:
-      basicAuthPassword: perfana
-  - name: influxDb-locust
-    type: influxdb
-    url: http://influxdb:8086
-    access: proxy
-    uid: influxdb-locust
-    editable: true
-    database: locust
-    basicAuth: true
-    basicAuthUser: admin
-    secureJsonData:
-      basicAuthPassword: perfana
-  - name: influxDb-neoload
-    type: influxdb
-    url: http://influxdb:8086
-    access: proxy
-    uid: influxdb-neoload
-    editable: true
-    database: neoload
-    basicAuth: true
-    basicAuthUser: admin
-    secureJsonData:
-      basicAuthPassword: perfana
-  - name: influxDb-telegraf
-    type: influxdb
-    url: http://influxdb:8086
-    access: proxy
-    uid: influxdb-telegraf
-    editable: true
-    database: telegraf
-    basicAuth: true
-    basicAuthUser: admin
-    secureJsonData:
-      basicAuthPassword: perfana
-  - name: Tempo
-    type: tempo
-    uid: tempo
-    url: http://tempo:3200
-    access: proxy
-    jsonData:
-      httpMethod: GET
-      tracesToLogs:
-        datasourceUid: loki
-        spanStartTimeShift: '-1h'
-        spanEndTimeShift: '1h'
-        filterByTraceID: true
-        filterBySpanID: false
-        tags: []
-      nodeGraph:
-        enabled: true
-      search:
-        hide: false
-      serviceMap:
-        datasourceUid: prometheus
-        hide: false
-  - name: Pyroscope
-    type: grafana-pyroscope-datasource
-    access: proxy
-    url: http://pyroscope:4040 
-    editable: true
   - name: PostgreSQL-timescaledb
     type: grafana-postgresql-datasource
+    uid: postgres-timescaledb
     url: postgres:5432
     access: proxy
-    uid: postgres-timescaledb
     editable: false
     user: perfana
     database: perfana
     jsonData:
       timescaledb: true
-      sslmode: 'disable' # or 'require', 'verify-full' depending on your setup
+      sslmode: 'disable'
       maxOpenConns: 100
       maxIdleConns: 100
-      postgresVersion: 1200 # approximate version (e.g. 12.0)
+      postgresVersion: 1500
     secureJsonData:
-        password: 'perfana'  
+      password: ${POSTGRES_PASSWORD}

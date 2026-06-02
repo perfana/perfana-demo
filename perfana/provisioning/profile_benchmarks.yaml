@@ -1,0 +1,4 @@
+organizationId: 4834151e-a1bf-413b-b443-7c7db9953bcd
+# No default benchmarks ship for the jmeter profile. Define benchmarks per
+# system-under-test / workload from the Perfana UI, or add jmeter items here.
+items: []

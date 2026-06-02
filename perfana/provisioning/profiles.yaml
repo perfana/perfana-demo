@@ -1,0 +1,8 @@
+organizationId: 4834151e-a1bf-413b-b443-7c7db9953bcd
+items:
+  - _id: jmeter-profile
+    name: jmeter
+    description: Profile for Jmeter load test tool dashboards and metrics
+    tags:
+      - jmeter
+    readOnly: true

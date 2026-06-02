@@ -21,20 +21,8 @@ package-lock.json
 # Python
 venv/
 
-# LLM models
-models/
-
-# Dynatrace agent
-oneagent-temp/
-oneagent-log/
-
-# pgbouncer — regenerate with scripts/mint-pgbouncer-userlist.sh when using non-default password
-pgbouncer/userlist.txt
-
-# Load test artifacts
-loadtest/target/
-loadtest/log/
-jmeter/target/
+# Local boot helper generated on the server
+boot.sh
 
 # Backup files
 *.bak
