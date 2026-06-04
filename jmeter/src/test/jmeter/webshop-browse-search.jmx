@@ -1299,12 +1299,12 @@
           <collectionProp name="Arguments.arguments">
             <elementProp name="timescaleDBHost" elementType="Argument">
               <stringProp name="Argument.name">timescaleDBHost</stringProp>
-              <stringProp name="Argument.value">${__P(timescaleHost,perfana-pgbouncer)}</stringProp>
+              <stringProp name="Argument.value">${__P(timescaleHost,postgres)}</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
             <elementProp name="timescaleDBPort" elementType="Argument">
               <stringProp name="Argument.name">timescaleDBPort</stringProp>
-              <stringProp name="Argument.value">${__P(timescalePort,6432)}</stringProp>
+              <stringProp name="Argument.value">${__P(timescalePort,5432)}</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
             <elementProp name="timescaleDBDatabase" elementType="Argument">
@@ -1390,6 +1390,26 @@
             <elementProp name="saveResponseBody" elementType="Argument">
               <stringProp name="Argument.name">saveResponseBody</stringProp>
               <stringProp name="Argument.value">${__P(saveResponseBody,true)}</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="saveSessionVariables" elementType="Argument">
+              <stringProp name="Argument.name">saveSessionVariables</stringProp>
+              <stringProp name="Argument.value">${__P(saveSessionVariables,true)}</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="sessionVariablesExclude" elementType="Argument">
+              <stringProp name="Argument.name">sessionVariablesExclude</stringProp>
+              <stringProp name="Argument.value">${__P(sessionVariablesExclude,)}</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="sessionVariablesMaxValueLength" elementType="Argument">
+              <stringProp name="Argument.name">sessionVariablesMaxValueLength</stringProp>
+              <stringProp name="Argument.value">${__P(sessionVariablesMaxValueLength,2048)}</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="sessionVariablesMaxTotalBytes" elementType="Argument">
+              <stringProp name="Argument.name">sessionVariablesMaxTotalBytes</stringProp>
+              <stringProp name="Argument.value">${__P(sessionVariablesMaxTotalBytes,16384)}</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
           </collectionProp>

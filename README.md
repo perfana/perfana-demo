@@ -49,6 +49,7 @@ This starts two additional containers and automatically registers the Dynatrace 
 | keycloak                | Authentication server                    | 8080       |
 | postgres                | TimescaleDB — Perfana data store         | 5432       |
 | redis                   | Job queue                                | 6379       |
+| pgbouncer               | PostgreSQL connection pooler (optional)  | 6432       |
 | grafana                 | Grafana dashboards                       | 3000       |
 | prometheus              | Metrics collection                       | 9090       |
 | alertmanager            | Alert routing                            | 9093       |
@@ -97,6 +98,38 @@ This starts two additional containers and automatically registers the Dynatrace 
 ```
 
 Run a baseline first, then disable baseline mode in Perfana and run one of the issue variants to trigger automatic regression detection.
+
+### Connection pooling with PgBouncer (optional)
+
+PgBouncer is included but **disabled by default** — the single-node demo connects
+to PostgreSQL directly and does not need it. Enable it only when you run a **large
+number of distributed JMeter load generators**: each generator's TimescaleDB backend
+listener opens its own pool of connections to PostgreSQL, and with many generators
+this can exhaust PostgreSQL's `max_connections`. PgBouncer multiplexes those
+connections in `transaction` pooling mode so a large fleet of generators maps onto a
+small, bounded set of server connections.
+
+Start it on demand (it listens on port `6432`):
+
+```sh
+docker compose --profile pgbouncer up -d pgbouncer
+```
+
+Then point the JMeter TimescaleDB backend listener at PgBouncer instead of
+PostgreSQL by overriding the listener's host/port properties. In the `.jmx` test
+plans these are JMeter properties that default to `postgres:5432`:
+
+```sh
+# Per-run override (host = pgbouncer, port = 6432)
+jmeter -JtimescaleHost=pgbouncer -JtimescalePort=6432 ...
+
+# From distributed generators outside the Docker network, use the host's
+# address instead, e.g. -JtimescaleHost=<docker-host> -JtimescalePort=6432
+```
+
+> Config lives in `pgbouncer/pgbouncer.ini` (pool sizing) and `pgbouncer/userlist.txt`
+> (auth). `userlist.txt` holds the `perfana` credentials; if you change
+> `POSTGRES_PASSWORD`, update the password in that file to match.
 
 ## Detecting Regressions
 
