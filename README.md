@@ -163,8 +163,6 @@ URL: [http://localhost:4000](http://localhost:4000)
 | User | Password | Role |
 |:-----|:---------|:-----|
 | admin@perfana.io | Test@1234 | Admin |
-| daniel@perfana.io | perfana | User |
-| dylan@perfana.io | perfana | User |
 
 ### Grafana
 
