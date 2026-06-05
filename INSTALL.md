@@ -186,6 +186,11 @@ nproc                       # should reflect "processors"
 free -h                     # "Mem" total should reflect "memory"
 ```
 
+> **Hypervisor scheduler.** WSL2 expects the *root* scheduler, and it's the default on current
+> builds — but if this server has been hardened or specially configured, it's worth confirming
+> `hypervisorschedulertype` is `root` (visible in the System event log / `bcdedit`), since the
+> classic scheduler would change the contention dynamics.
+
 ---
 
 ## 6. Prepare the dedicated share inside WSL
