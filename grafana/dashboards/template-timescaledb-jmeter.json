@@ -3940,7 +3940,8 @@
   "tags": [
     "perfana",
     "perfana-template",
-    "no-anomaly-detection"
+    "no-anomaly-detection",
+    "jmeter"
   ],
   "templating": {
     "list": [

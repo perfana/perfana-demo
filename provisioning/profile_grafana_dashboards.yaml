@@ -1,4 +1,4 @@
-organizationId: 7f572571-c4da-420e-b554-f64c52e1e06f
+organizationId: 5de90bb1-a3ea-4dae-96eb-9ed29537d997
 items:
   - _id: gatling-overview
     profile: gatling
@@ -12,6 +12,7 @@ items:
     grafana: Demo
     dashboardName: JMeter TimescaleDB Dashboard
     dashboardUid: jmeter-timescaledb-dashboard
+    createSeparateDashboardForVariable: scenario_name
     readOnly: true
   - _id: k6-http-overview
     profile: k6
@@ -112,6 +113,11 @@ items:
     dashboardName: Span metrics
     dashboardUid: span-metrics
     createSeparateDashboardForVariable: requestName
+    matchRegexForVariables:
+      - name: transaction
+        regex: T04_Payment_Processing
+      - name: scenarioName
+        regex: Checkout
     readOnly: true
   - _id: gatling-loki-logs
     profile: gatling
