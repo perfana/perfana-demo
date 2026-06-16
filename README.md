@@ -154,6 +154,83 @@ ADAPT is Perfana's automated regression detection engine. It operates in two mod
 3. Run `./deploy-and-test-jmeter.sh cpu` (or `pool` / `backend`)
 4. Perfana automatically compares against the baseline and flags regressions
 
+## Analysing Results with Claude Code
+
+The demo ships an MCP integration and a Claude Code skill that let you analyse test
+runs and generate root-cause reports in natural language. The MCP server exposes
+Perfana data to any MCP-compatible client (Claude Code, Claude Desktop); the
+`perfana-report` skill orchestrates a full investigation on top of it.
+
+### Perfana MCP
+
+The [`@perfana/mcp`](https://www.npmjs.com/package/@perfana/mcp) server exposes test-run
+data — transaction stats, SLO checks, ADAPT regressions, errors, traces (Tempo),
+flamegraphs (Pyroscope) and Dynatrace problems — as MCP tools (`get_test_run`,
+`get_adapt_results`, `get_slow_traces`, `list_connected_sources`, …). Once configured,
+just ask Claude in plain English about any run.
+
+**Setup.** `init-demo.sh` creates a dedicated API key (label `perfana-mcp`) and, when it
+finishes, prints both an MCP config snippet and a one-line `claude mcp add` command.
+The repo already ships a `.mcp.json` with the `perfana` and `grafana` servers wired up,
+using a `PERFANA_API_KEY_PLACEHOLDER`. To activate it, either:
+
+```sh
+# Option A — paste the key from init-demo.sh output into .mcp.json,
+#            replacing PERFANA_API_KEY_PLACEHOLDER
+
+# Option B — let Claude Code register it for you (key from init-demo.sh output)
+claude mcp add perfana \
+  -e PERFANA_API_URL=http://localhost:3001/api \
+  -e PERFANA_API_KEY=<your-perfana-mcp-key> \
+  -- npx -y @perfana/mcp
+```
+
+> No API key? Generate one in the Perfana UI under **Settings → API Keys**.
+
+Restart Claude Code after editing config. The tools then appear as `mcp__perfana__*`.
+To skip the per-call approval prompts, allow them in bulk by adding
+`"mcp__perfana__*"` to `permissions.allow` in `.claude/settings.local.json`.
+
+The shipped `.mcp.json` also configures the **Grafana MCP** (`uvx mcp-grafana`, requires
+[`uv`](https://docs.astral.sh/uv/)), which unlocks direct Pyroscope profiles, Loki log
+queries and Tempo TraceQL during investigations. `init-demo.sh` prints its setup snippet too.
+
+**Example prompts:**
+
+```text
+Compare the last 3 runs for PerfanaWebshop in test-env and tell me if anything regressed.
+What was the Apdex for /checkout in run <testRunId>?
+Are there CPU hotspots in the afterburner service during run <testRunId>?
+```
+
+### `perfana-report` skill
+
+`perfana-report` (in `.claude/skills/perfana-report/`) turns a test run into a full,
+standardised performance report. Given a run ID it fetches all Perfana data, finds a
+baseline, classifies regressions, investigates root causes across the connected sources
+(traces, logs, flamegraphs, infrastructure, Dynatrace), correlates the evidence with
+confidence levels, and writes an opinionated Markdown report.
+
+**Prerequisites**
+
+* **Perfana MCP** — required (see above).
+* **Grafana MCP** — recommended; deepens root-cause analysis with Pyroscope, Loki and Tempo.
+* **Obsidian Local REST API** — optional; needed only to write the report straight into an
+  Obsidian vault. Without it the report is saved to `./reports/{testRunId}.md`.
+
+**Run it** from a Claude Code session in this repo by invoking the skill explicitly:
+
+```text
+/perfana-report
+
+# or describe the task — e.g.
+analyse test run PerfanaWebshop-acc-loadTest-00003 and write a report
+```
+
+The skill asks for a run ID (and optional baseline) and whether to write to Obsidian or a
+local file, then runs the investigation end-to-end. See
+`.claude/skills/perfana-report/README.md` for full details.
+
 ## Exploring the Environment
 
 ### Perfana

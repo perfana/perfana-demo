@@ -37,7 +37,7 @@ Add to your Claude Code MCP config (`~/.claude/claude_desktop_config.json` or pr
 }
 ```
 
-To get an API key, go to the Perfana UI (http://localhost:4001) > Settings > API Keys.
+To get an API key, go to the Perfana UI (http://localhost:4000) > Settings > API Keys.
 
 #### Auto-allow all Perfana MCP tools
 
