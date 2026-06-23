@@ -1,42 +1,144 @@
 {
-  "request": {
-    "method": "GET",
-    "urlPath": "/api/v2/entities"
-  },
-  "response": {
-    "status": 200,
-    "headers": {
-      "Content-Type": "application/json"
-    },
-    "jsonBody": {
-      "entities": [
-        {
-          "entityId": "HOST-123",
-          "displayName": "afterburner-be",
-          "type": "HOST",
-          "tags": [
-            {"key": "environment", "value": "acc"}
-          ],
-          "properties": {
-            "osType": "LINUX"
-          }
-        },
-        {
-          "entityId": "SERVICE-123",
-          "displayName": "afterburner-be",
-          "type": "SERVICE",
-          "tags": [
-            {"key": "environment", "value": "acc"}
-          ],
-          "properties": {
-            "serviceType": "WEB_REQUEST_SERVICE",
-            "webServiceName": "afterburner-be",
-            "webServiceNamespace": "default"
-          }
+  "mappings": [
+    {
+      "priority": 1,
+      "request": {
+        "method": "GET",
+        "urlPath": "/api/v2/entities",
+        "queryParameters": {
+          "entitySelector": { "contains": "type(\"HOST\")" }
         }
-      ],
-      "totalCount": 2,
-      "pageSize": 50
+      },
+      "response": {
+        "status": 200,
+        "headers": { "Content-Type": "application/json" },
+        "jsonBody": {
+          "entities": [
+            {
+              "entityId": "HOST-123",
+              "displayName": "afterburner-be",
+              "type": "HOST",
+              "tags": [
+                {"key": "environment", "value": "acc"},
+                {"key": "role", "value": "backend"},
+                {"key": "region", "value": "eu-west"}
+              ],
+              "properties": { "osType": "LINUX" }
+            },
+            {
+              "entityId": "HOST-456",
+              "displayName": "afterburner-fe",
+              "type": "HOST",
+              "tags": [
+                {"key": "environment", "value": "acc"},
+                {"key": "role", "value": "frontend"},
+                {"key": "region", "value": "eu-west"}
+              ],
+              "properties": { "osType": "LINUX" }
+            },
+            {
+              "entityId": "HOST-789",
+              "displayName": "afterburner-be-2",
+              "type": "HOST",
+              "tags": [
+                {"key": "environment", "value": "acc"},
+                {"key": "role", "value": "backend"},
+                {"key": "region", "value": "eu-west"}
+              ],
+              "properties": { "osType": "LINUX" }
+            },
+            {
+              "entityId": "HOST-901",
+              "displayName": "afterburner-be-prod",
+              "type": "HOST",
+              "tags": [
+                {"key": "environment", "value": "prod"},
+                {"key": "role", "value": "backend"},
+                {"key": "region", "value": "us-east"}
+              ],
+              "properties": { "osType": "LINUX" }
+            }
+          ],
+          "totalCount": 4,
+          "pageSize": 50
+        }
+      }
+    },
+    {
+      "priority": 1,
+      "request": {
+        "method": "GET",
+        "urlPath": "/api/v2/entities",
+        "queryParameters": {
+          "entitySelector": { "contains": "type(\"SERVICE\")" }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": { "Content-Type": "application/json" },
+        "jsonBody": {
+          "entities": [
+            {
+              "entityId": "SERVICE-123",
+              "displayName": "afterburner-be",
+              "type": "SERVICE",
+              "tags": [
+                {"key": "environment", "value": "acc"},
+                {"key": "role", "value": "backend"}
+              ],
+              "properties": {
+                "serviceType": "WEB_REQUEST_SERVICE",
+                "webServiceName": "afterburner-be",
+                "webServiceNamespace": "default"
+              }
+            }
+          ],
+          "totalCount": 1,
+          "pageSize": 50
+        }
+      }
+    },
+    {
+      "priority": 10,
+      "request": {
+        "method": "GET",
+        "urlPath": "/api/v2/entities"
+      },
+      "response": {
+        "status": 200,
+        "headers": { "Content-Type": "application/json" },
+        "jsonBody": {
+          "entities": [
+            {
+              "entityId": "HOST-123",
+              "displayName": "afterburner-be",
+              "type": "HOST",
+              "tags": [
+                {"key": "environment", "value": "acc"},
+                {"key": "role", "value": "backend"},
+                {"key": "region", "value": "eu-west"}
+              ],
+              "properties": { "osType": "LINUX" }
+            },
+            {
+              "entityId": "SERVICE-123",
+              "displayName": "afterburner-be",
+              "type": "SERVICE",
+              "tags": [
+                {"key": "environment", "value": "acc"},
+                {"key": "role", "value": "backend"}
+              ],
+              "properties": {
+                "serviceType": "WEB_REQUEST_SERVICE",
+                "webServiceName": "afterburner-be",
+                "webServiceNamespace": "default"
+              }
+            }
+          ],
+          "totalCount": 2,
+          "pageSize": 50
+        }
+      }
     }
-  }
+  ]
 }
