@@ -623,8 +623,8 @@ echo ""
 #               Regressions in response times, throughput, or resources are flagged.
 #
 # Strategy used in this init script:
-#   1. Runs 1 & 2  → BASELINE mode  (establishes the control group)
-#   2. Run 3+      → DEFAULT mode   (regression detection active)
+#   1. Runs 1-3    → BASELINE mode  (establishes the control group)
+#   2. Run 4+      → DEFAULT mode   (regression detection active)
 #
 # The SUT, test environment, and workload are pre-created above via POST /api/systems-under-test
 # (with environments pre-seeded), so ADAPT mode and all seed data are configured before the
@@ -634,6 +634,9 @@ echo "Running first baseline load tests..."
 ./deploy-and-test-jmeter.sh baseline
 
 echo "Running second baseline load tests..."
+./deploy-and-test-jmeter.sh baseline
+
+echo "Running third baseline load tests..."
 ./deploy-and-test-jmeter.sh baseline
 
 # ================================================================================================
