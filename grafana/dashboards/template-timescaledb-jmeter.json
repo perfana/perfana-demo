@@ -2049,7 +2049,7 @@
           "custom": {
             "align": "auto",
             "cellOptions": {
-              "type": "auto"
+              "type": "color-background"
             },
             "filterable": false,
             "footer": {
@@ -2074,17 +2074,347 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
+                "color": "transparent"
               }
             ]
-          }
+          },
+          "unit": "ms"
         },
         "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Transaction"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 220
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Transaction Analysis",
+                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?var-runId=${runId}&var-granularity=${granularity}&var-transaction=${__data.fields.Transaction}&${__url_time_range}&kiosk=true"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Min"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "dark-green"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgAll"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "dark-green"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgOk"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "transparent"
+                    },
+                    {
+                      "color": "dark-green",
+                      "value": 0
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Max"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "dark-green"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "90%"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "dark-green"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "95%"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "dark-green"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "99%"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "dark-green"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failed"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "transparent"
+                    },
+                    {
+                      "color": "dark-yellow",
+                      "value": 1
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 10
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 50
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 150
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Passed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              }
+            ]
+          },
           {
             "matcher": {
               "id": "byName",
@@ -2098,28 +2428,29 @@
               {
                 "id": "decimals",
                 "value": 2
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Transaction"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 501
               },
               {
-                "id": "links",
-                "value": [
-                  {
-                    "targetBlank": true,
-                    "title": "Transaction Analysis",
-                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?var-runId=${runId}&var-granularity=${granularity}&var-transaction=${__data.fields.Transaction}&${__url_time_range}&kiosk=true"
-                  }
-                ]
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "transparent"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 0.01
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 0.05
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 0.15
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -2152,7 +2483,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  transaction_name,\n  min(min_rt) AS min_response_time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS avg_response_time,\n  max(max_rt) AS max_response_time,\n  sum(n) AS total,\n  sum(n_ok) AS passed,\n  sum(n_err) AS failed,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS error_percentage\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  transaction_name,\n  min(min_rt) AS min_response_time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS avg_all,\n  ROUND(sum(sum_rt_ok)::numeric / NULLIF(sum(n_ok), 0)) AS avg_ok,\n  max(max_rt) AS max_response_time,\n  ROUND(approx_percentile(0.90, rollup(pct_agg))::numeric) AS p90,\n  ROUND(approx_percentile(0.95, rollup(pct_agg))::numeric) AS p95,\n  ROUND(approx_percentile(0.99, rollup(pct_agg))::numeric) AS p99,\n  sum(n) AS total,\n  sum(n_ok) AS passed,\n  sum(n_err) AS failed,\n  ROUND(sum(n_err)::numeric / NULLIF(sum(n), 0), 4) AS error_percentage\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -2179,34 +2510,39 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "Time": true
+              "Time": true,
+              "min_response_time": true,
+              "passed": true
             },
             "includeByName": {},
             "indexByName": {
               "transaction_name": 0,
               "min_response_time": 1,
-              "avg_response_time": 2,
-              "max_response_time": 3,
-              "total": 4,
-              "passed": 5,
-              "failed": 6,
-              "error_percentage": 7
+              "avg_all": 2,
+              "avg_ok": 3,
+              "max_response_time": 4,
+              "p90": 5,
+              "p95": 6,
+              "p99": 7,
+              "total": 8,
+              "passed": 9,
+              "failed": 10,
+              "error_percentage": 11
             },
             "renameByName": {
-              "Error": "Error",
-              "Total": "Total",
-              "avg_response_time": "Avg",
-              "count": "Passed",
-              "error_percentage": "Error (%)",
-              "failed": "Failed",
-              "max": "Max",
-              "max_response_time": "Max",
-              "mean": "Average",
-              "min": "Min",
+              "transaction_name": "Transaction",
+              "sampler_name": "Sampler",
               "min_response_time": "Min",
-              "passed": "Passed",
+              "avg_all": "AvgAll",
+              "avg_ok": "AvgOk",
+              "max_response_time": "Max",
+              "p90": "90%",
+              "p95": "95%",
+              "p99": "99%",
               "total": "Total",
-              "transaction_name": "Transaction"
+              "passed": "Passed",
+              "failed": "Failed",
+              "error_percentage": "Error (%)"
             }
           }
         }
@@ -2819,7 +3155,7 @@
           "custom": {
             "align": "auto",
             "cellOptions": {
-              "type": "auto"
+              "type": "color-background"
             },
             "filterable": false,
             "footer": {
@@ -2844,37 +3180,13 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Error (%)"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "percentunit"
-              },
-              {
-                "id": "decimals",
-                "value": 2
-              },
-              {
-                "id": "custom.width",
-                "value": 118
+                "color": "transparent"
               }
             ]
           },
+          "unit": "ms"
+        },
+        "overrides": [
           {
             "matcher": {
               "id": "byName",
@@ -2883,7 +3195,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 606
+                "value": 220
               },
               {
                 "id": "links",
@@ -2905,7 +3217,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 230
+                "value": 220
               },
               {
                 "id": "links",
@@ -2926,20 +3238,105 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 111
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "dark-green"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Avg"
+              "options": "AvgAll"
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 108
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "dark-green"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgOk"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "transparent"
+                    },
+                    {
+                      "color": "dark-green",
+                      "value": 0
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
               }
             ]
           },
@@ -2950,32 +3347,136 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 102
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "dark-green"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Total"
+              "options": "90%"
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 96
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "dark-green"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Passed"
+              "options": "95%"
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 99
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "dark-green"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "99%"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "dark-green"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 3000
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 5000
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 10000
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "ms"
               }
             ]
           },
@@ -2986,8 +3487,98 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 95
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "transparent"
+                    },
+                    {
+                      "color": "dark-yellow",
+                      "value": 1
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 10
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 50
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 150
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Passed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Error (%)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "transparent"
+                    },
+                    {
+                      "color": "dark-orange",
+                      "value": 0.01
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 0.05
+                    },
+                    {
+                      "color": "dark-purple",
+                      "value": 0.15
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -3021,7 +3612,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  sampler_name,\n  transaction_name,\n  min(min_rt) AS min_response_time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS avg_response_time,\n  max(max_rt) AS max_response_time,\n  sum(n) AS total,\n  sum(n_ok) AS passed,\n  sum(n_err) AS failed,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS error_percentage\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "rawSql": "SELECT\n  sampler_name,\n  transaction_name,\n  min(min_rt) AS min_response_time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS avg_all,\n  ROUND(sum(sum_rt_ok)::numeric / NULLIF(sum(n_ok), 0)) AS avg_ok,\n  max(max_rt) AS max_response_time,\n  ROUND(approx_percentile(0.90, rollup(pct_agg))::numeric) AS p90,\n  ROUND(approx_percentile(0.95, rollup(pct_agg))::numeric) AS p95,\n  ROUND(approx_percentile(0.99, rollup(pct_agg))::numeric) AS p99,\n  sum(n) AS total,\n  sum(n_ok) AS passed,\n  sum(n_err) AS failed,\n  ROUND(sum(n_err)::numeric / NULLIF(sum(n), 0), 4) AS error_percentage\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -3048,38 +3639,40 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "Time": true
+              "Time": true,
+              "min_response_time": true,
+              "passed": true
             },
             "includeByName": {},
             "indexByName": {
               "sampler_name": 0,
               "transaction_name": 1,
               "min_response_time": 2,
-              "avg_response_time": 3,
-              "max_response_time": 4,
-              "total": 5,
-              "passed": 6,
-              "failed": 7,
-              "error_percentage": 8
+              "avg_all": 3,
+              "avg_ok": 4,
+              "max_response_time": 5,
+              "p90": 6,
+              "p95": 7,
+              "p99": 8,
+              "total": 9,
+              "passed": 10,
+              "failed": 11,
+              "error_percentage": 12
             },
             "renameByName": {
-              "Error": "Failed",
-              "Total": "Total",
-              "avg_response_time": "Avg",
-              "count": "Passed",
-              "error_percentage": "Error (%)",
-              "failed": "Failed",
-              "max": "Max",
-              "max_response_time": "Max",
-              "mean": "Average",
-              "min": "Min",
-              "min_response_time": "Min",
-              "passed": "Passed",
-              "samplerName": "",
+              "transaction_name": "Transaction",
               "sampler_name": "Sampler",
+              "min_response_time": "Min",
+              "avg_all": "AvgAll",
+              "avg_ok": "AvgOk",
+              "max_response_time": "Max",
+              "p90": "90%",
+              "p95": "95%",
+              "p99": "99%",
               "total": "Total",
-              "transactionName": "",
-              "transaction_name": "Transaction"
+              "passed": "Passed",
+              "failed": "Failed",
+              "error_percentage": "Error (%)"
             }
           }
         }
