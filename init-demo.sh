@@ -460,22 +460,8 @@ else
   if [ -n "$sut_id" ] && [ "$sut_id" != "null" ]; then
     echo "       System Under Test ready: $sut_id"
 
-    # Set ADAPT mode to BASELINE before the first run — the workload now exists
-    echo "       Setting ADAPT mode to BASELINE (control group build-up)..."
-    adapt_result=$(curl -sf -X PUT 'http://localhost:3001/api/test-runs/workload-adapt-settings' \
-      -H "Authorization: Bearer $auth_token" \
-      -H 'Content-Type: application/json' \
-      -d "{
-        \"systemUnderTestId\": \"$sut_id\",
-        \"testEnvironment\": \"acc\",
-        \"workload\": \"loadTest\",
-        \"adaptMode\": \"BASELINE\"
-      }" 2>/dev/null)
-    if echo "$adapt_result" | jq -e '.adaptMode == "BASELINE"' > /dev/null 2>&1; then
-      echo "       ADAPT mode set to BASELINE"
-    else
-      echo "       WARNING: Could not set ADAPT mode to BASELINE"
-    fi
+    # No need to pre-set BASELINE: the API forces BASELINE for the first run of a
+    # sut/test-environment/workload combination automatically (perfana#407).
 
     tempo_id=$(curl -sf 'http://localhost:3001/api/tracing-instances' \
       -H "Authorization: Bearer $auth_token" | jq -r '.[0].id' 2>/dev/null)
@@ -623,12 +609,17 @@ echo ""
 #               Regressions in response times, throughput, or resources are flagged.
 #
 # Strategy used in this init script:
-#   1. Runs 1-3    → BASELINE mode  (establishes the control group)
-#   2. Run 4+      → DEFAULT mode   (regression detection active)
+#   Run 1   → BASELINE  — forced automatically by the API (perfana#407): the first run of a
+#             sut/test-environment/workload combination has nothing to compare against, so it is
+#             always seeded as the control-group baseline regardless of requested mode.
+#   Run 2+  → DEFAULT   — workload default; regression detection active.
+#
+# Because the API self-seeds the first baseline, the demo no longer pre-sets BASELINE mode. The
+# three baseline (good) runs below still build run history; only run 1 anchors the control group,
+# so runs 2-3 are already evaluated in DEFAULT (an intentionally thin early baseline).
 #
 # The SUT, test environment, and workload are pre-created above via POST /api/systems-under-test
-# (with environments pre-seeded), so ADAPT mode and all seed data are configured before the
-# first run starts.
+# (with environments pre-seeded), so all seed data is configured before the first run starts.
 # ================================================================================================
 echo "Running first baseline load tests..."
 ./deploy-and-test-jmeter.sh baseline
@@ -640,11 +631,13 @@ echo "Running third baseline load tests..."
 ./deploy-and-test-jmeter.sh baseline
 
 # ================================================================================================
-# Switch ADAPT mode to DEFAULT (regression detection) before running tests with injected issues.
+# Explicitly set ADAPT mode to DEFAULT (regression detection) before the injected-issue runs.
+# The workload is already DEFAULT (run 1 was auto-seeded as BASELINE by the API), but we set it
+# explicitly so regression detection is guaranteed active regardless of any prior workload state.
 # In DEFAULT mode, ADAPT compares each new run against the last 10 successful baseline runs and
 # automatically flags regressions in response times, throughput, or resource utilisation.
 # ================================================================================================
-echo "Switching ADAPT mode to DEFAULT (regression detection)..."
+echo "Ensuring ADAPT mode is DEFAULT (regression detection)..."
 
 # Re-authenticate: the JWT (5 min lifespan) will have expired during the second load test
 adapt_auth_token=$(curl -sf 'http://localhost:8080/realms/perfana-prod/protocol/openid-connect/token' \
