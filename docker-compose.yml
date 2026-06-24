@@ -101,7 +101,7 @@ services:
 
   # Database Migration Runner - runs TypeORM migrations then exits
   perfana-migration:
-    image: perfana/perfana-migration:0.2.61.15
+    image: perfana/perfana-migration:0.2.61.17
     container_name: perfana-migration
     environment:
       DB_HOST: postgres
@@ -122,7 +122,7 @@ services:
 
   # Next.js Frontend
   perfana-web:
-    image: perfana/perfana-web:0.2.61.15
+    image: perfana/perfana-web:0.2.61.17
     container_name: perfana-web
     ports:
       - "4000:3000"
@@ -161,7 +161,7 @@ services:
 
   # NestJS API Backend
   perfana-api:
-    image: perfana/perfana-api:0.2.61.15
+    image: perfana/perfana-api:0.2.61.17
     container_name: perfana-api
     ports:
       - "3001:3001"
@@ -229,7 +229,7 @@ services:
 
   # BullMQ Worker for Pipeline Processing
   perfana-worker:
-    image: perfana/perfana-worker:0.2.61.15
+    image: perfana/perfana-worker:0.2.61.17
     container_name: perfana-worker
     networks:
       - perfana
@@ -271,7 +271,7 @@ services:
 
   # Grafana Dashboard Synchronization
   perfana-grafana-sync:
-    image: perfana/perfana-grafana-sync:0.2.61.15
+    image: perfana/perfana-grafana-sync:0.2.61.17
     container_name: perfana-grafana-sync
     networks:
       - perfana
@@ -314,7 +314,7 @@ services:
 
   # PDF Report Generation Service
   perfana-report:
-    image: perfana/perfana-report:0.2.61.15
+    image: perfana/perfana-report:0.2.61.17
     container_name: perfana-report
     networks:
       - perfana
