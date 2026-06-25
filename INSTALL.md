@@ -13,20 +13,32 @@ tooling. Add any further Grafana data sources from the Grafana UI after install.
 
 ## Table of contents
 
-1. [What gets deployed](#1-what-gets-deployed)
-2. [Sizing & prerequisites](#2-sizing--prerequisites)
-3. [The dedicated share](#3-the-dedicated-share)
-4. [Install WSL2 on Windows Server 2025](#4-install-wsl2-on-windows-server-2025)
-5. [Allocate resources to WSL2 (`.wslconfig`)](#5-allocate-resources-to-wsl2-wslconfig)
-6. [Prepare the dedicated share inside WSL](#6-prepare-the-dedicated-share-inside-wsl)
-7. [Install Docker Engine CE in WSL](#7-install-docker-engine-ce-in-wsl)
-8. [Point Docker storage at the dedicated share](#8-point-docker-storage-at-the-dedicated-share)
-9. [Deploy Perfana](#9-deploy-perfana)
-10. [Access Perfana](#10-access-perfana)
-11. [Start automatically on boot](#11-start-automatically-on-boot)
-12. [Backups](#12-backups)
-13. [Upgrades](#13-upgrades)
-14. [Troubleshooting](#14-troubleshooting)
+- [Installing Perfana on Windows Server 2025 (WSL2 + Docker Engine CE)](#installing-perfana-on-windows-server-2025-wsl2--docker-engine-ce)
+  - [Table of contents](#table-of-contents)
+  - [1. What gets deployed](#1-what-gets-deployed)
+  - [2. Sizing \& prerequisites](#2-sizing--prerequisites)
+  - [3. The dedicated share](#3-the-dedicated-share)
+  - [4. Install WSL2 on Windows Server 2025](#4-install-wsl2-on-windows-server-2025)
+  - [5. Allocate resources to WSL2 (`.wslconfig`)](#5-allocate-resources-to-wsl2-wslconfig)
+  - [6. Prepare the dedicated share inside WSL](#6-prepare-the-dedicated-share-inside-wsl)
+    - [Option A — dedicated ext4 VHDX (recommended)](#option-a--dedicated-ext4-vhdx-recommended)
+    - [Option B — directory on the distro disk (simpler)](#option-b--directory-on-the-distro-disk-simpler)
+  - [7. Install Docker Engine CE in WSL](#7-install-docker-engine-ce-in-wsl)
+    - [7.1 Enable systemd](#71-enable-systemd)
+    - [7.2 Install Docker CE from Docker's official repository](#72-install-docker-ce-from-dockers-official-repository)
+    - [7.3 Enable and start Docker, allow your user to run it](#73-enable-and-start-docker-allow-your-user-to-run-it)
+  - [8. Point Docker storage at the dedicated share](#8-point-docker-storage-at-the-dedicated-share)
+  - [9. Deploy Perfana](#9-deploy-perfana)
+    - [9.1 Get the deployment repository onto the share](#91-get-the-deployment-repository-onto-the-share)
+    - [9.2 Configure `.env`](#92-configure-env)
+    - [9.3 Start the stack](#93-start-the-stack)
+    - [9.4 Run first-run bootstrap (once)](#94-run-first-run-bootstrap-once)
+    - [9.5 Verify](#95-verify)
+  - [10. Access Perfana](#10-access-perfana)
+  - [11. Start automatically on boot](#11-start-automatically-on-boot)
+  - [12. Backups](#12-backups)
+  - [13. Upgrades](#13-upgrades)
+  - [14. Troubleshooting](#14-troubleshooting)
 
 ---
 
@@ -166,6 +178,12 @@ memory=20GB
 # Swap on the WSL2 VM. Helps avoid OOM kills during PDF generation / analysis spikes.
 swap=8GB
 
+# Mirrored networking: WSL2 shares the host's network interfaces, so a container port
+# published on 0.0.0.0 is reachable on the server's LAN IP without netsh portproxy rules
+# (which otherwise break on every reboot because the NAT-mode WSL IP changes). Required if
+# you expose PostgreSQL to other hosts — see step 9.6.
+networkingMode=mirrored
+
 # Reclaim unused RAM back to Windows over time (Windows 11/Server 2025).
 [experimental]
 autoMemoryReclaim=gradual
@@ -204,9 +222,9 @@ Create and attach a virtual disk that lives wherever you want the data on the Wi
 
 ```powershell
 # Create a 200 GB dynamically-expanding VHDX on the data drive.
-$vhd = "D:\perfana\perfana-data.vhdx"
+$vhd = "G:\perfana\perfana-data.vhdx"
 New-Item -ItemType Directory -Force -Path (Split-Path $vhd) | Out-Null
-New-VHD -Path $vhd -Dynamic -SizeBytes 200GB
+New-VHD -Path $vhd -Dynamic -SizeBytes 500GB
 
 # Attach it into WSL (bare-mounts it for formatting/mounting in Linux).
 wsl --mount --vhd $vhd --bare
@@ -286,7 +304,7 @@ Re-open Ubuntu, then confirm: `systemctl is-system-running` (expect `running` or
 ```bash
 # Prereqs
 sudo apt-get update
-sudo apt-get install -y ca-certificates curl gnupg jq
+sudo apt-get install -y ca-certificates curl gnupg jq git
 
 # Docker's GPG key
 sudo install -m 0755 -d /etc/apt/keyrings
@@ -416,6 +434,39 @@ docker compose ps                                        # all services Up/healt
 ```
 
 Then browse to `\<PERFANA_SCHEME\>://\<PERFANA_HOST\>:4001` and log in with `PERFANA_ADMIN_USER`.
+
+### 9.6 Expose PostgreSQL to other hosts (optional)
+
+By default PostgreSQL is published on `127.0.0.1:5432` and is **not** reachable from the network —
+other hosts go through the Perfana API, not the database directly. Only do this if you have a
+deliberate need (e.g. an external BI tool or a remote load generator querying the DB).
+
+> ⚠️ This puts the database on the network. Auth is `scram-sha-256`, but scope the firewall rule
+> to known source IPs and use a strong `POSTGRES_PASSWORD`.
+
+This requires `networkingMode=mirrored` in `.wslconfig` ([step 5](#5-allocate-resources-to-wsl2-wslconfig)) —
+in mirrored mode a `0.0.0.0` container bind is reachable on the server's LAN IP directly, with no
+`netsh portproxy` rule to maintain.
+
+1. **Publish the port on all interfaces** — in `docker-compose.yml`, drop the `127.0.0.1:` prefix
+   from the `postgres` service:
+   ```yaml
+       ports:
+         - "5432:5432"
+   ```
+   Re-apply with `./start.sh` (or `docker compose up -d postgres`).
+
+2. **Open the Windows firewall**, scoped to the hosts that need access (PowerShell, as Administrator):
+   ```powershell
+   New-NetFirewallRule -DisplayName "Perfana Postgres 5432" -Direction Inbound `
+     -Protocol TCP -LocalPort 5432 -Action Allow `
+     -RemoteAddress 10.0.0.0/24       # <-- restrict to your client subnet
+   ```
+
+3. **Verify from another host:**
+   ```powershell
+   Test-NetConnection <THIS-SERVER-IP> -Port 5432   # TcpTestSucceeded : True
+   ```
 
 ---
 
