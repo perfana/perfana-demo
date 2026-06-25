@@ -46,7 +46,7 @@ tooling. Add any further Grafana data sources from the Grafana UI after install.
 
 | Service | Image | Purpose | Browser port |
 |---|---|---|---|
-| `postgres` | timescale/timescaledb-ha:pg15 | Perfana + Keycloak + Grafana databases | 5432 (loopback) |
+| `postgres` | timescale/timescaledb-ha:pg15 | Perfana + Keycloak + Grafana databases | 5432 (LAN) |
 | `keycloak` | quay.io/keycloak/keycloak:24.0 | Authentication / SSO | 8080 |
 | `perfana-migration` | perfana/perfana-migration | One-shot DB migrations | — |
 | `perfana-api` | perfana/perfana-api | REST API (NestJS) | 3001 |
@@ -58,7 +58,8 @@ tooling. Add any further Grafana data sources from the Grafana UI after install.
 | `grafana` | grafana/grafana:12.4 | Metric access for Perfana | 3100 (`GRAFANA_PORT`) |
 
 Grafana provisions only Perfana's own TimescaleDB data source; add others from the Grafana UI.
-PostgreSQL and Valkey are bound to `127.0.0.1` and are not reachable from the network.
+PostgreSQL is published on the LAN (see [step 9.6](#96-expose-postgresql-to-other-hosts)); Valkey is
+bound to `127.0.0.1` and is not reachable from the network.
 
 ---
 
@@ -180,8 +181,8 @@ swap=8GB
 
 # Mirrored networking: WSL2 shares the host's network interfaces, so a container port
 # published on 0.0.0.0 is reachable on the server's LAN IP without netsh portproxy rules
-# (which otherwise break on every reboot because the NAT-mode WSL IP changes). Required if
-# you expose PostgreSQL to other hosts — see step 9.6.
+# (which otherwise break on every reboot because the NAT-mode WSL IP changes). Required —
+# PostgreSQL is published on the LAN (see step 9.6).
 networkingMode=mirrored
 
 # Reclaim unused RAM back to Windows over time (Windows 11/Server 2025).
@@ -435,35 +436,27 @@ docker compose ps                                        # all services Up/healt
 
 Then browse to `\<PERFANA_SCHEME\>://\<PERFANA_HOST\>:4001` and log in with `PERFANA_ADMIN_USER`.
 
-### 9.6 Expose PostgreSQL to other hosts (optional)
+### 9.6 Expose PostgreSQL to other hosts
 
-By default PostgreSQL is published on `127.0.0.1:5432` and is **not** reachable from the network —
-other hosts go through the Perfana API, not the database directly. Only do this if you have a
-deliberate need (e.g. an external BI tool or a remote load generator querying the DB).
+This deployment publishes PostgreSQL on the network so other hosts can query the database directly
+(e.g. external BI tools, remote load generators). `docker-compose.yml` already binds `5432` on all
+interfaces; two host-side steps make it reachable from the LAN.
 
-> ⚠️ This puts the database on the network. Auth is `scram-sha-256`, but scope the firewall rule
-> to known source IPs and use a strong `POSTGRES_PASSWORD`.
+> ⚠️ This puts the database on the network. Auth is `scram-sha-256` — scope the firewall rule to
+> known source IPs and use a strong `POSTGRES_PASSWORD`.
 
-This requires `networkingMode=mirrored` in `.wslconfig` ([step 5](#5-allocate-resources-to-wsl2-wslconfig)) —
-in mirrored mode a `0.0.0.0` container bind is reachable on the server's LAN IP directly, with no
+It relies on `networkingMode=mirrored` in `.wslconfig` ([step 5](#5-allocate-resources-to-wsl2-wslconfig)) —
+in mirrored mode the `0.0.0.0` container bind is reachable on the server's LAN IP directly, with no
 `netsh portproxy` rule to maintain.
 
-1. **Publish the port on all interfaces** — in `docker-compose.yml`, drop the `127.0.0.1:` prefix
-   from the `postgres` service:
-   ```yaml
-       ports:
-         - "5432:5432"
-   ```
-   Re-apply with `./start.sh` (or `docker compose up -d postgres`).
-
-2. **Open the Windows firewall**, scoped to the hosts that need access (PowerShell, as Administrator):
+1. **Open the Windows firewall**, scoped to the hosts that need access (PowerShell, as Administrator):
    ```powershell
    New-NetFirewallRule -DisplayName "Perfana Postgres 5432" -Direction Inbound `
      -Protocol TCP -LocalPort 5432 -Action Allow `
      -RemoteAddress 10.0.0.0/24       # <-- restrict to your client subnet
    ```
 
-3. **Verify from another host:**
+2. **Verify from another host:**
    ```powershell
    Test-NetConnection <THIS-SERVER-IP> -Port 5432   # TcpTestSucceeded : True
    ```

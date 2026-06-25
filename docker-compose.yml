@@ -14,11 +14,12 @@ services:
       POSTGRES_USER: perfana
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
-    # Bound to the loopback interface only. Other hosts reach the database
-    # through the application, not directly. Remove the "127.0.0.1:" prefix
-    # only if you deliberately want to expose PostgreSQL on the network.
+    # Published on all interfaces so other hosts on the network can reach the database
+    # directly (e.g. external BI tools, remote load generators). Requires WSL2 mirrored
+    # networking and a scoped firewall rule — see INSTALL.md step 9.6. Auth is scram-sha-256;
+    # use a strong POSTGRES_PASSWORD.
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/home/postgres/pgdata
       - ./database/init:/docker-entrypoint-initdb.d/
