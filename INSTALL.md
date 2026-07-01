@@ -130,6 +130,21 @@ Throughout this guide the dedicated share is mounted at **`/srv/perfana`**. Adju
 
 Open **PowerShell as Administrator**.
 
+> **Behind a corporate proxy?** `wsl --install` / `wsl --update` download the WSL2 kernel and the
+> distro image from Microsoft over HTTPS and will fail if outbound traffic is proxied. This runs on
+> the **Windows** side, so it uses the Windows **WinHTTP** system proxy (separate from the browser
+> proxy) — set it first, in the same admin PowerShell (replace host/port):
+>
+> ```powershell
+> netsh winhttp set proxy proxy-server="http://proxy.example.com:3128" bypass-list="localhost;127.0.0.1"
+> netsh winhttp show proxy          # verify
+> # Or import the browser's proxy:  netsh winhttp import proxy source=ie
+> ```
+>
+> The Linux-side proxy settings ([7.2](#72-install-docker-ce-from-dockers-official-repository),
+> [7.3](#73-enable-and-start-docker-allow-your-user-to-run-it),
+> [9.1](#91-get-the-deployment-repository-onto-the-share)) are still needed once you're inside WSL.
+
 ```powershell
 # Installs the WSL2 platform + a default Ubuntu distro and sets WSL2 as default.
 wsl --install -d Ubuntu-24.04
