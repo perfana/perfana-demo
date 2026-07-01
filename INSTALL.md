@@ -302,6 +302,22 @@ Re-open Ubuntu, then confirm: `systemctl is-system-running` (expect `running` or
 > `docker.io` package (older, no Compose v2) and over the `get.docker.com` convenience script
 > (handy for throwaway setups, but Docker advises against it for production).
 
+> **Behind a corporate proxy?** If the server reaches the internet only through an HTTP proxy,
+> point `apt` at it before running the commands below — otherwise `apt-get update` and the
+> `curl` GPG fetch will hang. Create a drop-in (replace host/port, and `user:pass@` if the proxy
+> needs auth):
+>
+> ```bash
+> sudo tee /etc/apt/apt.conf.d/95proxy > /dev/null <<'EOF'
+> Acquire::http::Proxy "http://proxy.example.com:3128";
+> Acquire::https::Proxy "http://proxy.example.com:3128";
+> EOF
+> ```
+>
+> `curl` reads `http_proxy` / `https_proxy` from the environment instead, so also
+> `export https_proxy=http://proxy.example.com:3128` in the shell for the GPG-key step.
+> (The Docker **daemon** needs its own proxy config for image pulls — see [step 7.3](#73-enable-and-start-docker-allow-your-user-to-run-it).)
+
 ```bash
 # Prereqs
 sudo apt-get update
@@ -329,6 +345,21 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 sudo systemctl enable --now docker
 sudo usermod -aG docker "$USER"
 ```
+
+> **Behind a corporate proxy?** The Docker daemon pulls images through its own proxy config
+> (not `apt`'s from [step 7.2](#72-install-docker-ce-from-dockers-official-repository)). Add a
+> systemd drop-in before starting the stack, replacing host/port (and `user:pass@` if needed):
+>
+> ```bash
+> sudo mkdir -p /etc/systemd/system/docker.service.d
+> sudo tee /etc/systemd/system/docker.service.d/http-proxy.conf > /dev/null <<'EOF'
+> [Service]
+> Environment="HTTP_PROXY=http://proxy.example.com:3128"
+> Environment="HTTPS_PROXY=http://proxy.example.com:3128"
+> Environment="NO_PROXY=localhost,127.0.0.1"
+> EOF
+> sudo systemctl daemon-reload && sudo systemctl restart docker
+> ```
 
 Close and reopen the WSL shell (so the `docker` group applies), then verify:
 
