@@ -410,6 +410,19 @@ cd app
 self-contained: `docker-compose.yml`, `.env.example`, the `start/stop/update/bootstrap` scripts,
 and the `database/`, `keycloak/`, `grafana/`, `perfana/provisioning/` config directories.)
 
+> **Behind a corporate proxy?** `git` reads its own proxy setting (independent of `apt` and the
+> Docker daemon). Set it for HTTPS clones (replace host/port, and `user:pass@` if the proxy needs
+> auth):
+>
+> ```bash
+> git config --global http.proxy  http://proxy.example.com:3128
+> git config --global https.proxy http://proxy.example.com:3128
+> ```
+>
+> This proxies HTTPS remotes only. If you clone over **SSH** (`git@…`), Git ignores these — route
+> SSH through the proxy in `~/.ssh/config` instead, e.g.
+> `ProxyCommand nc -X connect -x proxy.example.com:3128 %h %p`.
+
 ### 9.2 Configure `.env`
 
 ```bash
