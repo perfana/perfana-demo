@@ -410,6 +410,20 @@ cd app
 self-contained: `docker-compose.yml`, `.env.example`, the `start/stop/update/bootstrap` scripts,
 and the `database/`, `keycloak/`, `grafana/`, `perfana/provisioning/` config directories.)
 
+**No Git access?** If the repo was copied to the Windows server instead (e.g. alongside the
+offline images in **`D:\installation folder\Perfana`**, mounted at `/mnt/d`), copy it onto the
+share rather than cloning:
+
+```bash
+# Note the quotes — the path contains a space.
+cp -r "/mnt/d/installation folder/Perfana/perfana-demo" /srv/perfana/app
+cd /srv/perfana/app
+```
+
+Copy it **into** the ext4 share as shown — don't run the stack straight from `/mnt/d` (the Windows
+9P filesystem is slow and lacks POSIX semantics, same reason as the images in
+[step 15](#15-load-docker-images-offline-air-gapped)).
+
 > **Behind a corporate proxy?** `git` reads its own proxy setting (independent of `apt` and the
 > Docker daemon). Set it for HTTPS clones (replace host/port, and `user:pass@` if the proxy needs
 > auth):
