@@ -39,6 +39,7 @@ tooling. Add any further Grafana data sources from the Grafana UI after install.
   - [12. Backups](#12-backups)
   - [13. Upgrades](#13-upgrades)
   - [14. Troubleshooting](#14-troubleshooting)
+  - [15. Load Docker images offline (air-gapped)](#15-load-docker-images-offline-air-gapped)
 
 ---
 
@@ -439,6 +440,10 @@ Edit `.env` and set **every** value. The important ones:
 
 ### 9.3 Start the stack
 
+> **Air-gapped server (no Docker Hub / registry access)?** Load the images from the offline
+> bundle first — see [15. Load Docker images offline (air-gapped)](#15-load-docker-images-offline-air-gapped) —
+> then run `./start.sh` as below.
+
 ```bash
 ./start.sh
 ```
@@ -628,3 +633,27 @@ docker stats                          # live CPU/RAM per container
 ./stop.sh                             # stop (keep data)
 ./stop.sh --volumes                   # stop and DELETE all data (destructive)
 ```
+
+---
+
+## 15. Load Docker images offline (air-gapped)
+
+If the server has no registry access, load the pre-saved image `.tar` files before running
+`./start.sh`. Place them in **`D:\installation folder\Perfana`** on the Windows server; from WSL the
+`D:` drive is mounted at `/mnt/d`:
+
+```bash
+# Note the quotes — the path contains a space.
+for f in "/mnt/d/installation folder/Perfana"/*.tar; do
+  docker load -i "$f"
+done
+
+docker images                         # confirm all 10 images are present
+```
+
+Then start the stack as in [9.3](#93-start-the-stack) — the images resolve locally and nothing is
+pulled.
+
+> Reading `.tar` files straight from `/mnt/d` is slow (Windows drive over the 9P filesystem). For
+> faster loads, copy the folder into WSL first —
+> `cp -r "/mnt/d/installation folder/Perfana" /srv/perfana/images` — and load from there.
