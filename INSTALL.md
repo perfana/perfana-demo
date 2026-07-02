@@ -234,7 +234,7 @@ free -h                     # "Mem" total should reflect "memory"
 ### Option A — dedicated ext4 VHDX (recommended)
 
 Create and attach a virtual disk that lives wherever you want the data on the Windows host
-(e.g. a separate data drive `D:`).
+(e.g. a separate data drive `G:`).
 
 **On the Windows host (PowerShell as Administrator):**
 
@@ -242,7 +242,7 @@ Create and attach a virtual disk that lives wherever you want the data on the Wi
 # Create a 500 GB dynamically-expanding VHDX on the data drive.
 $vhd = "G:\perfana\perfana-data.vhdx"
 New-Item -ItemType Directory -Force -Path (Split-Path $vhd) | Out-Null
-New-VHD -Path $vhd -Dynamic -SizeBytes 500GB
+New-VHD -Path $vhd -Fixed -SizeBytes 450GB
 
 # Attach it into WSL (bare-mounts it for formatting/mounting in Linux).
 wsl --mount --vhd $vhd --bare
@@ -272,11 +272,33 @@ the startup task from [step 11](#11-start-automatically-on-boot)) that runs befo
 used:
 
 ```powershell
-wsl --mount --vhd "D:\perfana\perfana-data.vhdx" --bare
+wsl --mount --vhd "G:\perfana\perfana-data.vhdx" --bare
 ```
 
 > To re-attach after a host reboot manually: run the `wsl --mount --vhd ... --bare` command again,
 > then `sudo mount -a` inside WSL.
+
+**Starting over — delete the VHDX and its data.** To wipe the share and recreate it from scratch
+(⚠️ **destroys all database, Keycloak, Grafana, and Valkey data** — back up first per
+[step 12](#12-backups) if you need it):
+
+1. Unmount the VHDX from WSL and shut WSL down (**PowerShell as Administrator**):
+
+   ```powershell
+   # Unmount whatever's currently attached (safe to run even if nothing is).
+   wsl --unmount
+   wsl --shutdown
+   ```
+
+2. Delete the VHDX file on the host:
+
+   ```powershell
+   $vhd = "G:\perfana\perfana-data.vhdx"
+   Remove-Item $vhd -Force
+   ```
+
+Then recreate it from the top of this Option A (and remove the stale `/etc/fstab` line if you're
+not reusing the same label/mount point).
 
 ### Option B — directory on the distro disk (simpler)
 
