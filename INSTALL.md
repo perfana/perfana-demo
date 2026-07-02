@@ -466,7 +466,7 @@ openssl rand -base64 24   # for POSTGRES_PASSWORD, admin passwords
 openssl rand -hex 32      # for ENCRYPTION_KEY and the client secrets
 ```
 
-Edit `.env` and set **every** value. The important ones:
+Edit `.env` (e.g. `nano .env`) and set **every** value. The important ones:
 
 | Variable | Set to |
 |---|---|
