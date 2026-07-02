@@ -34,6 +34,7 @@ tooling. Add any further Grafana data sources from the Grafana UI after install.
     - [9.3 Start the stack](#93-start-the-stack)
     - [9.4 Run first-run bootstrap (once)](#94-run-first-run-bootstrap-once)
     - [9.5 Verify](#95-verify)
+    - [9.6 Expose PostgreSQL to other hosts](#96-expose-postgresql-to-other-hosts)
   - [10. Access Perfana](#10-access-perfana)
   - [11. Start automatically on boot](#11-start-automatically-on-boot)
   - [12. Backups](#12-backups)
@@ -238,7 +239,7 @@ Create and attach a virtual disk that lives wherever you want the data on the Wi
 **On the Windows host (PowerShell as Administrator):**
 
 ```powershell
-# Create a 200 GB dynamically-expanding VHDX on the data drive.
+# Create a 500 GB dynamically-expanding VHDX on the data drive.
 $vhd = "G:\perfana\perfana-data.vhdx"
 New-Item -ItemType Directory -Force -Path (Split-Path $vhd) | Out-Null
 New-VHD -Path $vhd -Dynamic -SizeBytes 500GB
@@ -337,7 +338,7 @@ Re-open Ubuntu, then confirm: `systemctl is-system-running` (expect `running` or
 ```bash
 # Prereqs
 sudo apt-get update
-sudo apt-get install -y ca-certificates curl gnupg jq git
+sudo apt-get install -y ca-certificates curl gnupg jq git nano
 
 # Docker's GPG key
 sudo install -m 0755 -d /etc/apt/keyrings
