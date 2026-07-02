@@ -252,7 +252,7 @@ wsl --mount --vhd $vhd --bare
 
 ```bash
 lsblk                                   # identify the new device, e.g. /dev/sdc
-sudo mkfs.ext4 -L perfana /dev/sdc      # format ONCE (destroys the disk's contents)
+sudo mkfs.ext4 -L perfana /dev/sdd      # format ONCE (destroys the disk's contents)
 sudo mkdir -p /srv/perfana
 sudo mount /dev/disk/by-label/perfana /srv/perfana
 sudo chown -R "$USER":"$USER" /srv/perfana
