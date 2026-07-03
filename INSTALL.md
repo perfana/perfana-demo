@@ -626,20 +626,30 @@ wsl --mount --vhd "G:\perfana\perfana-data.vhdx" --bare
 wsl -d Ubuntu-24.04 -u root -e /srv/perfana/app/boot.sh
 ```
 
-Register the startup task (PowerShell as Administrator). **`-Force` makes this idempotent** — safe
-to run even if a `Perfana` task already exists, so you can (re-)apply it after an earlier install:
+Register the startup task (PowerShell as Administrator). Run it **as the admin user who installed
+WSL**, not `SYSTEM`: WSL distros are registered per-user, so a task running as `SYSTEM` looks for
+`Ubuntu-24.04` under `SYSTEM`'s profile, doesn't find it, and the boot silently does nothing.
+Replace `SERVERNAME\perfana-admin` with that account and its password. **`-Force` makes this
+idempotent** — safe to re-run even if a `Perfana` task already exists:
 
 ```powershell
 $action = New-ScheduledTaskAction -Execute "powershell.exe" `
   -Argument "-NoProfile -ExecutionPolicy Bypass -File G:\perfana\boot.ps1"
 $trigger = New-ScheduledTaskTrigger -AtStartup
-$principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
-Register-ScheduledTask -TaskName "Perfana" -Action $action -Trigger $trigger -Principal $principal -Force
+Register-ScheduledTask -TaskName "Perfana" -Action $action -Trigger $trigger `
+  -User "SERVERNAME\perfana-admin" -Password "<password>" -RunLevel Highest -Force
 ```
 
-> **Already set up the old single-task version?** Re-running the `Register-ScheduledTask` above
-> with `-Force` overwrites it in place (no need to unregister first). On **Option 6B** (no VHDX),
-> the `wsl --mount` line in `boot.ps1` simply no-ops — you can leave it or delete that line.
+> - **Which account?** Use the exact user that ran `wsl --install` and owns the `Ubuntu-24.04`
+>   distro — confirm with `wsl -l -v` while logged in as them. Local account = `SERVERNAME\user`,
+>   domain account = `DOMAIN\user`. It needs the **"Log on as a batch job"** right (local admins
+>   have it by default).
+> - **Password logon** (implied by `-Password`) runs the task at startup whether or not the user is
+>   logged in, and loads their full profile so WSL launches correctly. The password is stored in the
+>   Windows LSA secret store; if it later changes, re-run this command to update the task.
+> - **Already set up the old `SYSTEM` version?** Re-running the command above with `-Force`
+>   overwrites the task in place (no need to unregister first). On **Option 6B** (no VHDX), the
+>   `wsl --mount` line in `boot.ps1` simply no-ops — leave it or delete that line.
 
 Test it end-to-end with a host reboot before handing over.
 
