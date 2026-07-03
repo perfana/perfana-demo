@@ -35,6 +35,11 @@ ORG_NAME="${PERFANA_ORG_NAME:-Perfana}"
 PERFANA_USER="${PERFANA_ADMIN_USER:-admin@perfana.io}"
 PERFANA_PW="${PERFANA_ADMIN_PASSWORD:?PERFANA_ADMIN_PASSWORD must be set}"
 
+# Every call below is server-local. If a corporate proxy is configured (http_proxy/https_proxy),
+# curl would otherwise route localhost through it and fail (proxy can't resolve localhost -> 504).
+export no_proxy="localhost,127.0.0.1${no_proxy:+,$no_proxy}"
+export NO_PROXY="$no_proxy"
+
 KC_LOCAL="http://localhost:8080"
 API_LOCAL="http://localhost:3001"
 GRAFANA_LOCAL="http://localhost:${GRAFANA_PORT}"

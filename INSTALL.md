@@ -598,24 +598,13 @@ WSL distros do not start until something invokes them. Combine three things:
    containers back once Docker is up.
 3. **A Windows Scheduled Task** boots the distro (and re-attaches the VHDX) at system start.
 
-Create the startup task (PowerShell as Administrator). Adjust the distro name, VHDX path, and
-share path:
-
-```powershell
-$action = New-ScheduledTaskAction -Execute "wsl.exe" `
-  -Argument "-d Ubuntu-24.04 -u root -e /srv/perfana/app/boot.sh"
-$trigger = New-ScheduledTaskTrigger -AtStartup
-$principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
-Register-ScheduledTask -TaskName "Perfana" -Action $action -Trigger $trigger -Principal $principal
-```
-
-Create `boot.sh` on the share so the task has one entry point:
+Create `boot.sh` inside WSL so there is one Linux entry point:
 
 ```bash
 cat > /srv/perfana/app/boot.sh <<'EOF'
 #!/usr/bin/env bash
 set -e
-mount -a 2>/dev/null || true          # mount the dedicated VHDX (Option A)
+mount -a 2>/dev/null || true          # mount the dedicated VHDX by label (Option A)
 cd /srv/perfana/app
 # Run as the owning user so the docker group applies:
 sudo -u "$(stat -c '%U' /srv/perfana/app)" ./start.sh
@@ -623,9 +612,34 @@ EOF
 chmod +x /srv/perfana/app/boot.sh
 ```
 
-> If you use **VHDX (Option 6A)** add the `wsl --mount --vhd ... --bare` call as a *second*
-> scheduled task triggered slightly earlier, or run it from the host side of the task before the
-> distro starts.
+Then create a host-side `boot.ps1` on the share that **attaches the VHDX first, then boots the
+distro**. Attaching the raw disk (`--bare`) is what makes the `mount -a` inside `boot.sh` succeed;
+`boot.ps1` is a single ordered entry point, so no second scheduled task and no ordering race.
+
+Save it as **`G:\perfana\boot.ps1`** (adjust the VHDX path, distro name, and share path):
+
+```powershell
+$ErrorActionPreference = 'SilentlyContinue'
+# Attach the dedicated VHDX (Option 6A). Harmless/no-op if already attached, or on Option 6B.
+wsl --mount --vhd "G:\perfana\perfana-data.vhdx" --bare
+# Boot the stack inside the distro.
+wsl -d Ubuntu-24.04 -u root -e /srv/perfana/app/boot.sh
+```
+
+Register the startup task (PowerShell as Administrator). **`-Force` makes this idempotent** — safe
+to run even if a `Perfana` task already exists, so you can (re-)apply it after an earlier install:
+
+```powershell
+$action = New-ScheduledTaskAction -Execute "powershell.exe" `
+  -Argument "-NoProfile -ExecutionPolicy Bypass -File G:\perfana\boot.ps1"
+$trigger = New-ScheduledTaskTrigger -AtStartup
+$principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+Register-ScheduledTask -TaskName "Perfana" -Action $action -Trigger $trigger -Principal $principal -Force
+```
+
+> **Already set up the old single-task version?** Re-running the `Register-ScheduledTask` above
+> with `-Force` overwrites it in place (no need to unregister first). On **Option 6B** (no VHDX),
+> the `wsl --mount` line in `boot.ps1` simply no-ops — you can leave it or delete that line.
 
 Test it end-to-end with a host reboot before handing over.
 
