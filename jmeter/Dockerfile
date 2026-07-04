@@ -3,6 +3,7 @@ FROM eclipse-temurin:21-jre-jammy
 # TARGETARCH is automatically set by Docker buildx (amd64 or arm64)
 ARG TARGETARCH
 ARG BREAKTEST_VERSION=2026.07.03
+ARG BREAKTEST_SHA512=1b39fe3f67bb632719303477192133d5d4f5edb238b2b9d2081335037b197cc6c3f9a6ea0aacbf05d5b64ec431ee57f5fef316689de7cf74cdf84c9e2201e799
 ARG PERFANA_CLI_VERSION=0.7.4
 ARG TIMESCALEDB_PLUGIN_VERSION=1.0.4
 
@@ -17,6 +18,7 @@ RUN apt-get update && \
 RUN set -eux; \
     wget --tries=3 --timeout=60 -O breaktest-${BREAKTEST_VERSION}.tgz \
         "https://github.com/Breaking-IT/breaktest/releases/download/rel/v${BREAKTEST_VERSION}/breaktest-${BREAKTEST_VERSION}.tgz" && \
+    echo "${BREAKTEST_SHA512}  breaktest-${BREAKTEST_VERSION}.tgz" | sha512sum -c - && \
     tar -xzf breaktest-${BREAKTEST_VERSION}.tgz -C /opt && \
     mv /opt/breaktest-${BREAKTEST_VERSION} ${JMETER_HOME} && \
     rm breaktest-${BREAKTEST_VERSION}.tgz
