@@ -257,4 +257,6 @@ git pull && docker compose pull
 
 ## Credits
 
+JMeter load tests run on [BreakTest](https://github.com/Breaking-IT/breaktest), a JMeter-compatible fork.
+
 The employee database used in this demo is derived from [datacharmer/test_db](https://github.com/datacharmer/test_db).
