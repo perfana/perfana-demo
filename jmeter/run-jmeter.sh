@@ -6,7 +6,7 @@
 TEST_RUN_ID="$1"
 
 for f in /tests/src/test/jmeter/${JMETER_TEST}; do
-  jmeter -n -t "$f" \
+  breaktest.sh -n -t "$f" \
     -JHOST=afterburner-fe \
     -JPORT=8080 \
     -JPROTOCOL=http \

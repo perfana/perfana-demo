@@ -1,29 +1,25 @@
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:21-jre-jammy
 
 # TARGETARCH is automatically set by Docker buildx (amd64 or arm64)
 ARG TARGETARCH
-ARG JMETER_VERSION=5.6.3
+ARG BREAKTEST_VERSION=2026.07.03
 ARG PERFANA_CLI_VERSION=0.7.4
 ARG TIMESCALEDB_PLUGIN_VERSION=1.0.4
 
-ENV JMETER_HOME=/opt/jmeter
+ENV JMETER_HOME=/opt/breaktest
 ENV PATH=${JMETER_HOME}/bin:${PATH}
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends wget ca-certificates curl jq && \
     rm -rf /var/lib/apt/lists/*
 
-# Install JMeter — try dlcdn (Apache CDN, fast) first, fall back to archive (always present, slow)
+# Install BreakTest (JMeter-compatible fork) from its GitHub release
 RUN set -eux; \
-    for url in \
-        "https://dlcdn.apache.org/jmeter/binaries/apache-jmeter-${JMETER_VERSION}.tgz" \
-        "https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-${JMETER_VERSION}.tgz"; \
-    do \
-        if wget --tries=2 --timeout=60 -O apache-jmeter-${JMETER_VERSION}.tgz "$url"; then break; fi; \
-    done && \
-    tar -xzf apache-jmeter-${JMETER_VERSION}.tgz -C /opt && \
-    mv /opt/apache-jmeter-${JMETER_VERSION} ${JMETER_HOME} && \
-    rm apache-jmeter-${JMETER_VERSION}.tgz
+    wget --tries=3 --timeout=60 -O breaktest-${BREAKTEST_VERSION}.tgz \
+        "https://github.com/Breaking-IT/breaktest/releases/download/rel/v${BREAKTEST_VERSION}/breaktest-${BREAKTEST_VERSION}.tgz" && \
+    tar -xzf breaktest-${BREAKTEST_VERSION}.tgz -C /opt && \
+    mv /opt/breaktest-${BREAKTEST_VERSION} ${JMETER_HOME} && \
+    rm breaktest-${BREAKTEST_VERSION}.tgz
 
 # Install TimescaleDB backend listener plugin and its runtime dependencies from Maven Central
 RUN wget -q https://repo1.maven.org/maven2/io/perfana/perfana-jmeter-timescaledb/${TIMESCALEDB_PLUGIN_VERSION}/perfana-jmeter-timescaledb-${TIMESCALEDB_PLUGIN_VERSION}.jar \
