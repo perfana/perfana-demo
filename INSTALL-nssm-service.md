@@ -106,6 +106,24 @@ its WSL commands as `-u root`, so the default-user setting only matters if a hum
 > (Get-ScheduledTask -TaskName "perfana-import" | Get-ScheduledTaskInfo).LastTaskResult   # 0 = success
 > Unregister-ScheduledTask -TaskName "perfana-import" -Confirm:$false
 > ```
+>
+> **`Register-ScheduledTask` fails with "The specified logon session does not exist" (error 1312)?**
+> A hardening policy is blocking storage of the task's password — *Network access: Do not allow
+> storage of passwords and credentials for network authentication* is enabled. Register the task with
+> an **S4U** principal instead, which runs as `perfana-svc` without storing a password. The import
+> only reads a local tar and writes to local disk, so it needs no network credentials:
+> ```powershell
+> $principal = New-ScheduledTaskPrincipal -UserId "SERVERNAME\perfana-svc" `
+>   -LogonType S4U -RunLevel Highest
+> Register-ScheduledTask -TaskName "perfana-import" -Action $imp -Principal $principal
+> Start-ScheduledTask -TaskName "perfana-import"
+> Start-Sleep 30
+> (Get-ScheduledTask -TaskName "perfana-import" | Get-ScheduledTaskInfo).LastTaskResult   # 0 = success
+> Unregister-ScheduledTask -TaskName "perfana-import" -Confirm:$false
+> ```
+> S4U requires `perfana-svc` to hold the **Log on as a batch job** right (`secpol.msc` → *User Rights
+> Assignment*). The NSSM service itself ([step 5](#5-create-the-nssm-service)) is unaffected — NSSM
+> stores its credential as an LSA secret, not through Task Scheduler.
 
 ---
 
