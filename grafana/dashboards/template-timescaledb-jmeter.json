@@ -76,7 +76,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -99,7 +99,6 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "measurement": "virtualUsers",
           "orderByTime": "ASC",
           "policy": "default",
@@ -193,7 +192,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -291,7 +290,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -363,7 +362,6 @@
         "type": "grafana-postgresql-datasource",
         "uid": "postgres-timescaledb"
       },
-      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -430,7 +428,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "alias": "Throughput",
@@ -460,7 +458,6 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "measurement": "requestsAggregated_10s",
           "orderByTime": "ASC",
           "policy": "default",
@@ -567,7 +564,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -590,7 +587,6 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "measurement": "requestsError",
           "orderByTime": "ASC",
           "policy": "default",
@@ -693,7 +689,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -716,7 +712,6 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "measurement": "requestsError",
           "orderByTime": "ASC",
           "policy": "default",
@@ -810,7 +805,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -819,7 +814,6 @@
           },
           "editorMode": "code",
           "format": "table",
-          "hide": false,
           "rawQuery": true,
           "rawSql": "SELECT EXTRACT(EPOCH FROM (to_timestamp($__to/1000) - to_timestamp($__from/1000))) AS total_seconds;",
           "refId": "A",
@@ -960,7 +954,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -969,7 +963,6 @@
           },
           "editorMode": "code",
           "format": "time_series",
-          "hide": false,
           "rawQuery": true,
           "rawSql": "SELECT\n  time_bucket('$__interval', time) AS time,\n  SUM(max_threads_per_node) AS \"Total\"\nFROM (\n  SELECT\n    time_bucket('$__interval', time) AS time,\n    node_name,\n    MAX(active_threads) AS max_threads_per_node\n  FROM virtual_users\n  WHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n        AND $__timeFilter(time)\n  GROUP BY 1,2\n  ORDER BY 1,2\n) sub\nGROUP BY 1\nORDER BY 1;\n",
           "refId": "A",
@@ -1000,7 +993,6 @@
         "type": "grafana-postgresql-datasource",
         "uid": "postgres-timescaledb"
       },
-      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1126,7 +1118,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -1135,7 +1127,6 @@
           },
           "editorMode": "code",
           "format": "time_series",
-          "hide": false,
           "rawQuery": true,
           "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(bytes_in) as \"Bytes In\",\n  sum(bytes_out) as \"Bytes Out\",\n (sum(bytes_in) + sum(bytes_out)) / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) as \"Total Traffic\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
           "refId": "B",
@@ -1268,7 +1259,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -1277,7 +1268,6 @@
           },
           "editorMode": "code",
           "format": "time_series",
-          "hide": false,
           "rawQuery": true,
           "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) as \"Requests per second\",\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as \"Response times\",\n  sum(avg_connect * n) / NULLIF(sum(n), 0) as \"TCP Connect\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
           "refId": "B",
@@ -1392,7 +1382,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -1498,7 +1488,7 @@
             {
               "targetBlank": true,
               "title": "Transaction Analysis",
-              "url": "/d/transaction-analysis/transaction-analysis?var-granularity=1&var-Transaction=${__field.labels.transactionName}&${__url_time_range}&kiosk=true"
+              "url": "/d/transaction-analysis/transaction-analysis?${__all_variables}&var-granularity=1&var-Transaction=${__field.labels.transactionName}&${__url_time_range}&kiosk=true"
             }
           ],
           "mappings": [],
@@ -1546,7 +1536,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "alias": "$tag_transactionName",
@@ -1691,8 +1681,8 @@
           "links": [
             {
               "targetBlank": true,
-              "title": "Transaction Analysis",
-              "url": "/d/transaction-analysis/transaction-analysis?var-granularity=1&var-Transaction=${__data.fields.transactionName}&${__url_time_range}&kiosk=true"
+              "title": "Request Analysis",
+              "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?${__all_variables}&var-runId=${runId}&var-granularity=${granularity}&var-sampler=${__data.fields.Sampler}&${__url_time_range}&kiosk=true"
             }
           ],
           "mappings": [],
@@ -1740,7 +1730,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "alias": "All Transactions",
@@ -1770,7 +1760,6 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "measurement": "requestsRaw",
           "orderByTime": "ASC",
           "policy": "default",
@@ -1845,16 +1834,58 @@
       },
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "spanNulls": false
-          },
-          "unit": "short",
           "color": {
             "mode": "palette-classic"
-          }
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
         },
         "overrides": [
           {
@@ -1897,11 +1928,6 @@
       },
       "id": 71,
       "options": {
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "desc"
-        },
         "legend": {
           "calcs": [
             "mean",
@@ -1914,9 +1940,14 @@
           "showLegend": true,
           "sortBy": "Mean",
           "sortDesc": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -1959,17 +1990,59 @@
       },
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "spanNulls": false
-          },
-          "unit": "percentunit",
-          "min": 0,
           "color": {
             "mode": "palette-classic"
-          }
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit"
         },
         "overrides": []
       },
@@ -1981,11 +2054,6 @@
       },
       "id": 73,
       "options": {
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "desc"
-        },
         "legend": {
           "calcs": [
             "mean",
@@ -1998,9 +2066,14 @@
           "showLegend": true,
           "sortBy": "Mean",
           "sortDesc": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -2074,7 +2147,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "transparent"
+                "color": "transparent",
+                "value": 0
               }
             ]
           },
@@ -2097,7 +2171,7 @@
                   {
                     "targetBlank": true,
                     "title": "Transaction Analysis",
-                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?var-runId=${runId}&var-granularity=${granularity}&var-transaction=${__data.fields.Transaction}&${__url_time_range}&kiosk=true"
+                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?${__all_variables}&${var-runId=${runId}﻿&var-granularity=﻿${granularity}﻿&var-transaction=﻿${__data.fields.Transaction}﻿&﻿${__url_time_range}﻿&kiosk=true"
                   }
                 ]
               }
@@ -2115,7 +2189,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "dark-green"
+                      "color": "dark-green",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -2150,7 +2225,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "dark-green"
+                      "color": "dark-green",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -2185,7 +2261,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "transparent"
+                      "color": "transparent",
+                      "value": 0
                     },
                     {
                       "color": "dark-green",
@@ -2224,7 +2301,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "dark-green"
+                      "color": "dark-green",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -2259,7 +2337,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "dark-green"
+                      "color": "dark-green",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -2294,7 +2373,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "dark-green"
+                      "color": "dark-green",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -2329,7 +2409,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "dark-green"
+                      "color": "dark-green",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -2364,7 +2445,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "transparent"
+                      "color": "transparent",
+                      "value": 0
                     },
                     {
                       "color": "dark-yellow",
@@ -2435,7 +2517,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "transparent"
+                      "color": "transparent",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -2473,7 +2556,7 @@
           }
         ]
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -2516,33 +2599,33 @@
             },
             "includeByName": {},
             "indexByName": {
-              "transaction_name": 0,
-              "min_response_time": 1,
               "avg_all": 2,
               "avg_ok": 3,
+              "error_percentage": 11,
+              "failed": 10,
               "max_response_time": 4,
+              "min_response_time": 1,
               "p90": 5,
               "p95": 6,
               "p99": 7,
-              "total": 8,
               "passed": 9,
-              "failed": 10,
-              "error_percentage": 11
+              "total": 8,
+              "transaction_name": 0
             },
             "renameByName": {
-              "transaction_name": "Transaction",
-              "sampler_name": "Sampler",
-              "min_response_time": "Min",
               "avg_all": "AvgAll",
               "avg_ok": "AvgOk",
+              "error_percentage": "Error (%)",
+              "failed": "Failed",
               "max_response_time": "Max",
+              "min_response_time": "Min",
               "p90": "90%",
               "p95": "95%",
               "p99": "99%",
-              "total": "Total",
               "passed": "Passed",
-              "failed": "Failed",
-              "error_percentage": "Error (%)"
+              "sampler_name": "Sampler",
+              "total": "Total",
+              "transaction_name": "Transaction"
             }
           }
         }
@@ -2658,7 +2741,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "alias": "$tag_samplerName",
@@ -2688,7 +2771,6 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "measurement": "requestsAggregated_10s",
           "orderByTime": "ASC",
           "policy": "default",
@@ -2847,7 +2929,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "alias": "$tag_samplerName",
@@ -2877,7 +2959,6 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "measurement": "requestsAggregated_10s",
           "orderByTime": "ASC",
           "policy": "default",
@@ -2952,16 +3033,58 @@
       },
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "spanNulls": false
-          },
-          "unit": "short",
           "color": {
             "mode": "palette-classic"
-          }
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
         },
         "overrides": [
           {
@@ -3004,11 +3127,6 @@
       },
       "id": 70,
       "options": {
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "desc"
-        },
         "legend": {
           "calcs": [
             "mean",
@@ -3021,9 +3139,14 @@
           "showLegend": true,
           "sortBy": "Mean",
           "sortDesc": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -3066,17 +3189,59 @@
       },
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "spanNulls": false
-          },
-          "unit": "percentunit",
-          "min": 0,
           "color": {
             "mode": "palette-classic"
-          }
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit"
         },
         "overrides": []
       },
@@ -3088,11 +3253,6 @@
       },
       "id": 72,
       "options": {
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "desc"
-        },
         "legend": {
           "calcs": [
             "mean",
@@ -3105,9 +3265,14 @@
           "showLegend": true,
           "sortBy": "Mean",
           "sortDesc": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -3180,7 +3345,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "transparent"
+                "color": "transparent",
+                "value": 0
               }
             ]
           },
@@ -3203,7 +3369,7 @@
                   {
                     "targetBlank": true,
                     "title": "Request Analysis",
-                    "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?var-runId=${runId}&${__url_time_range}&var-sampler=${__data.fields.sampler_name}&kiosk=true"
+                    "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?${__all_variables}&var-runId=${runId}&${__url_time_range}&var-sampler=${__data.fields.Sampler}&kiosk=true"
                   }
                 ]
               }
@@ -3225,7 +3391,7 @@
                   {
                     "targetBlank": true,
                     "title": "Transaction Analysis",
-                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?var-runId=${runId}&var-granularity=${granularity}&var-transaction=${__data.fields.transaction_name}\ufeff\ufeff&\ufeff\ufeff${__url_time_range}\ufeff\ufeff&kiosk=true"
+                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?${__all_variables}&var-runId=${runId}&var-granularity=${granularity}&var-transaction=${__data.fields.transaction_name}﻿﻿&﻿﻿${__url_time_range}﻿﻿&kiosk=true"
                   }
                 ]
               }
@@ -3243,7 +3409,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "dark-green"
+                      "color": "dark-green",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -3278,7 +3445,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "dark-green"
+                      "color": "dark-green",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -3313,7 +3481,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "transparent"
+                      "color": "transparent",
+                      "value": 0
                     },
                     {
                       "color": "dark-green",
@@ -3352,7 +3521,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "dark-green"
+                      "color": "dark-green",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -3387,7 +3557,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "dark-green"
+                      "color": "dark-green",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -3422,7 +3593,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "dark-green"
+                      "color": "dark-green",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -3457,7 +3629,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "dark-green"
+                      "color": "dark-green",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -3492,7 +3665,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "transparent"
+                      "color": "transparent",
+                      "value": 0
                     },
                     {
                       "color": "dark-yellow",
@@ -3563,7 +3737,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "transparent"
+                      "color": "transparent",
+                      "value": 0
                     },
                     {
                       "color": "dark-orange",
@@ -3601,7 +3776,7 @@
           }
         ]
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -3610,7 +3785,6 @@
           },
           "editorMode": "code",
           "format": "table",
-          "hide": false,
           "rawQuery": true,
           "rawSql": "SELECT\n  sampler_name,\n  transaction_name,\n  min(min_rt) AS min_response_time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS avg_all,\n  ROUND(sum(sum_rt_ok)::numeric / NULLIF(sum(n_ok), 0)) AS avg_ok,\n  max(max_rt) AS max_response_time,\n  ROUND(approx_percentile(0.90, rollup(pct_agg))::numeric) AS p90,\n  ROUND(approx_percentile(0.95, rollup(pct_agg))::numeric) AS p95,\n  ROUND(approx_percentile(0.99, rollup(pct_agg))::numeric) AS p99,\n  sum(n) AS total,\n  sum(n_ok) AS passed,\n  sum(n_err) AS failed,\n  ROUND(sum(n_err)::numeric / NULLIF(sum(n), 0), 4) AS error_percentage\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
@@ -3645,34 +3819,34 @@
             },
             "includeByName": {},
             "indexByName": {
-              "sampler_name": 0,
-              "transaction_name": 1,
-              "min_response_time": 2,
               "avg_all": 3,
               "avg_ok": 4,
+              "error_percentage": 12,
+              "failed": 11,
               "max_response_time": 5,
+              "min_response_time": 2,
               "p90": 6,
               "p95": 7,
               "p99": 8,
-              "total": 9,
               "passed": 10,
-              "failed": 11,
-              "error_percentage": 12
+              "sampler_name": 0,
+              "total": 9,
+              "transaction_name": 1
             },
             "renameByName": {
-              "transaction_name": "Transaction",
-              "sampler_name": "Sampler",
-              "min_response_time": "Min",
               "avg_all": "AvgAll",
               "avg_ok": "AvgOk",
+              "error_percentage": "Error (%)",
+              "failed": "Failed",
               "max_response_time": "Max",
+              "min_response_time": "Min",
               "p90": "90%",
               "p95": "95%",
               "p99": "99%",
-              "total": "Total",
               "passed": "Passed",
-              "failed": "Failed",
-              "error_percentage": "Error (%)"
+              "sampler_name": "Sampler",
+              "total": "Total",
+              "transaction_name": "Transaction"
             }
           }
         }
@@ -3825,7 +3999,7 @@
                   {
                     "targetBlank": true,
                     "title": "Transaction Analysis",
-                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?var-runId=${runId}&var-granularity=${granularity}&var-transaction=${__data.fields.transaction_name}\ufeff\ufeff&\ufeff\ufeff${__url_time_range}\ufeff\ufeff&kiosk=true"
+                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?${__all_variables}&var-runId=${runId}&var-granularity=${granularity}&var-transaction=${__data.fields.transaction_name}﻿﻿&﻿﻿${__url_time_range}﻿﻿&kiosk=true"
                   }
                 ]
               }
@@ -3859,7 +4033,7 @@
                   {
                     "targetBlank": true,
                     "title": "Request Analysis",
-                    "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?var-runId=${runId}&${__url_time_range}&var-sampler=${__data.fields.sampler_name}&kiosk=true"
+                    "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?${__all_variables}&var-runId=${runId}&${__url_time_range}&var-sampler=${__data.fields.Sampler}&kiosk=true"
                   }
                 ]
               }
@@ -3903,7 +4077,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -4116,7 +4290,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "datasource": {
@@ -4125,7 +4299,6 @@
           },
           "editorMode": "code",
           "format": "time_series",
-          "hide": false,
           "rawQuery": true,
           "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  location,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) as avg_rt\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND \n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
@@ -4253,7 +4426,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "12.4.5",
       "targets": [
         {
           "alias": "$tag_location RPS",
@@ -4283,7 +4456,6 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "measurement": "requestsRaw",
           "orderByTime": "ASC",
           "policy": "default",
@@ -4350,7 +4522,6 @@
         "type": "grafana-postgresql-datasource",
         "uid": "postgres-timescaledb"
       },
-      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -4471,7 +4642,6 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "measurement": "requestsError",
           "orderByTime": "ASC",
           "policy": "default",
@@ -4531,6 +4701,7 @@
   "refresh": "",
   "schemaVersion": 42,
   "tags": [
+    "jmeter",
     "perfana",
     "perfana-template",
     "no-anomaly-detection",
@@ -4539,17 +4710,15 @@
   "templating": {
     "list": [
       {
+        "allowCustomValue": false,
         "current": {
           "text": "5s",
           "value": "5s"
         },
         "description": "CAGG bucket resolution. 5s = finest (near real-time). 1m/5m for wider time ranges.",
-        "hide": 0,
         "includeAll": false,
         "label": "CAGG resolution",
-        "multi": false,
         "name": "cagg_suffix",
-        "allowCustomValue": false,
         "options": [
           {
             "selected": true,
@@ -4568,9 +4737,9 @@
           }
         ],
         "query": "5s,1m,5m",
-        "queryValue": "",
         "skipUrlSync": true,
-        "type": "custom"
+        "type": "custom",
+        "valuesFormat": "csv"
       },
       {
         "current": {
@@ -4588,6 +4757,7 @@
         "query": "select system_under_test from requests_raw",
         "refresh": 1,
         "regex": "",
+        "regexApplyTo": "value",
         "type": "query"
       },
       {
@@ -4605,6 +4775,7 @@
         "query": "select test_environment from requests_raw where system_under_test = '$system_under_test' ",
         "refresh": 1,
         "regex": "",
+        "regexApplyTo": "value",
         "type": "query"
       },
       {
@@ -4631,6 +4802,7 @@
         "query": "select scenario_name from requests_raw where system_under_test = '$system_under_test' AND test_environment = '$test_environment' ",
         "refresh": 1,
         "regex": "",
+        "regexApplyTo": "value",
         "type": "query"
       }
     ]
@@ -4645,5 +4817,6 @@
   "timezone": "browser",
   "title": "JMeter TimescaleDB Dashboard",
   "uid": "jmeter-timescaledb-dashboard",
-  "version": 33
+  "version": 3,
+  "weekStart": ""
 }
