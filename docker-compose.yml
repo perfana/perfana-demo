@@ -14,6 +14,7 @@ services:
       POSTGRES_USER: perfana
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    command: ["-c", "max_connections=500"]
     # Published on all interfaces so other hosts on the network can reach the database
     # directly (e.g. external BI tools, remote load generators). Requires WSL2 mirrored
     # networking and a scoped firewall rule — see INSTALL.md step 9.6. Auth is scram-sha-256;
