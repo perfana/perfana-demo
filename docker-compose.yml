@@ -149,6 +149,11 @@ services:
       NODE_ENV: production
       NODE_OPTIONS: "--max-old-space-size=3584"
       LOG_LEVEL: info
+      # Outbound HTTP proxy for external calls (corporate env).
+      # Internal service hostnames bypass it via NO_PROXY.
+      HTTP_PROXY: http://proxy.example.com:3128
+      HTTPS_PROXY: http://proxy.example.com:3128
+      NO_PROXY: localhost,127.0.0.1,.svc,postgres,valkey,keycloak,grafana
       HEALTH_HEAP_THRESHOLD_MB: "1500"
       HEALTH_RSS_THRESHOLD_MB: "3000"
       DB_HOST: postgres
@@ -209,6 +214,11 @@ services:
     environment:
       NODE_ENV: production
       LOG_LEVEL: info
+      # Outbound HTTP proxy for external calls (corporate env).
+      # Internal service hostnames bypass it via NO_PROXY.
+      HTTP_PROXY: http://proxy.example.com:3128
+      HTTPS_PROXY: http://proxy.example.com:3128
+      NO_PROXY: localhost,127.0.0.1,.svc,postgres,valkey,keycloak,grafana
       DB_HOST: postgres
       DB_PORT: "5432"
       DB_USERNAME: perfana
