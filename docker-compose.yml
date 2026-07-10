@@ -148,6 +148,7 @@ services:
       - perfana
     environment:
       NODE_ENV: production
+      TZ: Europe/Amsterdam
       NODE_OPTIONS: "--max-old-space-size=3584"
       LOG_LEVEL: info
       # Outbound HTTP proxy for external calls (corporate env).
