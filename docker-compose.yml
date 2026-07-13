@@ -80,7 +80,7 @@ services:
   # One-shot TypeORM migration runner. Brings the Perfana schema up to date
   # then exits 0. Re-run on every upgrade (start.sh / update.sh do this).
   perfana-migration:
-    image: perfana/perfana-migration:0.2.61.39
+    image: perfana/perfana-migration:0.2.61.47
     container_name: perfana-migration
     environment:
       DB_HOST: postgres
@@ -103,7 +103,7 @@ services:
   # Next.js frontend. All values prefixed with PERFANA_HOST are what the
   # browser uses, so they must resolve from the end-user's machine.
   perfana-web:
-    image: perfana/perfana-web:0.2.61.39
+    image: perfana/perfana-web:0.2.61.47
     container_name: perfana-web
     ports:
       - "${PERFANA_WEB_PORT:-4001}:3000"
@@ -123,6 +123,8 @@ services:
       NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: perfana-web
       NEXT_PUBLIC_USE_KEYCLOAK_AUTH: "true"
       NEXT_PUBLIC_CSP_FRAME_SRC: ${PERFANA_SCHEME:-http}://${PERFANA_HOST:-localhost}:${GRAFANA_PORT:-3100} ${PERFANA_SCHEME:-http}://${PERFANA_HOST:-localhost}:8080
+      # Admin log viewer UI (must match perfana-api LOG_VIEWER_ENABLED)
+      NEXT_PUBLIC_LOG_VIEWER_ENABLED: "true"
     depends_on:
       perfana-api:
         condition: service_started
@@ -140,7 +142,7 @@ services:
 
   # NestJS API backend.
   perfana-api:
-    image: perfana/perfana-api:0.2.61.39
+    image: perfana/perfana-api:0.2.61.47
     container_name: perfana-api
     ports:
       - "3001:3001"
@@ -182,8 +184,21 @@ services:
       FRONTEND_URL: ${PERFANA_SCHEME:-http}://${PERFANA_HOST:-localhost}:${PERFANA_WEB_PORT:-4001}
       CORS_ALLOWED_ORIGINS: ${PERFANA_SCHEME:-http}://${PERFANA_HOST:-localhost}:${PERFANA_WEB_PORT:-4001}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY must be set in .env}
+      # Admin log viewer — reads container logs via the Docker Engine API.
+      # LOG_VIEWER_COMPOSE_PROJECT must match this stack's compose project;
+      # both derive from COMPOSE_PROJECT_NAME so they can never drift.
+      LOG_VIEWER_ENABLED: "true"
+      LOG_VIEWER_COMPOSE_PROJECT: ${COMPOSE_PROJECT_NAME:-perfana}
     volumes:
       - ./perfana/provisioning:/data/provisioning:ro
+      # Read-only Docker socket for the admin log viewer (see LOG_VIEWER_ENABLED)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    # The api image runs as a non-root (distroless) user. On Docker Engine CE
+    # the socket is root:docker mode 660, so the process must join the host's
+    # docker group by its numeric GID to read it. Find it on the WSL host with:
+    #   getent group docker | cut -d: -f3   (or: stat -c '%g' /var/run/docker.sock)
+    group_add:
+      - "${DOCKER_GID:?DOCKER_GID must be set in .env — the host docker group GID; see comment above}"
     depends_on:
       postgres:
         condition: service_healthy
@@ -209,7 +224,7 @@ services:
 
   # BullMQ worker — runs the analysis pipeline and pulls metrics from Grafana.
   perfana-worker:
-    image: perfana/perfana-worker:0.2.61.39
+    image: perfana/perfana-worker:0.2.61.47
     container_name: perfana-worker
     networks:
       - perfana
@@ -252,7 +267,7 @@ services:
 
   # Keeps Grafana dashboards in sync with Perfana's templates.
   perfana-grafana-sync:
-    image: perfana/perfana-grafana-sync:0.2.61.39
+    image: perfana/perfana-grafana-sync:0.2.61.47
     container_name: perfana-grafana-sync
     networks:
       - perfana
@@ -288,7 +303,7 @@ services:
 
   # PDF report generation (runs headless Chromium).
   perfana-report:
-    image: perfana/perfana-report:0.2.61.39
+    image: perfana/perfana-report:0.2.61.47
     container_name: perfana-report
     networks:
       - perfana
