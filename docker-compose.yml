@@ -100,6 +100,26 @@ services:
 # PERFANA PLATFORM
 ######################################################################################################################
 
+  # Hardened Docker Engine API gateway for the admin log viewer. This is the
+  # only container that touches the host docker socket. It runs as root inside
+  # (so it reads the root:docker socket by owner — no DOCKER_GID needed) and
+  # exposes an HAProxy-filtered API on tcp:2375, reachable only on the internal
+  # perfana network (no host port). CONTAINERS=1 permits GET list/inspect/logs;
+  # every write verb (POST/exec/create) is denied by default — so a compromised
+  # perfana-api cannot escape to the host.
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:0.3.0
+    container_name: docker-socket-proxy
+    environment:
+      CONTAINERS: "1"
+      # Everything else stays at the image default (denied).
+      POST: "0"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - perfana
+    restart: unless-stopped
+
   # Next.js frontend. All values prefixed with PERFANA_HOST are what the
   # browser uses, so they must resolve from the end-user's machine.
   perfana-web:
@@ -185,21 +205,19 @@ services:
       CORS_ALLOWED_ORIGINS: ${PERFANA_SCHEME:-http}://${PERFANA_HOST:-localhost}:${PERFANA_WEB_PORT:-4001}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY must be set in .env}
       # Admin log viewer — reads container logs via the Docker Engine API.
-      # LOG_VIEWER_COMPOSE_PROJECT must match this stack's compose project;
-      # both derive from COMPOSE_PROJECT_NAME so they can never drift.
+      # It talks to docker-socket-proxy over TCP, never the raw socket, so a
+      # compromised api can only list/inspect containers and read logs — not
+      # create containers or exec into them (see the docker-socket-proxy
+      # service). LOG_VIEWER_COMPOSE_PROJECT must match this stack's compose
+      # project; both derive from COMPOSE_PROJECT_NAME so they can never drift.
       LOG_VIEWER_ENABLED: "true"
       LOG_VIEWER_COMPOSE_PROJECT: ${COMPOSE_PROJECT_NAME:-perfana}
+      DOCKER_HOST: tcp://docker-socket-proxy:2375
     volumes:
       - ./perfana/provisioning:/data/provisioning:ro
-      # Read-only Docker socket for the admin log viewer (see LOG_VIEWER_ENABLED)
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    # The api image runs as a non-root (distroless) user. On Docker Engine CE
-    # the socket is root:docker mode 660, so the process must join the host's
-    # docker group by its numeric GID to read it. Find it on the WSL host with:
-    #   getent group docker | cut -d: -f3   (or: stat -c '%g' /var/run/docker.sock)
-    group_add:
-      - "${DOCKER_GID:?DOCKER_GID must be set in .env — the host docker group GID; see comment above}"
     depends_on:
+      docker-socket-proxy:
+        condition: service_started
       postgres:
         condition: service_healthy
       valkey:
