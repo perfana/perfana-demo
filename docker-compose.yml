@@ -145,6 +145,8 @@ services:
       NEXT_PUBLIC_CSP_FRAME_SRC: ${PERFANA_SCHEME:-http}://${PERFANA_HOST:-localhost}:${GRAFANA_PORT:-3100} ${PERFANA_SCHEME:-http}://${PERFANA_HOST:-localhost}:8080
       # Admin log viewer UI (must match perfana-api LOG_VIEWER_ENABLED)
       NEXT_PUBLIC_LOG_VIEWER_ENABLED: "true"
+      # Admin SUT export/import UI (must match perfana-api SUT_TRANSFER_ENABLED)
+      NEXT_PUBLIC_SUT_TRANSFER_ENABLED: "true"
     depends_on:
       perfana-api:
         condition: service_started
@@ -213,6 +215,8 @@ services:
       LOG_VIEWER_ENABLED: "true"
       LOG_VIEWER_COMPOSE_PROJECT: ${COMPOSE_PROJECT_NAME:-perfana}
       DOCKER_HOST: tcp://docker-socket-proxy:2375
+      # Admin SUT export/import (admin-only; exports SUT data to a downloadable file)
+      SUT_TRANSFER_ENABLED: "true"
     volumes:
       - ./perfana/provisioning:/data/provisioning:ro
     depends_on:
