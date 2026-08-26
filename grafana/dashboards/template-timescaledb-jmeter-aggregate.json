@@ -78,6 +78,22 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "scenario"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              },
+              {
+                "id": "custom.filterable",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "transaction"
             },
             "properties": [
@@ -395,7 +411,7 @@
         "sortBy": [
           {
             "desc": false,
-            "displayName": "transaction"
+            "displayName": "scenario"
           }
         ]
       },
@@ -409,7 +425,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  transaction_name AS \"transaction\",\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS \"AvgAll\",\n  ROUND(sum(sum_rt_ok)::numeric / NULLIF(sum(n_ok), 0)) AS \"AvgOk\",\n  sum(n) AS \"# Samples\",\n  ROUND(approx_percentile(0.90, rollup(pct_agg))::numeric) AS \"90%\",\n  ROUND(approx_percentile(0.95, rollup(pct_agg))::numeric) AS \"95%\",\n  ROUND(approx_percentile(0.99, rollup(pct_agg))::numeric) AS \"99%\",\n  min(min_rt) AS \"Minimal\",\n  max(max_rt) AS \"Maximal\",\n  ROUND(sum(n_err)::numeric / NULLIF(sum(n), 0) * 100.0, 2) AS \"ErrorRate\",\n  sum(n_err) AS \"Errors\",\n  ROUND(approx_percentile(0.50, rollup(pct_agg))::numeric) AS \"Median\",\n  ROUND(stddev_samp(avg_rt), 2) AS \"Stddev\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  scenario_name AS \"scenario\",\n  transaction_name AS \"transaction\",\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS \"AvgAll\",\n  ROUND(sum(sum_rt_ok)::numeric / NULLIF(sum(n_ok), 0)) AS \"AvgOk\",\n  sum(n) AS \"# Samples\",\n  ROUND(approx_percentile(0.90, rollup(pct_agg))::numeric) AS \"90%\",\n  ROUND(approx_percentile(0.95, rollup(pct_agg))::numeric) AS \"95%\",\n  ROUND(approx_percentile(0.99, rollup(pct_agg))::numeric) AS \"99%\",\n  min(min_rt) AS \"Minimal\",\n  max(max_rt) AS \"Maximal\",\n  ROUND(sum(n_err)::numeric / NULLIF(sum(n), 0) * 100.0, 2) AS \"ErrorRate\",\n  sum(n_err) AS \"Errors\",\n  ROUND(approx_percentile(0.50, rollup(pct_agg))::numeric) AS \"Median\",\n  ROUND(stddev_samp(avg_rt), 2) AS \"Stddev\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket)\nGROUP BY 1, 2\nORDER BY 1, 2;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -437,7 +453,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  transaction_name AS \"transaction\",\n  sum(bytes_out) AS \"Sent bytes\",\n  sum(bytes_in) AS \"Received bytes\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND transaction_name IS NOT NULL\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  scenario_name AS \"scenario\",\n  transaction_name AS \"transaction\",\n  sum(bytes_out) AS \"Sent bytes\",\n  sum(bytes_in) AS \"Received bytes\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND transaction_name IS NOT NULL\nGROUP BY 1, 2\nORDER BY 1, 2;",
           "refId": "B",
           "sql": {
             "columns": [
