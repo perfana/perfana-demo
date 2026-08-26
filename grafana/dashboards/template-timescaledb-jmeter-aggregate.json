@@ -463,7 +463,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  scenario_name AS \"scenario\",\n  transaction_name AS \"transaction\",\n  sum(bytes_out) AS \"Sent bytes\",\n  sum(bytes_in) AS \"Received bytes\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND transaction_name IS NOT NULL\nGROUP BY 1, 2\nORDER BY 1, 2;",
+          "rawSql": "SELECT\n  scenario_name AS \"scenario\",\n  transaction_name AS \"transaction\",\n  sum(bytes_out) AS \"Sent bytes\",\n  sum(bytes_in) AS \"Received bytes\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND transaction_name IS NOT NULL\n  -- Orphaned requests: when a sampler runs outside a Transaction Controller the\n  -- load test tool attributes it to itself, so transaction_name = sampler_name.\n  -- Those are requests, not transactions, and would otherwise merge in as extra\n  -- rows carrying only bytes. Same rule perfana uses in TransactionStatsRollupPipeline.\n  AND transaction_name IS DISTINCT FROM sampler_name\nGROUP BY 1, 2\nORDER BY 1, 2;",
           "refId": "B",
           "sql": {
             "columns": [
@@ -2302,7 +2302,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT\n  transaction_name AS \"transaction\",\n  sum(bytes_out) AS \"Sent bytes\",\n  sum(bytes_in) AS \"Received bytes\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name' AND transaction_name IS NOT NULL\nGROUP BY 1\nORDER BY 1;",
+              "rawSql": "SELECT\n  transaction_name AS \"transaction\",\n  sum(bytes_out) AS \"Sent bytes\",\n  sum(bytes_in) AS \"Received bytes\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name' AND transaction_name IS NOT NULL\n  -- Orphaned requests: when a sampler runs outside a Transaction Controller the\n  -- load test tool attributes it to itself, so transaction_name = sampler_name.\n  -- Those are requests, not transactions, and would otherwise merge in as extra\n  -- rows carrying only bytes. Same rule perfana uses in TransactionStatsRollupPipeline.\n  AND transaction_name IS DISTINCT FROM sampler_name\nGROUP BY 1\nORDER BY 1;",
               "refId": "B",
               "sql": {
                 "columns": [
