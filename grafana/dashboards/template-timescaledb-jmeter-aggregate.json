@@ -2627,7 +2627,7 @@
               "editorMode": "code",
               "format": "time_series",
               "rawQuery": true,
-              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  ROUND(sum(n_err)::numeric / NULLIF(sum(n), 0) * 100.0, 2) AS \"Error rate\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
+              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  ROUND(sum(n_err)::numeric / NULLIF(sum(n), 0) * 100.0, 2) AS \"Error rate\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
               "refId": "A",
               "sql": {
                 "columns": [
