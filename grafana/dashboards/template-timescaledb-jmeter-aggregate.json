@@ -3572,6 +3572,435 @@
           ],
           "title": "Failed Requests",
           "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-background"
+                },
+                "filterable": false,
+                "footer": {
+                  "reducers": []
+                },
+                "inspect": false
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "NaN": {
+                      "index": 0,
+                      "text": "0%"
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "transparent",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Sampler"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 220
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "Request Analysis",
+                        "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?var-system_under_test=${system_under_test}&var-test_environment=${test_environment}&var-scenario_name=${scenario_name}&var-sampler_name=${__data.fields.Sampler}&var-cagg_suffix=${cagg_suffix}&${__url_time_range}&kiosk=true"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "AvgAll"
+                },
+                "properties": [
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "dark-green",
+                          "value": 0
+                        },
+                        {
+                          "color": "dark-orange",
+                          "value": 3000
+                        },
+                        {
+                          "color": "dark-red",
+                          "value": 5000
+                        },
+                        {
+                          "color": "dark-purple",
+                          "value": 10000
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "AvgOk"
+                },
+                "properties": [
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "dark-green",
+                          "value": 0
+                        },
+                        {
+                          "color": "dark-orange",
+                          "value": 3000
+                        },
+                        {
+                          "color": "dark-red",
+                          "value": 5000
+                        },
+                        {
+                          "color": "dark-purple",
+                          "value": 10000
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Max"
+                },
+                "properties": [
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "dark-green",
+                          "value": 0
+                        },
+                        {
+                          "color": "dark-orange",
+                          "value": 3000
+                        },
+                        {
+                          "color": "dark-red",
+                          "value": 5000
+                        },
+                        {
+                          "color": "dark-purple",
+                          "value": 10000
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "90%"
+                },
+                "properties": [
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "dark-green",
+                          "value": 0
+                        },
+                        {
+                          "color": "dark-orange",
+                          "value": 3000
+                        },
+                        {
+                          "color": "dark-red",
+                          "value": 5000
+                        },
+                        {
+                          "color": "dark-purple",
+                          "value": 10000
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "95%"
+                },
+                "properties": [
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "dark-green",
+                          "value": 0
+                        },
+                        {
+                          "color": "dark-orange",
+                          "value": 3000
+                        },
+                        {
+                          "color": "dark-red",
+                          "value": 5000
+                        },
+                        {
+                          "color": "dark-purple",
+                          "value": 10000
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "99%"
+                },
+                "properties": [
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "dark-green",
+                          "value": 0
+                        },
+                        {
+                          "color": "dark-orange",
+                          "value": 3000
+                        },
+                        {
+                          "color": "dark-red",
+                          "value": 5000
+                        },
+                        {
+                          "color": "dark-purple",
+                          "value": 10000
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Total"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "none"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Failed"
+                },
+                "properties": [
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "transparent",
+                          "value": 0
+                        },
+                        {
+                          "color": "dark-yellow",
+                          "value": 1
+                        },
+                        {
+                          "color": "dark-orange",
+                          "value": 10
+                        },
+                        {
+                          "color": "dark-red",
+                          "value": 50
+                        },
+                        {
+                          "color": "dark-purple",
+                          "value": 150
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "unit",
+                    "value": "none"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Error (%)"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percentunit"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 2
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "transparent",
+                          "value": 0
+                        },
+                        {
+                          "color": "dark-orange",
+                          "value": 0.01
+                        },
+                        {
+                          "color": "dark-red",
+                          "value": 0.05
+                        },
+                        {
+                          "color": "dark-purple",
+                          "value": 0.15
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 91
+          },
+          "id": 76,
+          "options": {
+            "cellHeight": "sm",
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Failed"
+              }
+            ]
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "postgres-timescaledb"
+              },
+              "editorMode": "code",
+              "format": "table",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  sampler_name AS \"Sampler\",\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS \"AvgAll\",\n  ROUND(sum(sum_rt_ok)::numeric / NULLIF(sum(n_ok), 0)) AS \"AvgOk\",\n  max(max_rt) AS \"Max\",\n  ROUND(approx_percentile(0.90, rollup(pct_agg))::numeric) AS \"90%\",\n  ROUND(approx_percentile(0.95, rollup(pct_agg))::numeric) AS \"95%\",\n  ROUND(approx_percentile(0.99, rollup(pct_agg))::numeric) AS \"99%\",\n  sum(n) AS \"Total\",\n  sum(n_err) AS \"Failed\",\n  ROUND(sum(n_err)::numeric / NULLIF(sum(n), 0), 4) AS \"Error (%)\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name' AND transaction_name = '$transaction'\nGROUP BY 1\nORDER BY 1;",
+              "refId": "A",
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              }
+            }
+          ],
+          "title": "Request response time table - $transaction",
+          "type": "table"
         }
       ],
       "title": "Transactie: ${transaction}",
