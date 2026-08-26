@@ -1488,7 +1488,7 @@
             {
               "targetBlank": true,
               "title": "Transaction Analysis",
-              "url": "/d/transaction-analysis/transaction-analysis?${__all_variables}&var-granularity=1&var-Transaction=${__field.labels.transactionName}&${__url_time_range}&kiosk=true"
+              "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?${__all_variables}&var-transaction=${__field.labels.transaction_name}&${__url_time_range}&kiosk=true"
             }
           ],
           "mappings": [],
@@ -1682,7 +1682,7 @@
             {
               "targetBlank": true,
               "title": "Request Analysis",
-              "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?${__all_variables}&var-runId=${runId}&var-granularity=${granularity}&var-sampler=${__data.fields.Sampler}&${__url_time_range}&kiosk=true"
+              "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?${__all_variables}&var-transaction=${__field.labels.transaction_name}&${__url_time_range}&kiosk=true"
             }
           ],
           "mappings": [],
@@ -2171,7 +2171,7 @@
                   {
                     "targetBlank": true,
                     "title": "Transaction Analysis",
-                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?${__all_variables}&${var-runId=${runId}﻿&var-granularity=﻿${granularity}﻿&var-transaction=﻿${__data.fields.Transaction}﻿&﻿${__url_time_range}﻿&kiosk=true"
+                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?${__all_variables}&var-transaction=${__data.fields.Transaction}&${__url_time_range}&kiosk=true"
                   }
                 ]
               }
@@ -2694,7 +2694,7 @@
             {
               "targetBlank": true,
               "title": "Requests Analysis",
-              "url": "/d/request-analysis/request-analysis?${db:queryparam}&${__url_time_range}&var-URL=${__field.labels.samplerName}&kiosk=true"
+              "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?${__all_variables}&var-sampler_name=${__field.labels.sampler_name}&${__url_time_range}&kiosk=true"
             }
           ],
           "mappings": [],
@@ -2881,7 +2881,7 @@
             {
               "targetBlank": true,
               "title": "Request Analysis",
-              "url": "/d/request-analysis/request-analysis?${db:queryparam}&${__url_time_range}&var-URL=${__field.labels.samplerName}&kiosk=true"
+              "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?${__all_variables}&var-sampler_name=${__field.labels.sampler_name}&${__url_time_range}&kiosk=true"
             }
           ],
           "mappings": [],
@@ -3369,7 +3369,7 @@
                   {
                     "targetBlank": true,
                     "title": "Request Analysis",
-                    "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?${__all_variables}&var-runId=${runId}&${__url_time_range}&var-sampler=${__data.fields.Sampler}&kiosk=true"
+                    "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?${__all_variables}&var-sampler_name=${__data.fields.Sampler}&${__url_time_range}&kiosk=true"
                   }
                 ]
               }
@@ -3391,7 +3391,7 @@
                   {
                     "targetBlank": true,
                     "title": "Transaction Analysis",
-                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?${__all_variables}&var-runId=${runId}&var-granularity=${granularity}&var-transaction=${__data.fields.transaction_name}﻿﻿&﻿﻿${__url_time_range}﻿﻿&kiosk=true"
+                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?${__all_variables}&var-transaction=${__data.fields.Transaction}&${__url_time_range}&kiosk=true"
                   }
                 ]
               }
@@ -3923,7 +3923,7 @@
                   {
                     "targetBlank": true,
                     "title": "URL",
-                    "url": "/d/jmeter-timescaledb-error-dashboard/show-error?var-runId=${runId}&var-timestamp=${__value.time}&var-randomId=${__data.fields.random_id}&var-nodeName=${__data.fields.node_name}&var-db=postgres-timescaledb&kiosk=true"
+                    "url": "/d/jmeter-timescaledb-error-dashboard/jmeter-timescaledb-error-dashboard?var-timestamp=${__value.time}&var-randomId=${__data.fields.random_id}&var-nodeName=${__data.fields.Node}&var-db=postgres-timescaledb&kiosk=true"
                   }
                 ]
               },
@@ -3999,7 +3999,7 @@
                   {
                     "targetBlank": true,
                     "title": "Transaction Analysis",
-                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?${__all_variables}&var-runId=${runId}&var-granularity=${granularity}&var-transaction=${__data.fields.transaction_name}﻿﻿&﻿﻿${__url_time_range}﻿﻿&kiosk=true"
+                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?${__all_variables}&var-transaction=${__data.fields.Transaction}&${__url_time_range}&kiosk=true"
                   }
                 ]
               }
@@ -4033,7 +4033,7 @@
                   {
                     "targetBlank": true,
                     "title": "Request Analysis",
-                    "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?${__all_variables}&var-runId=${runId}&${__url_time_range}&var-sampler=${__data.fields.Sampler}&kiosk=true"
+                    "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?${__all_variables}&var-sampler_name=${__data.fields.Sampler}&${__url_time_range}&kiosk=true"
                   }
                 ]
               }
@@ -4239,13 +4239,6 @@
               "mode": "off"
             }
           },
-          "links": [
-            {
-              "targetBlank": true,
-              "title": "Requests Analysis",
-              "url": "/d/request-analysis/request-analysis?${db:queryparam}&${__url_time_range}&var-URL=${__field.labels.samplerName}&kiosk=true"
-            }
-          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
