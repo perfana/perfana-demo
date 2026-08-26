@@ -1652,12 +1652,246 @@
       "type": "stat"
     },
     {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postgres-timescaledb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "time"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Time"
+              },
+              {
+                "id": "unit",
+                "value": "time: HH:mm:ss.SSS"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Error detail",
+                    "url": "/d/jmeter-timescaledb-error-dashboard/jmeter-timescaledb-error-dashboard?var-timestamp=${__value.time}&var-randomId=${__data.fields.random_id}&var-nodeName=${__data.fields.Node}&var-db=postgres-timescaledb&kiosk=true"
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 124
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Scenario"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Transaction"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 268
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Transaction Analysis",
+                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?var-system_under_test=${system_under_test}&var-test_environment=${test_environment}&var-scenario_name=${__data.fields.Scenario}&var-transaction=${__data.fields.transaction}&var-cagg_suffix=${cagg_suffix}&${__url_time_range}&kiosk=true"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "RT (ms)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "custom.width",
+                "value": 71
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "random_id"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom.viz",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "url"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 460
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Node"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 111
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Code"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 58
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Sampler"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 233
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Request Analysis",
+                    "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?var-system_under_test=${system_under_test}&var-test_environment=${test_environment}&var-scenario_name=${__data.fields.Scenario}&var-sampler_name=${__data.fields.Sampler}&var-cagg_suffix=${cagg_suffix}&${__url_time_range}&kiosk=true"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 80,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time,\n  scenario_name AS \"Scenario\",\n  transaction_name AS \"Transaction\",\n  sampler_name AS \"Sampler\",\n  response_time AS \"RT (ms)\",\n  random_id,\n  url,\n  node_name AS \"Node\",\n  response_code AS \"Code\",\n  response_message AS \"Message\"\nFROM requests_error\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(time)\nORDER BY 1 DESC\nLIMIT 100;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Errors",
+      "type": "table"
+    },
+    {
       "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 34
       },
       "id": 10,
       "panels": [
@@ -3127,6 +3361,228 @@
           ],
           "title": "Active threads",
           "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "footer": {
+                  "reducers": []
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "time"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Time"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "time: HH:mm:ss.SSS"
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "Error detail",
+                        "url": "/d/jmeter-timescaledb-error-dashboard/jmeter-timescaledb-error-dashboard?var-timestamp=${__value.time}&var-randomId=${__data.fields.random_id}&var-nodeName=${__data.fields.Node}&var-db=postgres-timescaledb&kiosk=true"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 124
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Transaction"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 268
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "Transaction Analysis",
+                        "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?var-system_under_test=${system_under_test}&var-test_environment=${test_environment}&var-scenario_name=${scenario_name}&var-transaction=${__data.fields.transaction}&var-cagg_suffix=${cagg_suffix}&${__url_time_range}&kiosk=true"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "RT (ms)"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "none"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 71
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "random_id"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom.viz",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "url"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 460
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Node"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 111
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Code"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 58
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Sampler"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 233
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "Request Analysis",
+                        "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?var-system_under_test=${system_under_test}&var-test_environment=${test_environment}&var-scenario_name=${scenario_name}&var-sampler_name=${__data.fields.Sampler}&var-cagg_suffix=${cagg_suffix}&${__url_time_range}&kiosk=true"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 55
+          },
+          "id": 81,
+          "options": {
+            "cellHeight": "sm",
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "postgres-timescaledb"
+              },
+              "editorMode": "code",
+              "format": "table",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  time,\n  transaction_name AS \"Transaction\",\n  sampler_name AS \"Sampler\",\n  response_time AS \"RT (ms)\",\n  random_id,\n  url,\n  node_name AS \"Node\",\n  response_code AS \"Code\",\n  response_message AS \"Message\"\nFROM requests_error\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(time) AND scenario_name = '$scenario_name'\nORDER BY 1 DESC\nLIMIT 100;",
+              "refId": "A",
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              }
+            }
+          ],
+          "title": "Errors - ${scenario_name}",
+          "type": "table"
         }
       ],
       "title": "Scenario ${scenario_name}",
@@ -3138,7 +3594,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 25
+        "y": 35
       },
       "id": 14,
       "panels": [
@@ -4000,6 +4456,206 @@
             }
           ],
           "title": "Request response time table - $transaction",
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "footer": {
+                  "reducers": []
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "time"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Time"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "time: HH:mm:ss.SSS"
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "Error detail",
+                        "url": "/d/jmeter-timescaledb-error-dashboard/jmeter-timescaledb-error-dashboard?var-timestamp=${__value.time}&var-randomId=${__data.fields.random_id}&var-nodeName=${__data.fields.Node}&var-db=postgres-timescaledb&kiosk=true"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 124
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "RT (ms)"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "none"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 71
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "random_id"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom.viz",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "url"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 460
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Node"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 111
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Code"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 58
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Sampler"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 233
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "Request Analysis",
+                        "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?var-system_under_test=${system_under_test}&var-test_environment=${test_environment}&var-scenario_name=${scenario_name}&var-sampler_name=${__data.fields.Sampler}&var-cagg_suffix=${cagg_suffix}&${__url_time_range}&kiosk=true"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 99
+          },
+          "id": 82,
+          "options": {
+            "cellHeight": "sm",
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "postgres-timescaledb"
+              },
+              "editorMode": "code",
+              "format": "table",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  time,\n  sampler_name AS \"Sampler\",\n  response_time AS \"RT (ms)\",\n  random_id,\n  url,\n  node_name AS \"Node\",\n  response_code AS \"Code\",\n  response_message AS \"Message\"\nFROM requests_error\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(time) AND scenario_name = '$scenario_name' AND transaction_name = '$transaction'\nORDER BY 1 DESC\nLIMIT 100;",
+              "refId": "A",
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              }
+            }
+          ],
+          "title": "Errors - $transaction",
           "type": "table"
         }
       ],
