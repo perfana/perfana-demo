@@ -3716,7 +3716,7 @@
               }
             }
           ],
-          "title": "Response times - $transaction",
+          "title": "Transaction response times - $transaction",
           "type": "timeseries"
         },
         {
@@ -3924,7 +3924,7 @@
               "editorMode": "code",
               "format": "time_series",
               "rawQuery": true,
-              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n_ok) AS \"Successful requests\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name' AND transaction_name = '$transaction'\nGROUP BY 1\nORDER BY 1;",
+              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n_ok) AS \"Successful transactions\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name' AND transaction_name = '$transaction'\nGROUP BY 1\nORDER BY 1;",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -3945,7 +3945,7 @@
               }
             }
           ],
-          "title": "successful requests",
+          "title": "Successful transactions - $transaction",
           "type": "stat"
         },
         {
@@ -4005,6 +4005,406 @@
               "editorMode": "code",
               "format": "time_series",
               "rawQuery": true,
+              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n_err) AS \"Failed transactions\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name' AND transaction_name = '$transaction'\nGROUP BY 1\nORDER BY 1;",
+              "refId": "A",
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              }
+            }
+          ],
+          "title": "Failed transactions - $transaction",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 10,
+            "x": 0,
+            "y": 91
+          },
+          "id": 83,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max",
+                "mean",
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "postgres-timescaledb"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS \"Response times\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name' AND transaction_name = '$transaction'\nGROUP BY 1, 2\nORDER BY 1, 2;",
+              "refId": "A",
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              }
+            }
+          ],
+          "title": "Request response times - $transaction",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 10,
+            "x": 10,
+            "y": 91
+          },
+          "id": 84,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max",
+                "mean",
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "postgres-timescaledb"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  sum(n)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) AS \"count\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name' AND transaction_name = '$transaction'\nGROUP BY 1, 2\nORDER BY 1, 2;",
+              "refId": "A",
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              }
+            }
+          ],
+          "title": "Requests per second - $transaction",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 20,
+            "y": 91
+          },
+          "id": 85,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "sum"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "postgres-timescaledb"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n_ok) AS \"Successful requests\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name' AND transaction_name = '$transaction'\nGROUP BY 1\nORDER BY 1;",
+              "refId": "A",
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              }
+            }
+          ],
+          "title": "Successful requests - $transaction",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 20,
+            "y": 97
+          },
+          "id": 86,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "sum"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "postgres-timescaledb"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "rawQuery": true,
               "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n) AS \"Failed requests\"\nFROM requests_error_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name' AND transaction_name = '$transaction'\nGROUP BY 1\nORDER BY 1;",
               "refId": "A",
               "sql": {
@@ -4026,7 +4426,7 @@
               }
             }
           ],
-          "title": "Failed Requests",
+          "title": "Failed requests - $transaction",
           "type": "stat"
         },
         {
@@ -4411,7 +4811,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 91
+            "y": 102
           },
           "id": 76,
           "options": {
@@ -4616,7 +5016,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 99
+            "y": 110
           },
           "id": 82,
           "options": {
