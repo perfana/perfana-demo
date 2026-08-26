@@ -104,6 +104,16 @@
               {
                 "id": "custom.filterable",
                 "value": true
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Transaction Analysis",
+                    "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?var-system_under_test=${system_under_test}&var-test_environment=${test_environment}&var-scenario_name=${__data.fields.scenario}&var-transaction=${__data.fields.transaction}&var-cagg_suffix=${cagg_suffix}&${__url_time_range}&kiosk=true"
+                  }
+                ]
               }
             ]
           },
@@ -1699,6 +1709,16 @@
                   {
                     "id": "custom.filterable",
                     "value": true
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "targetBlank": true,
+                        "title": "Transaction Analysis",
+                        "url": "/d/transaction-analysis-timescaledb/transaction-analysis-timescaledb?var-system_under_test=${system_under_test}&var-test_environment=${test_environment}&var-scenario_name=${scenario_name}&var-transaction=${__data.fields.transaction}&var-cagg_suffix=${cagg_suffix}&${__url_time_range}&kiosk=true"
+                      }
+                    ]
                   }
                 ]
               },
