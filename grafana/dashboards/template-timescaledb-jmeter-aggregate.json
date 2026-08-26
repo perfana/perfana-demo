@@ -5479,7 +5479,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "rn8_KJEnk"
+            "uid": "efwch0ya7t5hcd"
           },
           "fieldConfig": {
             "defaults": {
@@ -5565,7 +5565,7 @@
             {
               "datasource": {
                 "type": "influxdb",
-                "uid": "rn8_KJEnk"
+                "uid": "efwch0ya7t5hcd"
               },
               "query": "from(bucket: \"monitoring\")\r\n    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n    |> filter(fn: (r) => r._measurement == \"cpu\" and r.host == \"${host}\" and r._field == \"usage_idle\" and r.cpu == \"cpu-total\")\r\n    |> aggregateWindow(every: 15s, fn: mean, createEmpty: false)\r\n    |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n    |> map(fn: (r) => ({r with _usage: r.usage_idle * -1.0 + 100.0}))\r\n    |> keep(columns: [\"_time\", \"_usage\"])\r\n",
               "refId": "A"
@@ -5580,7 +5580,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "rn8_KJEnk"
+            "uid": "efwch0ya7t5hcd"
           },
           "fieldConfig": {
             "defaults": {
@@ -5666,7 +5666,7 @@
             {
               "datasource": {
                 "type": "influxdb",
-                "uid": "rn8_KJEnk"
+                "uid": "efwch0ya7t5hcd"
               },
               "query": "from(bucket: \"monitoring\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"mem\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"used_percent\")\r\n  |> filter(fn: (r) =>  r.host =~ /$host$/)\r\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\r\n  |> yield(name: \"last\")",
               "refId": "A"
@@ -5681,7 +5681,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "rn8_KJEnk"
+            "uid": "efwch0ya7t5hcd"
           },
           "fieldConfig": {
             "defaults": {
@@ -5761,7 +5761,7 @@
             {
               "datasource": {
                 "type": "influxdb",
-                "uid": "rn8_KJEnk"
+                "uid": "efwch0ya7t5hcd"
               },
               "query": "  from(bucket: \"monitoring\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"net\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"bytes_recv\" or r[\"_field\"] == \"bytes_sent\")\r\n  |> filter(fn: (r) => r[\"host\"] == \"${host}\")\r\n  |> filter(fn: (r) => r[\"interface\"] == \"PROD\")\r\n  |> derivative(unit: 1s, nonNegative: true)\r\n  |> yield(name: \"nonnegative derivative\")",
               "refId": "A"
@@ -5902,7 +5902,7 @@
         },
         "datasource": {
           "type": "influxdb",
-          "uid": "rn8_KJEnk"
+          "uid": "efwch0ya7t5hcd"
         },
         "definition": "import \"influxdata/influxdb/v1\"\r\nv1.tagValues(\r\n    bucket: \"monitoring\",\r\n    tag: \"host\",\r\n    predicate: (r) => true,\r\n    start: -1d\r\n)",
         "includeAll": true,
