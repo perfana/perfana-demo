@@ -4275,49 +4275,6 @@
       ],
       "title": "Errors ${scenario_name}",
       "type": "row"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 27
-      },
-      "id": 70,
-      "panels": [],
-      "title": "Uitgevoerde testen",
-      "type": "row"
-    },
-    {
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 28
-      },
-      "id": 55,
-      "options": {
-        "limit": 25,
-        "navigateAfter": "5m",
-        "navigateBefore": "5m",
-        "navigateToPanel": false,
-        "onlyFromThisDashboard": false,
-        "onlyInTimeRange": false,
-        "showTags": true,
-        "showTime": true,
-        "showUser": false,
-        "tags": [
-          "$system_under_test"
-        ]
-      },
-      "pluginVersion": "12.2.0",
-      "title": "Uitgevoerde testen",
-      "type": "annolist"
     }
   ],
   "preload": false,
