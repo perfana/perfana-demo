@@ -3129,7 +3129,7 @@
           "type": "timeseries"
         }
       ],
-      "title": "Samenvatting ${scenario_name}",
+      "title": "Scenario ${scenario_name}",
       "type": "row"
     },
     {
