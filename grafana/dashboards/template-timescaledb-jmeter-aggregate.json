@@ -2135,7 +2135,7 @@
               "editorMode": "code",
               "format": "time_series",
               "rawQuery": true,
-              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n) AS \"Total requests\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
+              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n) AS \"Total transactions\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -2156,7 +2156,7 @@
               }
             }
           ],
-          "title": "Total requests",
+          "title": "Total transactions",
           "type": "stat"
         },
         {
@@ -2216,7 +2216,7 @@
               "editorMode": "code",
               "format": "time_series",
               "rawQuery": true,
-              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n) AS \"Failed requests\"\nFROM requests_error_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
+              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n_err) AS \"Failed transactions\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -2237,7 +2237,7 @@
               }
             }
           ],
-          "title": "Failed Requests",
+          "title": "Failed transactions",
           "type": "stat"
         },
         {
