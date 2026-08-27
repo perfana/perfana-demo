@@ -1084,7 +1084,7 @@
         "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
-            "mean"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
@@ -1101,9 +1101,9 @@
             "uid": "postgres-timescaledb"
           },
           "editorMode": "code",
-          "format": "time_series",
+          "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS \"Gemiddeld\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS \"Gemiddeld\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket);",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1166,7 +1166,7 @@
         "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
-            "mean"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
@@ -1183,9 +1183,9 @@
             "uid": "postgres-timescaledb"
           },
           "editorMode": "code",
-          "format": "time_series",
+          "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  min(min_rt) AS \"Minimum\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  min(min_rt) AS \"Minimum\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket);",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1445,7 +1445,7 @@
         "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
-            "mean"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
@@ -1462,9 +1462,9 @@
             "uid": "postgres-timescaledb"
           },
           "editorMode": "code",
-          "format": "time_series",
+          "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  ROUND(approx_percentile(0.90, rollup(pct_agg))::numeric) AS \"90e percentiel\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  ROUND(approx_percentile(0.90, rollup(pct_agg))::numeric) AS \"90e percentiel\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket);",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1527,7 +1527,7 @@
         "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
-            "max"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
@@ -1544,9 +1544,9 @@
             "uid": "postgres-timescaledb"
           },
           "editorMode": "code",
-          "format": "time_series",
+          "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  max(max_rt) AS \"Maximum\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  max(max_rt) AS \"Maximum\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket);",
           "refId": "A",
           "sql": {
             "columns": [
@@ -2533,7 +2533,7 @@
             "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "lastNotNull"
               ],
               "fields": "",
               "values": false
@@ -2550,9 +2550,9 @@
                 "uid": "postgres-timescaledb"
               },
               "editorMode": "code",
-              "format": "time_series",
+              "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS \"Gemiddeld\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
+              "rawSql": "SELECT\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS \"Gemiddeld\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name';",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -2615,7 +2615,7 @@
             "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "lastNotNull"
               ],
               "fields": "",
               "values": false
@@ -2632,9 +2632,9 @@
                 "uid": "postgres-timescaledb"
               },
               "editorMode": "code",
-              "format": "time_series",
+              "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  ROUND(approx_percentile(0.90, rollup(pct_agg))::numeric) AS \"90e percentiel\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
+              "rawSql": "SELECT\n  ROUND(approx_percentile(0.90, rollup(pct_agg))::numeric) AS \"90e percentiel\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name';",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -2697,7 +2697,7 @@
             "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "lastNotNull"
               ],
               "fields": "",
               "values": false
@@ -2714,9 +2714,9 @@
                 "uid": "postgres-timescaledb"
               },
               "editorMode": "code",
-              "format": "time_series",
+              "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  min(min_rt) AS \"Minimum\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
+              "rawSql": "SELECT\n  min(min_rt) AS \"Minimum\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name';",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -2779,7 +2779,7 @@
             "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
-                "max"
+                "lastNotNull"
               ],
               "fields": "",
               "values": false
@@ -2796,9 +2796,9 @@
                 "uid": "postgres-timescaledb"
               },
               "editorMode": "code",
-              "format": "time_series",
+              "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  max(max_rt) AS \"Maximum\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
+              "rawSql": "SELECT\n  max(max_rt) AS \"Maximum\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name';",
               "refId": "A",
               "sql": {
                 "columns": [
