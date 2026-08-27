@@ -3238,7 +3238,7 @@
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "lastNotNull"
               ],
               "fields": "",
               "values": false
@@ -3254,9 +3254,9 @@
                 "uid": "postgres-timescaledb"
               },
               "editorMode": "code",
-              "format": "time_series",
+              "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  ROUND(sum(n_err)::numeric / NULLIF(sum(n), 0) * 100.0, 2) AS \"Error rate\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
+              "rawSql": "SELECT\n  ROUND(sum(n_err)::numeric / NULLIF(sum(n), 0) * 100.0, 2) AS \"Error rate\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name';",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -4936,7 +4936,7 @@
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "mean"
+                "lastNotNull"
               ],
               "fields": "",
               "values": false
@@ -4952,9 +4952,9 @@
                 "uid": "postgres-timescaledb"
               },
               "editorMode": "code",
-              "format": "time_series",
+              "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  ROUND(sum(n_err)::numeric / NULLIF(sum(n), 0) * 100.0, 2) AS \"Error rate\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name' AND transaction_name = '$transaction'\nGROUP BY 1\nORDER BY 1;",
+              "rawSql": "SELECT\n  ROUND(sum(n_err)::numeric / NULLIF(sum(n), 0) * 100.0, 2) AS \"Error rate\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name' AND transaction_name = '$transaction';",
               "refId": "A",
               "sql": {
                 "columns": [
