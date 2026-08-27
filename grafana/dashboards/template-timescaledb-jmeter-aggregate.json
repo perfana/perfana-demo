@@ -2509,170 +2509,6 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "decbytes"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 4,
-            "x": 8,
-            "y": 40
-          },
-          "id": 4,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "horizontal",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "sum"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.2.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "grafana-postgresql-datasource",
-                "uid": "postgres-timescaledb"
-              },
-              "editorMode": "code",
-              "format": "time_series",
-              "rawQuery": true,
-              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(bytes_in) AS \"Received bytes\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
-              "refId": "A",
-              "sql": {
-                "columns": [
-                  {
-                    "parameters": [],
-                    "type": "function"
-                  }
-                ],
-                "groupBy": [
-                  {
-                    "property": {
-                      "type": "string"
-                    },
-                    "type": "groupBy"
-                  }
-                ],
-                "limit": 50
-              }
-            }
-          ],
-          "title": "Received Bytes",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "postgres-timescaledb"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "decbytes"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 4,
-            "x": 12,
-            "y": 40
-          },
-          "id": 5,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "horizontal",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "sum"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.2.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "grafana-postgresql-datasource",
-                "uid": "postgres-timescaledb"
-              },
-              "editorMode": "code",
-              "format": "time_series",
-              "rawQuery": true,
-              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(bytes_out) AS \"Sent bytes\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
-              "refId": "A",
-              "sql": {
-                "columns": [
-                  {
-                    "parameters": [],
-                    "type": "function"
-                  }
-                ],
-                "groupBy": [
-                  {
-                    "property": {
-                      "type": "string"
-                    },
-                    "type": "groupBy"
-                  }
-                ],
-                "limit": 50
-              }
-            }
-          ],
-          "title": "Sent Bytes",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "postgres-timescaledb"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
                     "color": "blue",
                     "value": 0
                   }
@@ -2685,7 +2521,7 @@
           "gridPos": {
             "h": 7,
             "w": 4,
-            "x": 16,
+            "x": 8,
             "y": 40
           },
           "id": 57,
@@ -2716,7 +2552,7 @@
               "editorMode": "code",
               "format": "time_series",
               "rawQuery": true,
-              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS \"Gemiddeld\",\n  ROUND(approx_percentile(0.90, rollup(pct_agg))::numeric) AS \"90e percentiel\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
+              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) AS \"Gemiddeld\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -2737,7 +2573,7 @@
               }
             }
           ],
-          "title": "Response times",
+          "title": "Gemiddelde response times",
           "type": "stat"
         },
         {
@@ -2765,9 +2601,91 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
+            "h": 7,
             "w": 4,
-            "x": 20,
+            "x": 12,
+            "y": 40
+          },
+          "id": 94,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "postgres-timescaledb"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  ROUND(approx_percentile(0.90, rollup(pct_agg))::numeric) AS \"90e percentiel\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND $__timeFilter(bucket) AND scenario_name = '$scenario_name'\nGROUP BY 1\nORDER BY 1;",
+              "refId": "A",
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              }
+            }
+          ],
+          "title": "90 percentile times",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postgres-timescaledb"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 4,
+            "x": 16,
             "y": 40
           },
           "id": 59,
@@ -2847,10 +2765,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 4,
+            "h": 7,
             "w": 4,
             "x": 20,
-            "y": 43
+            "y": 40
           },
           "id": 61,
           "options": {
