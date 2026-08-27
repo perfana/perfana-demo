@@ -1,8 +1,8 @@
 organizationId: __ORG_ID__  # placeholder; rewritten by bootstrap.sh to the real org id
 items:
-  - _id: jmeter-timescaledb
+  - _id: jmeter-timescaledb-aggregate-dashboard
     profile: jmeter
     grafana: Grafana
-    dashboardName: JMeter TimescaleDB Dashboard
-    dashboardUid: jmeter-timescaledb-dashboard
+    dashboardName: JMeter TimescaleDB Aggregate Dashboard
+    dashboardUid: jmeter-timescaledb-aggregate-dashboard
     readOnly: true
