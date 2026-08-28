@@ -50,7 +50,8 @@ services:
       postgres:
         condition: service_healthy
     # Published on all interfaces so remote load generators can reach it, same
-    # exposure as postgres above — see INSTALL.md step 9.6 for the firewall rule.
+    # exposure as postgres above. Needs its own firewall rule — the 5432 rule does
+    # not cover it; see INSTALL.md step 9.7.
     ports:
       - "6432:6432"
     volumes:

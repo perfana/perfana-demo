@@ -49,6 +49,7 @@ tooling. Add any further Grafana data sources from the Grafana UI after install.
 | Service | Image | Purpose | Browser port |
 |---|---|---|---|
 | `postgres` | timescale/timescaledb-ha:pg15 | Perfana + Keycloak + Grafana databases | 5432 (LAN) |
+| `pgbouncer` | edoburu/pgbouncer:1.21.0-p0 | Connection pooler for load generators (opt-in) | 6432 (LAN) |
 | `keycloak` | quay.io/keycloak/keycloak:24.0 | Authentication / SSO | 8080 |
 | `perfana-migration` | perfana/perfana-migration | One-shot DB migrations | — |
 | `perfana-api` | perfana/perfana-api | REST API (NestJS) | 3001 |
@@ -561,6 +562,58 @@ in mirrored mode the `0.0.0.0` container bind is reachable on the server's LAN I
    ```powershell
    Test-NetConnection <THIS-SERVER-IP> -Port 5432   # TcpTestSucceeded : True
    ```
+
+### 9.7 Expose PgBouncer to load generators (optional)
+
+Only needed if you run the optional pooler (see [9.8](#98-connection-pooling-with-pgbouncer-optional)).
+It binds `6432` on all interfaces exactly like PostgreSQL, so it needs the same two host-side steps —
+a firewall rule of its own; the 5432 rule does not cover it.
+
+1. **Open the Windows firewall**, scoped to your load generator subnet (PowerShell, as Administrator):
+   ```powershell
+   New-NetFirewallRule -DisplayName "Perfana PgBouncer 6432" -Direction Inbound `
+     -Protocol TCP -LocalPort 6432 -Action Allow `
+     -RemoteAddress 10.0.0.0/24       # <-- restrict to your load generator subnet
+   ```
+
+2. **Verify from a load generator:**
+   ```powershell
+   Test-NetConnection <THIS-SERVER-IP> -Port 6432   # TcpTestSucceeded : True
+   ```
+
+> If the generators reach the database only through the pooler, you can drop the 5432 rule from
+> step 9.6 and leave PostgreSQL unreachable from the LAN.
+
+### 9.8 Connection pooling with PgBouncer (optional)
+
+PgBouncer is **off by default** and sits behind a compose profile. The Perfana services connect to
+`postgres:5432` directly and never pass through it — the pooler exists only for **load generator**
+traffic. Enable it when many distributed JMeter generators write results at once: each generator's
+TimescaleDB backend listener opens its own connection pool, and a large fleet can exhaust
+PostgreSQL's `max_connections` (this deployment runs with `max_connections=500`). In `transaction`
+pooling mode PgBouncer multiplexes them onto a small, bounded set of server connections.
+
+1. **Write the auth file** (once, and again after any `POSTGRES_PASSWORD` change):
+   ```bash
+   ./scripts/mint-pgbouncer-userlist.sh
+   ```
+   `pgbouncer/userlist.txt` holds the password in plain text and is git-ignored. That is required,
+   not an oversight: with `auth_type = scram-sha-256` PgBouncer hashes it to authenticate clients
+   *and* needs it to log in to PostgreSQL itself, which a stored SCRAM verifier cannot do.
+
+2. **Start it:**
+   ```bash
+   docker compose --profile pgbouncer up -d pgbouncer
+   ```
+
+3. **Point the generators at it.** In the `.jmx` plans the TimescaleDB backend listener host and
+   port are JMeter properties defaulting to `postgres:5432`:
+   ```sh
+   jmeter -JtimescaleHost=<THIS-SERVER-IP> -JtimescalePort=6432 ...
+   ```
+
+Pool sizing lives in `pgbouncer/pgbouncer.ini`. Only the `perfana` database is exposed; Keycloak
+and Grafana keep talking to PostgreSQL directly.
 
 ---
 
