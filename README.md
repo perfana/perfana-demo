@@ -34,6 +34,7 @@ Browse to `http://localhost:4001` (`PERFANA_WEB_PORT`) on the server.
 | `stop.sh` | Stop containers (`--volumes` to also delete data — destructive). |
 | `update.sh` | Pull pinned images, re-run migrations, recreate services. |
 | `bootstrap.sh` | One-time first-run integration setup. |
+| `scripts/mint-pgbouncer-userlist.sh` | Write `pgbouncer/userlist.txt` from `POSTGRES_PASSWORD`. |
 
 ## Configuration
 
@@ -45,6 +46,33 @@ Browse to `http://localhost:4001` (`PERFANA_WEB_PORT`) on the server.
 | `grafana/provisioning/datasources/datasources.yaml` | Grafana data source (Perfana TimescaleDB). |
 | `perfana/provisioning/` | Perfana benchmark / dashboard provisioning applied by the API. |
 | `database/init/` | PostgreSQL init (creates the Keycloak and Grafana databases). |
+| `pgbouncer/pgbouncer.ini` | Connection pooler settings (optional, load generators only). |
+
+## Connection pooling for load generators (optional)
+
+PgBouncer is included but **off by default**. The Perfana services connect to
+PostgreSQL directly and always will — the pooler exists only for **load generator**
+traffic. Enable it when many distributed JMeter generators write results at once:
+each generator's TimescaleDB backend listener opens its own connection pool, and a
+large fleet can exhaust PostgreSQL's `max_connections`. In `transaction` pooling mode
+PgBouncer multiplexes them onto a small, bounded set of server connections.
+
+```bash
+./scripts/mint-pgbouncer-userlist.sh          # once, and after any password change
+docker compose --profile pgbouncer up -d pgbouncer
+```
+
+It listens on `6432`. Point the JMeter TimescaleDB backend listener at it instead of
+PostgreSQL — in the `.jmx` plans these are properties defaulting to `postgres:5432`:
+
+```sh
+jmeter -JtimescaleHost=<server> -JtimescalePort=6432 ...
+```
+
+`pgbouncer/userlist.txt` holds the database password in plain text and is git-ignored.
+That is required, not an oversight: with `auth_type = scram-sha-256` PgBouncer hashes
+it to authenticate clients *and* needs it to log in to PostgreSQL itself, which a
+stored SCRAM verifier cannot do.
 
 ## Health checks
 

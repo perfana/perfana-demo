@@ -34,3 +34,7 @@ boot.sh
 *.log
 .gitnexus
 .gstack/
+
+# pgbouncer — holds the database password in plain text; regenerate with
+# scripts/mint-pgbouncer-userlist.sh
+pgbouncer/userlist.txt

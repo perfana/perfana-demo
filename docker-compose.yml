@@ -34,6 +34,32 @@ services:
       start_period: 10s
     restart: unless-stopped
 
+  # PgBouncer — connection pooler for load generator traffic only. Opt-in: the
+  # Perfana services connect to postgres:5432 directly and never pass through it.
+  # Enable when many distributed JMeter generators write results concurrently; each
+  # generator's TimescaleDB backend listener opens its own pool, and transaction
+  # pooling multiplexes those onto a small, bounded set of PostgreSQL backends.
+  #   docker compose --profile pgbouncer up -d pgbouncer
+  # Needs pgbouncer/userlist.txt: scripts/mint-pgbouncer-userlist.sh
+  pgbouncer:
+    image: edoburu/pgbouncer:1.21.0-p0
+    container_name: perfana-pgbouncer
+    profiles:
+      - pgbouncer
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Published on all interfaces so remote load generators can reach it, same
+    # exposure as postgres above — see INSTALL.md step 9.6 for the firewall rule.
+    ports:
+      - "6432:6432"
+    volumes:
+      - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    networks:
+      - perfana
+    restart: unless-stopped
+
   # Keycloak — authentication / SSO. Uses the shared PostgreSQL instance.
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
