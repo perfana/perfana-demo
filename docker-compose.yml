@@ -14,7 +14,12 @@ services:
       POSTGRES_USER: perfana
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
-    command: ["-c", "max_connections=500"]
+    # max_worker_processes: TimescaleDB background workers and parallel query workers
+    # both come out of this pool. The default 8 is well under
+    # timescaledb.max_background_workers (16) + max_parallel_workers (8), which makes
+    # continuous aggregate refresh policies lose the race for a worker and log
+    # "failed to start job" -- silently leaving the aggregates behind.
+    command: ["-c", "max_connections=500", "-c", "max_worker_processes=32"]
     # Published on all interfaces so other hosts on the network can reach the database
     # directly (e.g. external BI tools, remote load generators). Requires WSL2 mirrored
     # networking and a scoped firewall rule — see INSTALL.md step 9.6. Auth is scram-sha-256;
