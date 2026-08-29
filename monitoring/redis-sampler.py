@@ -154,19 +154,35 @@ def main():
     r = None
     while True:
         started = time.monotonic()
+        batch = None
         try:
             if r is None:
                 r = Redis()
             batch = list(rows(r))
-            if batch:
-                emit(batch)
-        except Exception as exc:  # noqa: BLE001 — a sampler must outlive any single error
+        except Exception as exc:  # noqa: BLE001 — a sampler must outlive a Redis blip
             print(f"-- redis sample failed: {exc}", file=sys.stderr, flush=True)
             if r is not None:
                 r.close()
             r = None
+
+        if batch:
+            # A closed stdout means psql is gone — after a database restart, say. That is
+            # not retryable: every later sample would be written into a dead pipe while
+            # the container went on reporting itself healthy. Exit instead and let the
+            # restart policy bring the pair back up together.
+            try:
+                emit(batch)
+            except BrokenPipeError:
+                print("psql closed the pipe — exiting so the container restarts",
+                      file=sys.stderr, flush=True)
+                # Point stdout at /dev/null before leaving: the interpreter flushes it
+                # again on shutdown, which would raise a second BrokenPipeError and print
+                # a traceback over the real reason. This is the documented workaround.
+                os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+                return 1
+
         time.sleep(max(0.0, INTERVAL - (time.monotonic() - started)))
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)
