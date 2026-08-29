@@ -80,8 +80,8 @@ BEGIN
     WHERE NOT granted
     GROUP BY 3;
 
-    -- Connection budget. max_connections is 500 in this deployment; PgBouncer keeps a
-    -- fleet of load generators from eating into it.
+    -- Connection budget. max_connections is recorded alongside the count so the
+    -- dashboard can show the two as a percentage without knowing the deployment.
     INSERT INTO monitoring.pg_samples (ts, metric, source, detail, value)
     SELECT now_ts, 'conn.total', '', '', count(*) FROM pg_stat_activity
     UNION ALL

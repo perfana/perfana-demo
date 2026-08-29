@@ -55,16 +55,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "blue",
                 "value": 0
-              },
-              {
-                "color": "orange",
-                "value": 300
-              },
-              {
-                "color": "red",
-                "value": 450
               }
             ]
           }
@@ -128,7 +120,7 @@
       ],
       "title": "Connections in use",
       "type": "stat",
-      "description": "Backends against max_connections. PgBouncer keeps a fleet of load generators from eating into this budget."
+      "description": "Backends in use. max_connections differs per deployment, so the warning colours live on the percentage panel beside this one rather than on absolute counts here."
     },
     {
       "datasource": {
