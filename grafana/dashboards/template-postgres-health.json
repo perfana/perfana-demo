@@ -210,7 +210,8 @@
         }
       ],
       "title": "Connection budget used",
-      "type": "stat"
+      "type": "stat",
+      "description": "Backends against max_connections.\n\n**When it crosses:** the pools reserve far more than they use \u2014 api 20, grafana-sync 10, the JMeter listener 20, the worker up to 30, against a handful actually running a query. Check *Connections by application* for the biggest reserver. Either raise max_connections in docker-compose.yml, or put the load generators behind PgBouncer so a fleet maps onto a bounded set of backends instead of a pool each."
     },
     {
       "datasource": {
@@ -633,7 +634,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "dashed"
             }
           },
           "mappings": [],
@@ -643,6 +644,14 @@
               {
                 "color": "green",
                 "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 300
+              },
+              {
+                "color": "red",
+                "value": 900
               }
             ]
           },
@@ -735,7 +744,7 @@
       ],
       "title": "Oldest transaction / query age",
       "type": "timeseries",
-      "description": "ADAPT analysis legitimately runs for minutes, so a long transaction is not by itself a fault. A long *idle* one is."
+      "description": "ADAPT analysis legitimately runs for minutes, so a long transaction is not by itself a fault. A long *idle* one is. \n\n**When it crosses:** Identify it with `SELECT pid, state, now()-xact_start AS age, query FROM pg_stat_activity WHERE xact_start IS NOT NULL ORDER BY age DESC`. A long *idle* transaction is a leaked connection: the worker pool sets idleTimeoutMillis to 600000, so anything older is not being recycled. A long *active* one is usually ADAPT and needs nothing."
     },
     {
       "datasource": {
@@ -778,7 +787,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "dashed"
             }
           },
           "mappings": [],
@@ -786,8 +795,16 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "red",
                 "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 95
+              },
+              {
+                "color": "green",
+                "value": 99
               }
             ]
           },
@@ -853,7 +870,7 @@
       ],
       "title": "Cache hit ratio",
       "type": "timeseries",
-      "description": "Shared buffer hits as a share of all block reads. A sustained dip means the working set no longer fits in shared_buffers."
+      "description": "Shared buffer hits as a share of all block reads. A sustained dip means the working set no longer fits in shared_buffers. \n\n**When it crosses:** shared_buffers is 128 MB here, small for these result tables. Raise it toward a quarter of host RAM via `-c shared_buffers=...` in docker-compose.yml and restart PostgreSQL. Check the Storage row first \u2014 a dip right after a hypertable jump is a cold cache, not a misconfiguration."
     },
     {
       "collapsed": false,
@@ -1272,7 +1289,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "dashed"
             }
           },
           "mappings": [],
@@ -1282,6 +1299,14 @@
               {
                 "color": "green",
                 "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1048576
+              },
+              {
+                "color": "red",
+                "value": 10485760
               }
             ]
           },
@@ -1374,7 +1399,7 @@
       ],
       "title": "Temp files and deadlocks",
       "type": "timeseries",
-      "description": "Temp bytes mean a query spilled past work_mem to disk."
+      "description": "Temp bytes mean a query spilled past work_mem to disk. \n\n**When it crosses:** work_mem is 4 MB here, and a batch re-evaluate was measured spilling 49 MB/s against it \u2014 the cheapest win available for analysis runtime. It applies per sort per connection, so multiply by the 30-connection worker pool before choosing; 32-64 MB is a sane step. Deadlocks are unrelated: any non-zero rate is a bug to chase in the logs."
     },
     {
       "collapsed": false,
@@ -1548,7 +1573,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "dashed"
             }
           },
           "mappings": [],
@@ -1558,6 +1583,14 @@
               {
                 "color": "green",
                 "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 2147483648
+              },
+              {
+                "color": "red",
+                "value": 4294967296
               }
             ]
           },
@@ -1623,7 +1656,7 @@
       ],
       "title": "WAL directory size",
       "type": "timeseries",
-      "description": "Growth here without a matching checkpoint rate means WAL is being retained -- a stalled archive, a replication slot, or max_wal_size too small."
+      "description": "Growth here without a matching checkpoint rate means WAL is being retained -- a stalled archive, a replication slot, or max_wal_size too small. \n\n**When it crosses:** max_wal_size is 1 GB, so settling near 2 GB is expected and 4 GB is not. Check `SELECT * FROM pg_replication_slots WHERE NOT active` first \u2014 an inactive slot pins WAL indefinitely. Otherwise raise max_wal_size, which also brings down the requested checkpoints beside it."
     },
     {
       "datasource": {
@@ -1747,7 +1780,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "dashed"
             }
           },
           "mappings": [],
@@ -1757,6 +1790,14 @@
               {
                 "color": "green",
                 "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 0.0033
+              },
+              {
+                "color": "red",
+                "value": 0.0167
               }
             ]
           },
@@ -1865,7 +1906,7 @@
       ],
       "title": "Checkpoints per second",
       "type": "timeseries",
-      "description": "Requested checkpoints are driven by WAL volume rather than by checkpoint_timeout. A rising share of them means max_wal_size is too small for the write rate."
+      "description": "Requested checkpoints are driven by WAL volume rather than by checkpoint_timeout. A rising share of them means max_wal_size is too small for the write rate. \n\n**When it crosses:** checkpoint_timeout is 300 s, so timed checkpoints arrive at 0.0033/s \u2014 the first threshold line. Once *requested* reaches it, WAL volume rather than the clock is driving checkpoints and each one competes with the ingest. Raise max_wal_size (1 GB now) until requested falls back to near zero."
     },
     {
       "datasource": {
@@ -1908,7 +1949,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "dashed"
             }
           },
           "mappings": [],
@@ -1918,6 +1959,14 @@
               {
                 "color": "green",
                 "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 100
               }
             ]
           },
@@ -2054,7 +2103,7 @@
       ],
       "title": "Buffers written per second",
       "type": "timeseries",
-      "description": "Backends writing their own buffers is the expensive path: it means the bgwriter and checkpointer are not keeping up."
+      "description": "Backends writing their own buffers is the expensive path: it means the bgwriter and checkpointer are not keeping up. \n\n**When it crosses:** Read the threshold against the *by backends* line only; the other two are meant to be busy. Raise shared_buffers first (128 MB here), then bgwriter_lru_maxpages if it persists. Sustained backend writes during a run surface as latency in the load test itself."
     },
     {
       "collapsed": false,
@@ -2197,7 +2246,7 @@
       ],
       "title": "Background jobs",
       "type": "table",
-      "description": "The continuous aggregate refresh policies behind every Perfana dashboard, plus the retention and columnstore policies. A refresh that stops succeeding shows up as stale dashboards long before it shows up as an error."
+      "description": "The continuous aggregate refresh policies behind every Perfana dashboard, plus the retention and columnstore policies. A refresh that stops succeeding shows up as stale dashboards long before it shows up as an error. Counts are for the selected time range.\n\n**When Failures is non-zero:** read the reason with `SELECT err_message, count(*) FROM timescaledb_information.job_errors GROUP BY 1 ORDER BY 2 DESC`. \"failed to start job\" means no background worker was free \u2014 compare Worker processes beside this table: max_worker_processes must exceed timescaledb.max_background_workers plus max_parallel_workers. Anything else is a real query error and the message names it. *Since success* is the staleness of that aggregate: while it climbs, the Perfana dashboards reading it are behind."
     },
     {
       "datasource": {
@@ -2570,7 +2619,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "dashed"
             }
           },
           "mappings": [],
@@ -2580,9 +2629,18 @@
               {
                 "color": "green",
                 "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 20
+              },
+              {
+                "color": "red",
+                "value": 50
               }
             ]
           },
+          "unit": "percent",
           "min": 0
         },
         "overrides": []
@@ -2621,7 +2679,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', ts) AS time,\n  source AS \"table\",\n  max(value) AS \"dead tuples\"\nFROM monitoring.pg_samples\nWHERE metric = 'table.dead_tup' AND $__timeFilter(ts)\nGROUP BY 1, 2\nHAVING max(value) > 0\nORDER BY 1, 2;",
+          "rawSql": "SELECT\n  time_bucket('$__interval', ts) AS time,\n  source AS \"table\",\n  100.0 * max(value) FILTER (WHERE metric = 'table.dead_tup')\n       / NULLIF(max(value) FILTER (WHERE metric = 'table.live_tup'), 0) AS \"dead %\"\nFROM monitoring.pg_samples\nWHERE metric IN ('table.dead_tup', 'table.live_tup') AND $__timeFilter(ts)\nGROUP BY 1, 2\nHAVING max(value) FILTER (WHERE metric = 'table.dead_tup') > 0\nORDER BY 1, 2;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -2644,7 +2702,7 @@
       ],
       "title": "Dead tuples",
       "type": "timeseries",
-      "description": "The result tables are insert-only, so anything but a low number means autovacuum is falling behind."
+      "description": "Dead tuples as a share of live ones \u2014 the absolute count says nothing without the table size. The result tables are insert-only, so this should stay low. \n\n**When it crosses:** autovacuum_vacuum_scale_factor is 0.2, so autovacuum should fire at 20% \u2014 the first threshold line is exactly where it ought to have run already. Check `SELECT relname, last_autovacuum, autovacuum_count FROM pg_stat_user_tables ORDER BY n_dead_tup DESC`. A stale last_autovacuum usually means a long-lived transaction is holding the xmin horizon back \u2014 see *Oldest transaction age*. Otherwise lower autovacuum_vacuum_scale_factor for that table."
     },
     {
       "collapsed": false,
@@ -2700,7 +2758,7 @@
               "mode": "normal"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "dashed"
             }
           },
           "mappings": [],
@@ -2710,6 +2768,14 @@
               {
                 "color": "green",
                 "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 25
+              },
+              {
+                "color": "red",
+                "value": 100
               }
             ]
           },
@@ -2774,7 +2840,7 @@
       ],
       "title": "Jobs waiting",
       "type": "timeseries",
-      "description": "Backlog per queue. perfana-analyze is the one that matters during a test run: it carries the analysis pipeline."
+      "description": "Backlog per queue. perfana-analyze is the one that matters during a test run: it carries the analysis pipeline. \n\n**When it crosses:** A spike straight after starting a batch is normal \u2014 watch whether it drains. If it holds while *Jobs active* sits flat at its ceiling, the workers are the limit: raise WORKER_ANALYZE_CONCURRENCY / WORKER_BATCH_CONCURRENCY. If active is below its ceiling as well, the workers are blocked on the database \u2014 look at Connections and Temp files."
     },
     {
       "datasource": {
@@ -2934,7 +3000,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "dashed"
             }
           },
           "mappings": [],
@@ -2944,6 +3010,14 @@
               {
                 "color": "green",
                 "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 10
               }
             ]
           },
@@ -3036,7 +3110,7 @@
       ],
       "title": "Jobs failed and delayed",
       "type": "timeseries",
-      "description": "Delayed jobs are usually retries with backoff, so a rising delayed count tends to precede a rising failed count."
+      "description": "Delayed jobs are usually retries with backoff, so a rising delayed count tends to precede a rising failed count. \n\n**When it crosses:** Failed jobs do not retry once attempts are exhausted. Read the reason with `valkey-cli LRANGE bull:<queue>:failed 0 10`, then find that job id in the worker log. A rising *delayed* count on its own is retries in flight and often clears itself."
     },
     {
       "datasource": {
@@ -3369,7 +3443,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "dashed"
             }
           },
           "mappings": [],
@@ -3379,6 +3453,14 @@
               {
                 "color": "green",
                 "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1073741824
+              },
+              {
+                "color": "red",
+                "value": 4294967296
               }
             ]
           },
@@ -3500,7 +3582,7 @@
       ],
       "title": "Valkey memory",
       "type": "timeseries",
-      "description": "maxmemory is 0 (unlimited) by default, so growth here is bounded by the host, not by Valkey."
+      "description": "maxmemory is 0 (unlimited) by default, so growth here is bounded by the host, not by Valkey. \n\n**When it crosses:** BullMQ trims its completed and failed sets, so steady growth means something is not being trimmed \u2014 usually a queue with no worker consuming it. Compare with Jobs waiting per queue to find which, and `valkey-cli --bigkeys` to name the key."
     },
     {
       "datasource": {
@@ -3660,7 +3742,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "dashed"
             }
           },
           "mappings": [],
@@ -3670,6 +3752,10 @@
               {
                 "color": "green",
                 "value": 0
+              },
+              {
+                "color": "red",
+                "value": 1
               }
             ]
           },
@@ -3790,7 +3876,7 @@
       ],
       "title": "Keys, evictions and expiries",
       "type": "timeseries",
-      "description": "Evictions are the alarming one: with maxmemory unset they should stay at zero, and a non-zero rate means jobs are being dropped."
+      "description": "Evictions are the alarming one: with maxmemory unset they should stay at zero, and a non-zero rate means jobs are being dropped. \n\n**When it crosses:** An eviction means Valkey dropped a key to stay under maxmemory, and a dropped BullMQ key is a lost job. Check `valkey-cli CONFIG GET maxmemory`: if something set it, raise it or give the container more memory. Expiries are normal and need no action."
     }
   ],
   "preload": false,
