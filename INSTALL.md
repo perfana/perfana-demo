@@ -654,6 +654,32 @@ What the dashboard shows, and why each matters here:
 - **Hypertable growth and dead tuples.** The result tables grow with every test run and are
   insert-only, so a rising dead-tuple count means autovacuum is falling behind.
 
+**Worker budget.** TimescaleDB background workers and parallel query workers both come
+out of `max_worker_processes`. The PostgreSQL default of 8 is well under
+`timescaledb.max_background_workers` (16) plus `max_parallel_workers` (8), and a refresh
+policy that cannot get a worker logs `failed to start job` and simply does not run —
+leaving continuous aggregates behind with nothing in the UI to say so.
+
+`docker-compose.yml` passes `max_worker_processes=32` on the command line, which covers a
+fresh deployment. An **existing** container keeps the `Cmd` it was created with, and
+`docker compose restart` does not change that — only `up -d` recreates it:
+
+```bash
+docker compose up -d postgres          # applies a changed command; restart does not
+docker inspect perfana-postgres --format '{{json .Config.Cmd}}'
+```
+
+`setup-db-monitoring.sh` also sets the value with `ALTER SYSTEM`, which lands in
+`postgresql.auto.conf` inside the data directory and therefore survives container
+recreation, image upgrades and any restart method. It still needs one PostgreSQL restart
+to take effect; the script says so when it changes the value. To check what is actually in
+force:
+
+```bash
+docker compose exec -T postgres psql -U perfana -d perfana -c \
+  "SELECT name, setting, source FROM pg_settings WHERE name = 'max_worker_processes';"
+```
+
 Storage is bounded by the retention policy and is small next to the result tables it
 watches. To remove it entirely:
 
