@@ -2174,7 +2174,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  source AS \"Job\",\n  max(value) FILTER (WHERE metric = 'job.total_runs')            AS \"Runs\",\n  max(value) FILTER (WHERE metric = 'job.total_successes')       AS \"Successes\",\n  max(value) FILTER (WHERE metric = 'job.total_failures')        AS \"Failures\",\n  max(value) FILTER (WHERE metric = 'job.last_duration_s')       AS \"Last duration (s)\",\n  max(value) FILTER (WHERE metric = 'job.age_since_success_s')   AS \"Since success (s)\"\nFROM monitoring.pg_samples\nWHERE metric LIKE 'job.%' AND $__timeFilter(ts)\nGROUP BY 1\nORDER BY 4 DESC, 1;",
+          "rawSql": "SELECT\n  source AS \"Job\",\n  -- Counters are cumulative, so difference them over the selected range: the table\n  -- answers \"what happened in the window I am looking at\", not \"since the job existed\".\n  max(value) FILTER (WHERE metric = 'job.total_runs')\n    - min(value) FILTER (WHERE metric = 'job.total_runs')        AS \"Runs\",\n  max(value) FILTER (WHERE metric = 'job.total_successes')\n    - min(value) FILTER (WHERE metric = 'job.total_successes')   AS \"Successes\",\n  max(value) FILTER (WHERE metric = 'job.total_failures')\n    - min(value) FILTER (WHERE metric = 'job.total_failures')    AS \"Failures\",\n  max(value) FILTER (WHERE metric = 'job.last_duration_s')       AS \"Last duration (s)\",\n  max(value) FILTER (WHERE metric = 'job.age_since_success_s')   AS \"Since success (s)\"\nFROM monitoring.pg_samples\nWHERE metric LIKE 'job.%' AND $__timeFilter(ts)\nGROUP BY 1\nORDER BY 4 DESC, 1;",
           "refId": "A",
           "sql": {
             "columns": [

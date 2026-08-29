@@ -63,7 +63,9 @@ BEGIN
     INSERT INTO monitoring.pg_samples (ts, metric, source, detail, value)
     SELECT now_ts, m.metric,
            COALESCE(NULLIF(a.application_name, ''), '(unset)'), '',
-           max(EXTRACT(EPOCH FROM (now_ts - m.since)))
+           -- now_ts is fixed at transaction start, so a backend that began its own
+           -- transaction a moment later yields a slightly negative age. Clamp it.
+           max(GREATEST(EXTRACT(EPOCH FROM (now_ts - m.since)), 0))
     FROM pg_stat_activity a
     CROSS JOIN LATERAL (VALUES
         ('conn.xact_age_s', a.xact_start),
