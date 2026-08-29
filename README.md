@@ -49,6 +49,7 @@ Browse to `http://localhost:4001` (`PERFANA_WEB_PORT`) on the server.
 | `database/init/` | PostgreSQL init (creates the Keycloak and Grafana databases). |
 | `pgbouncer/pgbouncer.ini` | Connection pooler settings (optional, load generators only). |
 | `monitoring/pg-monitoring.sql` | Database self-monitoring: schema, samplers, background jobs. |
+| `monitoring/redis-sampler.py` | Samples Valkey and the BullMQ queue depths into the same hypertable. |
 
 ## Connection pooling for load generators (optional)
 
@@ -78,7 +79,9 @@ health** dashboard reads it back.
 
 Connections, transaction and tuple rates, cache hit ratio, WAL generation and pg_wal
 size, checkpoints and buffer writes, continuous-aggregate job failures, hypertable growth
-and dead tuples. Seven days of history, then dropped by a retention policy. Details in
+and dead tuples. The `valkey-monitor` service adds Valkey and the BullMQ queues to the
+same dashboard — backlog, active and failed jobs per queue, memory, clients and
+evictions. Seven days of history, then dropped by a retention policy. Details in
 [INSTALL.md](INSTALL.md) step 9.9.
 
 ## Health checks

@@ -480,6 +480,32 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # Samples Valkey and the BullMQ queue depths into monitoring.pg_samples, next to the
+  # PostgreSQL samples, so one Grafana datasource covers both. Runs on the database image
+  # that is already pulled — it carries python3 and psql, so this needs no extra image and
+  # no package install. Needs the monitoring schema: scripts/setup-db-monitoring.sh.
+  valkey-monitor:
+    image: timescale/timescaledb-ha:pg15
+    container_name: perfana-valkey-monitor
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+    environment:
+      REDIS_HOST: valkey
+      SAMPLE_INTERVAL: "10"
+      PGHOST: postgres
+      PGUSER: perfana
+      PGDATABASE: perfana
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+    volumes:
+      - ./monitoring:/monitoring:ro
+    entrypoint: ["bash", "/monitoring/redis-sampler.sh"]
+    networks:
+      - perfana
+    restart: unless-stopped
+
 ######################################################################################################################
 networks:
   perfana:

@@ -633,6 +633,7 @@ It is idempotent — re-run it after an upgrade. What it installs:
 | `monitoring.pg_samples` | Hypertable holding the samples, 7-day retention policy |
 | `monitoring.sample_fast` | Every 10 s: connections, locks, database counters, WAL, checkpointer |
 | `monitoring.sample_slow` | Every 5 min: database and hypertable sizes, dead tuples, job stats |
+| `valkey-monitor` (container) | Every 10 s: Valkey INFO and the BullMQ queue depths |
 
 What the dashboard shows, and why each matters here:
 
@@ -653,6 +654,17 @@ What the dashboard shows, and why each matters here:
   before it shows up as an error.
 - **Hypertable growth and dead tuples.** The result tables grow with every test run and are
   insert-only, so a rising dead-tuple count means autovacuum is falling behind.
+- **BullMQ backlog per queue.** `perfana-analyze` carries the analysis pipeline. Jobs
+  *active* is bounded by the worker concurrency settings, so a flat ceiling there next to
+  a rising *waiting* count means the workers are the bottleneck rather than Valkey.
+  Blocked clients are workers parked in `BRPOPLPUSH` waiting for work — a healthy idle
+  state, not a stall. Evictions should stay at zero; a non-zero rate means jobs are being
+  dropped.
+
+The `valkey-monitor` container runs the sampler. It uses the database image, which is
+already pulled and carries both `python3` and `psql`, so it needs no extra image and no
+package install — it works on a host with no internet access. It waits for the monitoring
+schema to exist, so the order of the two steps does not matter.
 
 **Worker budget.** TimescaleDB background workers and parallel query workers both come
 out of `max_worker_processes`. The PostgreSQL default of 8 is well under
