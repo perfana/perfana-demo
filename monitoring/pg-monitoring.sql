@@ -227,9 +227,19 @@ BEGIN
     SELECT now_ts, 'worker.timescaledb_max_background', '', '',
            current_setting('timescaledb.max_background_workers')::float
     UNION ALL
-    SELECT now_ts, 'worker.running', '', '', count(*)::float
-    FROM pg_stat_activity
-    WHERE backend_type LIKE '%worker%' OR application_name LIKE 'TimescaleDB Background Job%';
+    -- Attached TimescaleDB processes: the scheduler, the launcher and any job worker
+    -- alive at this instant. Matched case-insensitively -- the backend_type values are
+    -- "TimescaleDB Background Worker Scheduler"/"... Launcher", so a lowercase LIKE
+    -- '%worker%' silently matches nothing.
+    SELECT now_ts, 'worker.timescaledb_processes', '', '', count(*)::float
+    FROM pg_stat_activity WHERE backend_type ILIKE 'TimescaleDB%'
+    UNION ALL
+    -- How many jobs could ask for a worker. Counting workers *running* would be close to
+    -- useless: a continuous aggregate refresh finishes in tens of milliseconds, so a
+    -- five-minute poll almost never catches one. Saturation shows up as "failed to start
+    -- job" in the Background jobs table, not as a high instantaneous count.
+    SELECT now_ts, 'worker.jobs_registered', '', '', count(*)::float
+    FROM timescaledb_information.jobs;
 END;
 $$;
 

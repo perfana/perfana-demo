@@ -2256,7 +2256,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', ts) AS time,\n  max(value) FILTER (WHERE metric = 'worker.running')                  AS \"running\",\n  max(value) FILTER (WHERE metric = 'worker.timescaledb_max_background') AS \"timescaledb max\",\n  max(value) FILTER (WHERE metric = 'worker.max_worker_processes')     AS \"max_worker_processes\"\nFROM monitoring.pg_samples\nWHERE metric LIKE 'worker.%' AND $__timeFilter(ts)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  time_bucket('$__interval', ts) AS time,\n  max(value) FILTER (WHERE metric = 'worker.jobs_registered')          AS \"jobs registered\",\n  max(value) FILTER (WHERE metric = 'worker.timescaledb_processes')    AS \"TimescaleDB processes\",\n  max(value) FILTER (WHERE metric = 'worker.timescaledb_max_background') AS \"timescaledb max\",\n  max(value) FILTER (WHERE metric = 'worker.max_worker_processes')     AS \"max_worker_processes\"\nFROM monitoring.pg_samples\nWHERE metric LIKE 'worker.%' AND $__timeFilter(ts)\nGROUP BY 1\nORDER BY 1;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -2279,7 +2279,7 @@
       ],
       "title": "Worker processes",
       "type": "stat",
-      "description": "TimescaleDB background workers are taken from max_worker_processes. If that is smaller than timescaledb.max_background_workers, jobs silently fail to start a worker when several policies fire at once."
+      "description": "The budget, not the instantaneous load: a continuous aggregate refresh finishes in tens of milliseconds, so counting workers in flight would read zero almost always. Saturation shows up as failures in the Background jobs table. max_worker_processes must exceed timescaledb.max_background_workers plus max_parallel_workers, or jobs lose the race for a worker."
     },
     {
       "collapsed": false,
