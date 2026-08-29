@@ -615,6 +615,52 @@ pooling mode PgBouncer multiplexes them onto a small, bounded set of server conn
 Pool sizing lives in `pgbouncer/pgbouncer.ini`. Only the `perfana` database is exposed; Keycloak
 and Grafana keep talking to PostgreSQL directly.
 
+### 9.9 Database monitoring (recommended)
+
+The Grafana instance already reads this database, so it can also graph the database's own
+health — no exporter, no Prometheus, no extra container. Two TimescaleDB background jobs
+sample the `pg_stat_*` catalogs into a hypertable in a separate `monitoring` schema, and
+the provisioned **PostgreSQL health** dashboard reads it back.
+
+```bash
+./scripts/setup-db-monitoring.sh
+```
+
+It is idempotent — re-run it after an upgrade. What it installs:
+
+| Object | Purpose |
+|---|---|
+| `monitoring.pg_samples` | Hypertable holding the samples, 7-day retention policy |
+| `monitoring.sample_fast` | Every 10 s: connections, locks, database counters, WAL, checkpointer |
+| `monitoring.sample_slow` | Every 5 min: database and hypertable sizes, dead tuples, job stats |
+
+What the dashboard shows, and why each matters here:
+
+- **Connections by state and by application.** Perfana's worker deliberately runs two
+  pools — 30 connections for analytics and 8 dedicated to writes — after analytics was
+  found starving writes. This is where saturation of either shows up. Attribution per
+  service relies on `PGAPPNAME`, which `docker-compose.yml` sets for each Perfana
+  service; connections without it are grouped under `(unset)`.
+- **Oldest transaction and idle-in-transaction age.** ADAPT analysis legitimately runs for
+  minutes, so a long transaction is not by itself a fault — a long *idle* one is, because
+  it pins a connection and holds back vacuum.
+- **WAL generation and `pg_wal` size.** The clearest signal of how hard a running test is
+  hitting the database, and the first place a retention problem surfaces.
+- **Checkpoints, timed versus requested.** A rising share of requested checkpoints means
+  `max_wal_size` is too small for the write rate.
+- **Continuous aggregate job failures.** Every Perfana dashboard reads from a continuous
+  aggregate; a refresh policy that stops succeeding shows up as stale dashboards long
+  before it shows up as an error.
+- **Hypertable growth and dead tuples.** The result tables grow with every test run and are
+  insert-only, so a rising dead-tuple count means autovacuum is falling behind.
+
+Storage is bounded by the retention policy and is small next to the result tables it
+watches. To remove it entirely:
+
+```sql
+DROP SCHEMA monitoring CASCADE;
+```
+
 ---
 
 ## 10. Access Perfana

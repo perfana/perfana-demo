@@ -111,6 +111,9 @@ services:
     container_name: perfana-migration
     environment:
       DB_HOST: postgres
+      # Labels this service's connections in pg_stat_activity. node-postgres
+      # reads PGAPPNAME, so no application code change is needed.
+      PGAPPNAME: perfana-migration
       DB_PORT: "5432"
       DB_USERNAME: perfana
       DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
@@ -210,6 +213,9 @@ services:
       HEALTH_HEAP_THRESHOLD_MB: "1500"
       HEALTH_RSS_THRESHOLD_MB: "3000"
       DB_HOST: postgres
+      # Labels this service's connections in pg_stat_activity. node-postgres
+      # reads PGAPPNAME, so no application code change is needed.
+      PGAPPNAME: perfana-api
       DB_PORT: "5432"
       DB_USERNAME: perfana
       DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
@@ -286,6 +292,9 @@ services:
       HTTPS_PROXY: http://proxy.example.com:3128
       NO_PROXY: localhost,127.0.0.1,.svc,postgres,valkey,keycloak,grafana
       DB_HOST: postgres
+      # Labels this service's connections in pg_stat_activity. node-postgres
+      # reads PGAPPNAME, so no application code change is needed.
+      PGAPPNAME: perfana-worker
       DB_PORT: "5432"
       DB_USERNAME: perfana
       DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
@@ -324,6 +333,9 @@ services:
       NODE_ENV: production
       LOG_LEVEL: info
       DB_HOST: postgres
+      # Labels this service's connections in pg_stat_activity. node-postgres
+      # reads PGAPPNAME, so no application code change is needed.
+      PGAPPNAME: perfana-grafana-sync
       DB_PORT: "5432"
       DB_USERNAME: perfana
       DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
@@ -361,6 +373,9 @@ services:
       PORT: "3003"
       LOG_LEVEL: info
       DB_HOST: postgres
+      # Labels this service's connections in pg_stat_activity. node-postgres
+      # reads PGAPPNAME, so no application code change is needed.
+      PGAPPNAME: perfana-report
       DB_PORT: "5432"
       DB_USERNAME: perfana
       DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}

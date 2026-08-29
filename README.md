@@ -35,6 +35,7 @@ Browse to `http://localhost:4001` (`PERFANA_WEB_PORT`) on the server.
 | `update.sh` | Pull pinned images, re-run migrations, recreate services. |
 | `bootstrap.sh` | One-time first-run integration setup. |
 | `scripts/mint-pgbouncer-userlist.sh` | Write `pgbouncer/userlist.txt` from `POSTGRES_PASSWORD`. |
+| `scripts/setup-db-monitoring.sh` | Install the database self-monitoring (schema, samplers, jobs). |
 
 ## Configuration
 
@@ -47,6 +48,7 @@ Browse to `http://localhost:4001` (`PERFANA_WEB_PORT`) on the server.
 | `perfana/provisioning/` | Perfana benchmark / dashboard provisioning applied by the API. |
 | `database/init/` | PostgreSQL init (creates the Keycloak and Grafana databases). |
 | `pgbouncer/pgbouncer.ini` | Connection pooler settings (optional, load generators only). |
+| `monitoring/pg-monitoring.sql` | Database self-monitoring: schema, samplers, background jobs. |
 
 ## Connection pooling for load generators (optional)
 
@@ -62,6 +64,22 @@ docker compose --profile pgbouncer up -d pgbouncer
 
 It listens on `6432` and needs its own firewall rule. Full steps, including pointing
 the JMeter backend listener at it: [INSTALL.md](INSTALL.md) steps 9.7 and 9.8.
+
+## Database monitoring
+
+The Grafana instance can graph the health of the database it already reads from — no
+exporter, no Prometheus, no extra container. Two TimescaleDB background jobs sample the
+`pg_stat_*` catalogs into a hypertable in the `monitoring` schema; the **PostgreSQL
+health** dashboard reads it back.
+
+```bash
+./scripts/setup-db-monitoring.sh
+```
+
+Connections, transaction and tuple rates, cache hit ratio, WAL generation and pg_wal
+size, checkpoints and buffer writes, continuous-aggregate job failures, hypertable growth
+and dead tuples. Seven days of history, then dropped by a retention policy. Details in
+[INSTALL.md](INSTALL.md) step 9.9.
 
 ## Health checks
 
