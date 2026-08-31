@@ -58,7 +58,7 @@ services:
     # exposure as postgres above. Needs its own firewall rule — the 5432 rule does
     # not cover it; see INSTALL.md step 9.7.
     ports:
-      - "6432:6432"
+      - "0.0.0.0:6432:6432"
     volumes:
       - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
       - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
