@@ -5477,7 +5477,9 @@
         },
         "regex": "",
         "sort": 0,
-        "hide": 0
+        "hide": 0,
+        "description": "CAGG bucket resolution, derived from the dashboard time range: 5s up to 1h, 1m up to 6h, 5m beyond.",
+        "skipUrlSync": true
       },
       {
         "current": {
