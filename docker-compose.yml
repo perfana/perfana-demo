@@ -506,6 +506,34 @@ services:
       - perfana
     restart: unless-stopped
 
+  # Samples per-container CPU, memory, block and network I/O from the Docker API into
+  # monitoring.pg_samples, next to the PostgreSQL and Valkey samples, so one Grafana
+  # datasource covers all three. Reads through docker-socket-proxy rather than mounting
+  # the socket. Runs on the database image that is already pulled — python3 and psql are
+  # in it. Needs the monitoring schema: scripts/setup-db-monitoring.sh.
+  # Dashboard: "Docker resources".
+  docker-monitor:
+    image: timescale/timescaledb-ha:pg15
+    container_name: perfana-docker-monitor
+    depends_on:
+      postgres:
+        condition: service_healthy
+      docker-socket-proxy:
+        condition: service_started
+    environment:
+      DOCKER_API: http://docker-socket-proxy:2375
+      SAMPLE_INTERVAL: "15"
+      PGHOST: postgres
+      PGUSER: perfana
+      PGDATABASE: perfana
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+    volumes:
+      - ./monitoring:/monitoring:ro
+    entrypoint: ["bash", "/monitoring/docker-sampler.sh"]
+    networks:
+      - perfana
+    restart: unless-stopped
+
 ######################################################################################################################
 networks:
   perfana:

@@ -50,6 +50,7 @@ Browse to `http://localhost:4001` (`PERFANA_WEB_PORT`) on the server.
 | `pgbouncer/pgbouncer.ini` | Connection pooler settings (optional, load generators only). |
 | `monitoring/pg-monitoring.sql` | Database self-monitoring: schema, samplers, background jobs. |
 | `monitoring/redis-sampler.py` | Samples Valkey and the BullMQ queue depths into the same hypertable. |
+| `monitoring/docker-sampler.py` | Samples per-container CPU, memory and I/O into the same hypertable. |
 
 ## Connection pooling for load generators (optional)
 

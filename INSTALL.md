@@ -634,6 +634,15 @@ It is idempotent — re-run it after an upgrade. What it installs:
 | `monitoring.sample_fast` | Every 10 s: connections, locks, database counters, WAL, checkpointer |
 | `monitoring.sample_slow` | Every 5 min: database and hypertable sizes, dead tuples, job stats |
 | `valkey-monitor` (container) | Every 10 s: Valkey INFO and the BullMQ queue depths |
+| `docker-monitor` (container) | Every 15 s: per-container CPU, memory, block and network I/O |
+
+The same two containers also feed the **Docker resources** dashboard, which answers the
+other half of the question: whether the *host* is the bottleneck rather than the database.
+`docker-monitor` reads the Docker API through `docker-socket-proxy` — it never sees the
+socket itself, and the proxy allows nothing but `GET /containers`. Per container it graphs
+CPU cores used, CFS throttling, memory working set against the container's limit, block and
+network I/O, and process count. Throttling above zero means a container's own CPU limit is
+the ceiling; a working set climbing toward the limit is what precedes an OOM kill.
 
 What the dashboard shows, and why each matters here:
 
