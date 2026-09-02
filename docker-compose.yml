@@ -14,12 +14,49 @@ services:
       POSTGRES_USER: perfana
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
-    # max_worker_processes: TimescaleDB background workers and parallel query workers
-    # both come out of this pool. The default 8 is well under
-    # timescaledb.max_background_workers (16) + max_parallel_workers (8), which makes
-    # continuous aggregate refresh policies lose the race for a worker and log
-    # "failed to start job" -- silently leaving the aggregates behind.
-    command: ["-c", "max_connections=500", "-c", "max_worker_processes=32"]
+    #
+    # Memory. shared_buffers defaults to 128 MB, far too small for a batch re-evaluate
+    # over several large tests: a run on 2026-09-02 dropped the cache hit ratio to 3.7%,
+    # read ~150 GB from disk in four minutes and had backends flushing ~690 buffers/s
+    # themselves for want of a clean one. effective_cache_size is what the planner
+    # believes the OS cache holds -- it changes plans, not allocation. Sized for a ~20 GB
+    # host; scale both down on a smaller one.
+    #
+    # work_mem is per sort per connection, so it multiplies by concurrency (~45 backends
+    # in practice, nowhere near max_connections). 32 MB stops the temp-file spills seen
+    # in that same run without risking the host.
+    #
+    # random_page_cost 4.0 is a spinning-disk default and pushes the planner toward
+    # sequential scans; this deployment is on SSD.
+    command:
+      - "-c"
+      - "max_connections=500"
+      # TimescaleDB background workers and parallel query workers both come out of this
+      # pool. The default 8 is well under timescaledb.max_background_workers (16) +
+      # max_parallel_workers (8), which makes continuous aggregate refresh policies lose
+      # the race for a worker and log "failed to start job" -- silently leaving the
+      # aggregates behind.
+      - "-c"
+      - "max_worker_processes=32"
+      - "-c"
+      - "shared_buffers=4GB"
+      - "-c"
+      - "effective_cache_size=12GB"
+      - "-c"
+      - "work_mem=32MB"
+      - "-c"
+      - "maintenance_work_mem=1GB"
+      - "-c"
+      - "max_wal_size=4GB"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "effective_io_concurrency=200"
+    # Parallel query passes tuples through /dev/shm, which Docker gives a 64 MB default —
+    # too small once several workers each hold work_mem, and it surfaces as
+    # "could not resize shared memory segment". shared_buffers itself is anonymous mmap
+    # and unaffected.
+    shm_size: 1gb
     # Published on all interfaces so other hosts on the network can reach the database
     # directly (e.g. external BI tools, remote load generators). Requires WSL2 mirrored
     # networking and a scoped firewall rule — see INSTALL.md step 9.6. Auth is scram-sha-256;
