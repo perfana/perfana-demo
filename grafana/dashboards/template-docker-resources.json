@@ -999,7 +999,7 @@
       "type": "timeseries"
     }
   ],
-  "preload": false,
+  "preload": true,
   "refresh": "30s",
   "schemaVersion": 42,
   "tags": [
