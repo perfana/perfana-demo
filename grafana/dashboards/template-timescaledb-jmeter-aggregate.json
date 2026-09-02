@@ -5458,28 +5458,36 @@
   "templating": {
     "list": [
       {
-        "name": "cagg_suffix",
-        "label": "CAGG resolution",
-        "type": "query",
-        "datasource": {
-          "type": "grafana-postgresql-datasource",
-          "uid": "postgres-timescaledb"
-        },
-        "definition": "SELECT CASE\n  WHEN ($__to - $__from) <= 3600000  THEN '5s'\n  WHEN ($__to - $__from) <= 21600000 THEN '1m'\n  ELSE '5m'\nEND",
-        "query": "SELECT CASE\n  WHEN ($__to - $__from) <= 3600000  THEN '5s'\n  WHEN ($__to - $__from) <= 21600000 THEN '1m'\n  ELSE '5m'\nEND",
-        "refresh": 2,
-        "includeAll": false,
-        "multi": false,
-        "options": [],
+        "allowCustomValue": false,
         "current": {
           "text": "5s",
           "value": "5s"
         },
-        "regex": "",
-        "sort": 0,
-        "hide": 0,
-        "description": "CAGG bucket resolution, derived from the dashboard time range: 5s up to 1h, 1m up to 6h, 5m beyond.",
-        "skipUrlSync": true
+        "description": "CAGG bucket resolution. 5s = finest (near real-time). 1m/5m for wider time ranges.",
+        "includeAll": false,
+        "label": "CAGG resolution",
+        "name": "cagg_suffix",
+        "options": [
+          {
+            "selected": true,
+            "text": "5s",
+            "value": "5s"
+          },
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          }
+        ],
+        "query": "5s,1m,5m",
+        "skipUrlSync": true,
+        "type": "custom",
+        "valuesFormat": "csv"
       },
       {
         "current": {
