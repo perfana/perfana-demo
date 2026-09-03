@@ -635,6 +635,7 @@ It is idempotent — re-run it after an upgrade. What it installs:
 | `monitoring.sample_slow` | Every 5 min: database and hypertable sizes, dead tuples, job stats |
 | `valkey-monitor` (container) | Every 10 s: Valkey INFO and the BullMQ queue depths |
 | `docker-monitor` (container) | Every 15 s: per-container CPU, memory, block and network I/O |
+| `pg_stat_statements` | Per-statement cost. `SELECT * FROM pg_stat_statements ORDER BY shared_blks_read DESC LIMIT 20` names the queries doing the reading |
 
 The same two containers also feed the **Docker resources** dashboard, which answers the
 other half of the question: whether the *host* is the bottleneck rather than the database.

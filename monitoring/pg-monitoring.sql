@@ -9,6 +9,12 @@
 -- Idempotent: safe to re-run. Apply with scripts/setup-db-monitoring.sh.
 -- =====================================================================================
 
+-- pg_stat_statements records per-statement call counts, time and block I/O. The library
+-- is preloaded in docker-compose.yml; this makes the view available. Unlike everything
+-- below it this lives in public, because that is where extensions belong and where every
+-- query example expects to find it.
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+
 CREATE SCHEMA IF NOT EXISTS monitoring;
 
 -- Long format on purpose: one table serves every metric, and adding a metric later is

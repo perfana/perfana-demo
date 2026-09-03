@@ -52,6 +52,20 @@ services:
       - "random_page_cost=1.1"
       - "-c"
       - "effective_io_concurrency=200"
+      #
+      # pg_stat_statements: which statements actually cost the time. The library has to
+      # be preloaded at startup; timescaledb must stay in the list or the extension
+      # fails to load. The view needs the extension too -- scripts/setup-db-monitoring.sh
+      # creates it. Reset the counters before a run with SELECT pg_stat_statements_reset()
+      # and read them after, ordering by shared_blks_read for I/O or total_exec_time for
+      # wall clock.
+      - "-c"
+      - "shared_preload_libraries=timescaledb,pg_stat_statements"
+      # Log any statement over a second, with its duration, to the container log:
+      #   docker compose logs -f postgres | grep duration
+      # Raise the threshold if a busy run makes this noisy; 0 logs everything and will.
+      - "-c"
+      - "log_min_duration_statement=1000"
     # Parallel query passes tuples through /dev/shm, which Docker gives a 64 MB default —
     # too small once several workers each hold work_mem, and it surfaces as
     # "could not resize shared memory segment". shared_buffers itself is anonymous mmap
