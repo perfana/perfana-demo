@@ -189,7 +189,7 @@ services:
   # One-shot TypeORM migration runner. Brings the Perfana schema up to date
   # then exits 0. Re-run on every upgrade (start.sh / update.sh do this).
   perfana-migration:
-    image: perfana/perfana-migration:0.2.94.1
+    image: perfana/perfana-migration:0.2.94.2
     container_name: perfana-migration
     environment:
       DB_HOST: postgres
@@ -235,7 +235,7 @@ services:
   # Next.js frontend. All values prefixed with PERFANA_HOST are what the
   # browser uses, so they must resolve from the end-user's machine.
   perfana-web:
-    image: perfana/perfana-web:0.2.94.1
+    image: perfana/perfana-web:0.2.94.2
     container_name: perfana-web
     ports:
       - "${PERFANA_WEB_PORT:-4001}:3000"
@@ -276,7 +276,7 @@ services:
 
   # NestJS API backend.
   perfana-api:
-    image: perfana/perfana-api:0.2.94.1
+    image: perfana/perfana-api:0.2.94.2
     container_name: perfana-api
     ports:
       - "3001:3001"
@@ -361,7 +361,7 @@ services:
 
   # BullMQ worker — runs the analysis pipeline and pulls metrics from Grafana.
   perfana-worker:
-    image: perfana/perfana-worker:0.2.94.1
+    image: perfana/perfana-worker:0.2.94.2
     container_name: perfana-worker
     networks:
       - perfana
@@ -407,7 +407,7 @@ services:
 
   # Keeps Grafana dashboards in sync with Perfana's templates.
   perfana-grafana-sync:
-    image: perfana/perfana-grafana-sync:0.2.94.1
+    image: perfana/perfana-grafana-sync:0.2.94.2
     container_name: perfana-grafana-sync
     networks:
       - perfana
@@ -446,7 +446,7 @@ services:
 
   # PDF report generation (runs headless Chromium).
   perfana-report:
-    image: perfana/perfana-report:0.2.94.1
+    image: perfana/perfana-report:0.2.94.2
     container_name: perfana-report
     networks:
       - perfana
