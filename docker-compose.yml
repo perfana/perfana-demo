@@ -47,7 +47,33 @@ services:
       - "-c"
       - "maintenance_work_mem=1GB"
       - "-c"
-      - "max_wal_size=4GB"
+      - "max_wal_size=8GB"
+      #
+      # Checkpoint and cleaner pacing, sized from a 3-hour ingest test on 2026-09-03.
+      # At ~13 MB/s of WAL a 4 GB max_wal_size filled every ~5 minutes, so every
+      # checkpoint was WAL-driven rather than timed and each one re-issued full page
+      # images: 140 GB of WAL for 41 GB of data. 8 GB roughly halves that cadence.
+      # pg_wal then sits at ~8 GB on disk permanently, and overshoots when checkpoints
+      # fall behind -- budget disk for more than the number itself.
+      #
+      # bgwriter_delay 200ms x bgwriter_lru_maxpages 100 caps the cleaner at 500
+      # buffers/s, and it sat pinned at 380-495/s for three hours while backends
+      # flushed 1000-3300/s of their own pages inline. These raise the ceiling to
+      # 20000/s so the overflow stops landing on the query path.
+      - "-c"
+      - "bgwriter_delay=50ms"
+      - "-c"
+      - "bgwriter_lru_maxpages=1000"
+      - "-c"
+      - "bgwriter_lru_multiplier=4.0"
+      #
+      # Autovacuum. The small metadata tables (test_runs, test_run_views, benchmarks,
+      # api_keys) held 300-1900% dead tuples for the whole of that test: the workers
+      # are busy on the 100 GB+ hypertables and cost-throttled while they are there.
+      - "-c"
+      - "autovacuum_max_workers=6"
+      - "-c"
+      - "autovacuum_vacuum_cost_limit=2000"
       - "-c"
       - "random_page_cost=1.1"
       - "-c"

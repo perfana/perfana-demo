@@ -1586,11 +1586,11 @@
               },
               {
                 "color": "orange",
-                "value": 8589934592
+                "value": 12884901888
               },
               {
                 "color": "red",
-                "value": 12884901888
+                "value": 17179869184
               }
             ]
           },
@@ -1656,7 +1656,7 @@
       ],
       "title": "WAL directory size",
       "type": "timeseries",
-      "description": "Growth here without a matching checkpoint rate means WAL is being retained -- a stalled archive, a replication slot, or max_wal_size too small. \n\n**When it crosses:** max_wal_size is 4 GB, so pg_wal settling near 4-5 GB is expected and 8 GB is not. Check `SELECT * FROM pg_replication_slots WHERE NOT active` first — an inactive slot pins WAL indefinitely. Otherwise raise max_wal_size, which also brings down the requested checkpoints beside it."
+      "description": "Growth here without a matching checkpoint rate means WAL is being retained -- a stalled archive, a replication slot, or max_wal_size too small. \n\n**When it crosses:** max_wal_size is 8 GB, so pg_wal settling near 8-9 GB is expected and 12 GB is not. Check `SELECT * FROM pg_replication_slots WHERE NOT active` first — an inactive slot pins WAL indefinitely. Otherwise raise max_wal_size, which also brings down the requested checkpoints beside it."
     },
     {
       "datasource": {
@@ -1906,7 +1906,7 @@
       ],
       "title": "Checkpoints per second",
       "type": "timeseries",
-      "description": "Requested checkpoints are driven by WAL volume rather than by checkpoint_timeout. A rising share of them means max_wal_size is too small for the write rate. \n\n**When it crosses:** checkpoint_timeout is 300 s, so timed checkpoints arrive at 0.0033/s — the first threshold line. Once *requested* reaches it, WAL volume rather than the clock is driving checkpoints and each one competes with the ingest. Raise max_wal_size (4 GB now) until requested falls back to near zero."
+      "description": "Requested checkpoints are driven by WAL volume rather than by checkpoint_timeout. A rising share of them means max_wal_size is too small for the write rate. \n\n**When it crosses:** checkpoint_timeout is 300 s, so timed checkpoints arrive at 0.0033/s — the first threshold line. Once *requested* reaches it, WAL volume rather than the clock is driving checkpoints and each one competes with the ingest. Raise max_wal_size (8 GB now) until requested falls back to near zero."
     },
     {
       "datasource": {
@@ -2103,7 +2103,7 @@
       ],
       "title": "Buffers written per second",
       "type": "timeseries",
-      "description": "Backends writing their own buffers is the expensive path: it means the bgwriter and checkpointer are not keeping up. \n\n**When it crosses:** Read the threshold against the *by backends* line only; the other two are meant to be busy. shared_buffers is already 4 GB, which took this line from 687/s to 99/s; if it climbs again, bgwriter_lru_maxpages is the next dial. Sustained backend writes during a run surface as latency in the load test itself."
+      "description": "Backends writing their own buffers is the expensive path: it means the bgwriter and checkpointer are not keeping up. \n\n**When it crosses:** Read the threshold against the *by backends* line only; the other two are meant to be busy. shared_buffers is 4 GB and bgwriter_lru_maxpages is 1000 (from 100), because a 3-hour ingest test on 2026-09-03 had the cleaner pinned at its old 500/s ceiling while backends flushed 1000-3300/s themselves. If this line is high again, the cleaner ceiling is 20000/s now, so the answer is shared_buffers or the write rate, not the cleaner. Sustained backend writes during a run surface as latency in the load test itself."
     },
     {
       "collapsed": false,
