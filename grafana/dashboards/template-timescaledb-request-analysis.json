@@ -2019,11 +2019,11 @@
           "type": "grafana-postgresql-datasource",
           "uid": "postgres-timescaledb"
         },
-        "definition": "select system_under_test from requests_raw",
+        "definition": "SELECT DISTINCT s.name\nFROM systems_under_test s\nJOIN test_runs tr ON tr.system_under_test_id = s.id\nORDER BY 1",
         "description": "",
         "name": "system_under_test",
         "options": [],
-        "query": "select system_under_test from requests_raw",
+        "query": "SELECT DISTINCT s.name\nFROM systems_under_test s\nJOIN test_runs tr ON tr.system_under_test_id = s.id\nORDER BY 1",
         "refresh": 1,
         "regex": "",
         "type": "query"
@@ -2037,10 +2037,10 @@
           "type": "grafana-postgresql-datasource",
           "uid": "postgres-timescaledb"
         },
-        "definition": "select test_environment from requests_raw where system_under_test = '$system_under_test' ",
+        "definition": "SELECT DISTINCT tr.test_environment\nFROM test_runs tr\nJOIN systems_under_test s ON s.id = tr.system_under_test_id\nWHERE s.name = '$system_under_test'\nORDER BY 1",
         "name": "test_environment",
         "options": [],
-        "query": "select test_environment from requests_raw where system_under_test = '$system_under_test' ",
+        "query": "SELECT DISTINCT tr.test_environment\nFROM test_runs tr\nJOIN systems_under_test s ON s.id = tr.system_under_test_id\nWHERE s.name = '$system_under_test'\nORDER BY 1",
         "refresh": 1,
         "regex": "",
         "type": "query"
@@ -2059,12 +2059,12 @@
           "type": "grafana-postgresql-datasource",
           "uid": "postgres-timescaledb"
         },
-        "definition": "select scenario_name from requests_raw where system_under_test = '$system_under_test' and test_environment = '$test_environment' ",
+        "definition": "SELECT DISTINCT scenario_name\nFROM requests_raw\nWHERE system_under_test = '$system_under_test'\n  AND test_environment = '$test_environment'\n  AND $__timeFilter(time)\nORDER BY 1",
         "includeAll": false,
         "multi": true,
         "name": "scenario_name",
         "options": [],
-        "query": "select scenario_name from requests_raw where system_under_test = '$system_under_test' and test_environment = '$test_environment' ",
+        "query": "SELECT DISTINCT scenario_name\nFROM requests_raw\nWHERE system_under_test = '$system_under_test'\n  AND test_environment = '$test_environment'\n  AND $__timeFilter(time)\nORDER BY 1",
         "refresh": 1,
         "regex": "",
         "type": "query"
@@ -2079,11 +2079,11 @@
           "type": "grafana-postgresql-datasource",
           "uid": "postgres-timescaledb"
         },
-        "definition": "SELECT DISTINCT sampler_name\nFROM requests_raw\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name)  AND $__timeFilter(time)\nORDER BY sampler_name;",
+        "definition": "SELECT DISTINCT sampler_name\nFROM requests_raw\nWHERE system_under_test = '$system_under_test'\n  AND test_environment = '$test_environment'\n  AND scenario_name IN ($scenario_name)\n  AND $__timeFilter(time)\nORDER BY 1",
         "includeAll": false,
         "name": "sampler_name",
         "options": [],
-        "query": "SELECT DISTINCT sampler_name\nFROM requests_raw\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name)  AND $__timeFilter(time)\nORDER BY sampler_name;",
+        "query": "SELECT DISTINCT sampler_name\nFROM requests_raw\nWHERE system_under_test = '$system_under_test'\n  AND test_environment = '$test_environment'\n  AND scenario_name IN ($scenario_name)\n  AND $__timeFilter(time)\nORDER BY 1",
         "refresh": 1,
         "regex": "",
         "sort": 5,
