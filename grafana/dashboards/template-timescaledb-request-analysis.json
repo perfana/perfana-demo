@@ -1643,7 +1643,7 @@
                   {
                     "targetBlank": true,
                     "title": "URL",
-                    "url": "/d/jmeter-timescaledb-error-dashboard/show-error?var-timestamp=${__value.time}&var-randomId=${__data.fields.random_id}&var-nodeName=${__data.fields.node_name}&var-db=postgres-timescaledb&kiosk=true"
+                    "url": "/d/jmeter-timescaledb-error-dashboard/show-error?${__url_time_range}&var-timestamp=${__value.time}&var-randomId=${__data.fields.random_id}&var-nodeName=${__data.fields.node_name}&kiosk=true"
                   }
                 ]
               },
@@ -1700,7 +1700,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "randomId"
+              "options": "random_id"
             },
             "properties": [
               {
@@ -1941,7 +1941,6 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "random_id": true,
               "transaction_name": true
             },
             "includeByName": {},
