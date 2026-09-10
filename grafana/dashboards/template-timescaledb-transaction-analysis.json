@@ -1642,7 +1642,7 @@
                   {
                     "targetBlank": true,
                     "title": "URL",
-                    "url": "/grafana/d/jmeter-timescaledb-error-dashboard/show-error?var-runId=${runId}&var-timestamp=${__value.time}&var-randomId=${__data.fields.random_id}&var-nodeName=${__data.fields.node_name}&var-db=postgres-timescaledb&kiosk=true"
+                    "url": "/d/jmeter-timescaledb-error-dashboard/show-error?var-timestamp=${__value.time}&var-randomId=${__data.fields.random_id}&var-nodeName=${__data.fields.node_name}&var-db=postgres-timescaledb&kiosk=true"
                   }
                 ]
               },
@@ -1760,7 +1760,7 @@
                   {
                     "targetBlank": true,
                     "title": "Request Analysis",
-                    "url": "/grafana/d/request-analysis-timescaledb/request-analysis-timescaledb?var-runId=${runId}&${__url_time_range}&var-sampler=${__data.fields.sampler_name}&kiosk=true"
+                    "url": "/d/request-analysis-timescaledb/request-analysis-timescaledb?${__url_time_range}&${system_under_test:queryparam}&${test_environment:queryparam}&${scenario_name:queryparam}&${cagg_suffix:queryparam}&var-sampler_name=${__data.fields.sampler_name}&kiosk=true"
                   }
                 ]
               }
