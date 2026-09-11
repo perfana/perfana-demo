@@ -70,3 +70,26 @@ SELECT h.hypertable_schema || '.' || h.hypertable_name AS hypertable,
 FROM timescaledb_information.hypertables h
 ORDER BY hypertable_size(
   format('%I.%I', h.hypertable_schema, h.hypertable_name)::regclass) DESC;
+
+-- 8. Compressed vs uncompressed, per hypertable.
+--    hypertable_columnstore_stats() reports before/after for the *compressed* chunks
+--    only, so "still_uncompressed" is the remainder of what is on disk -- that is the
+--    part a columnstore policy has not reached yet. LEFT JOIN LATERAL keeps hypertables
+--    with compression disabled (they return no rows) visible with a 0/N count.
+SELECT h.hypertable_schema || '.' || h.hypertable_name AS hypertable,
+       coalesce(s.number_compressed_chunks, 0) || '/' || h.num_chunks     AS chunks_compressed,
+       pg_size_pretty(coalesce(s.before_compression_total_bytes, 0))      AS compressed_was,
+       pg_size_pretty(coalesce(s.after_compression_total_bytes, 0))       AS compressed_now,
+       CASE WHEN coalesce(s.after_compression_total_bytes, 0) > 0
+            THEN round(s.before_compression_total_bytes::numeric
+                       / s.after_compression_total_bytes, 1) || 'x'
+            ELSE '-' END                                                  AS ratio,
+       pg_size_pretty(hypertable_size(format('%I.%I', h.hypertable_schema, h.hypertable_name)::regclass)
+                      - coalesce(s.after_compression_total_bytes, 0))     AS still_uncompressed,
+       pg_size_pretty(hypertable_size(
+         format('%I.%I', h.hypertable_schema, h.hypertable_name)::regclass)) AS on_disk_now
+FROM timescaledb_information.hypertables h
+LEFT JOIN LATERAL hypertable_columnstore_stats(
+  format('%I.%I', h.hypertable_schema, h.hypertable_name)::regclass) s ON true
+ORDER BY hypertable_size(
+  format('%I.%I', h.hypertable_schema, h.hypertable_name)::regclass) DESC;
