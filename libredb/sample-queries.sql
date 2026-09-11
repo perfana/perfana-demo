@@ -93,3 +93,37 @@ LEFT JOIN LATERAL hypertable_columnstore_stats(
   format('%I.%I', h.hypertable_schema, h.hypertable_name)::regclass) s ON true
 ORDER BY hypertable_size(
   format('%I.%I', h.hypertable_schema, h.hypertable_name)::regclass) DESC;
+
+-- 9. Did the postgres command-line settings actually take?
+--    source tells you where a value came from: 'command line' means the -c flag in
+--    docker-compose.yml took effect, 'default' means it did not. pending_restart is
+--    true when the value was changed but the server has not been restarted onto it --
+--    max_locks_per_transaction sizes the lock table at startup and needs a restart,
+--    client_connection_check_interval is reloadable.
+SELECT name,
+       setting || coalesce(' ' || unit, '')  AS current_value,
+       boot_val                              AS default_value,
+       source,
+       CASE WHEN name = 'max_locks_per_transaction'        AND setting::int >= 256
+              THEN 'OK'
+            WHEN name = 'client_connection_check_interval' AND setting::int  = 10000
+              THEN 'OK'
+            ELSE 'NOT SET' END               AS verdict,
+       pending_restart
+FROM pg_settings
+WHERE name IN ('max_locks_per_transaction', 'client_connection_check_interval')
+ORDER BY name;
+
+-- 9b. Lock table headroom. "Set" and "big enough" are different questions: the table
+--     holds max_locks_per_transaction x (max_connections + max_prepared_transactions)
+--     slots for the whole server, and a query touching many chunks spends them fast.
+--     If this climbs toward 100% you get "out of shared memory / You might need to
+--     increase max_locks_per_transaction" regardless of the verdict above.
+SELECT current_setting('max_locks_per_transaction')::int
+         * (current_setting('max_connections')::int
+            + current_setting('max_prepared_transactions')::int)      AS lock_slots_total,
+       (SELECT count(*) FROM pg_locks)                                AS locks_held_now,
+       round(100.0 * (SELECT count(*) FROM pg_locks)
+             / (current_setting('max_locks_per_transaction')::int
+                * (current_setting('max_connections')::int
+                   + current_setting('max_prepared_transactions')::int)), 2) AS pct_used;
