@@ -38,6 +38,21 @@ services:
       # aggregates behind.
       - "-c"
       - "max_worker_processes=32"
+      #
+      # Every chunk a statement touches takes its own lock, and the lock table is sized
+      # at max_locks_per_transaction x (max_connections + max_prepared_transactions).
+      # A query spanning a hypertable's chunks plus the continuous aggregates over it
+      # runs through them quickly -- monitoring.pg_samples alone carries 172 chunks --
+      # and exhausting it fails the statement with "out of shared memory / You might
+      # need to increase max_locks_per_transaction". Costs shared memory at startup only.
+      - "-c"
+      - "max_locks_per_transaction=256"
+      # Without this a backend only notices the client is gone when it next writes to
+      # the socket, so a long analytical query whose caller has already disconnected
+      # runs to completion holding its snapshot. 10 s polling lets it abort instead.
+      # PostgreSQL 14+; the image is pg15.
+      - "-c"
+      - "client_connection_check_interval=10000"
       - "-c"
       - "shared_buffers=4GB"
       - "-c"
