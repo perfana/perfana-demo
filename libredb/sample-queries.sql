@@ -53,3 +53,20 @@ SELECT source, round(max(value)::numeric, 1) AS peak_seconds
 FROM monitoring.pg_samples
 WHERE metric = 'conn.xact_age_s'
 GROUP BY 1 ORDER BY peak_seconds DESC LIMIT 15;
+
+-- 7. Hypertable sizes, and why the object browser disagrees.
+--    LibreDB (and any plain catalogue read) sizes the *parent* relation, which is
+--    empty for a hypertable -- every row lives in chunks under _timescaledb_internal,
+--    a schema the browser does not list. So ds_metrics shows as ~40 kB rather than 7 GB.
+--    hypertable_size() is the only reading that is correct.
+SELECT h.hypertable_schema || '.' || h.hypertable_name AS hypertable,
+       h.num_chunks,
+       pg_size_pretty(pg_total_relation_size(
+         format('%I.%I', h.hypertable_schema, h.hypertable_name)::regclass))  AS parent_only,
+       pg_size_pretty(hypertable_size(
+         format('%I.%I', h.hypertable_schema, h.hypertable_name)::regclass))  AS real_total,
+       (SELECT count(*) FROM timescaledb_information.chunks c
+         WHERE c.hypertable_name = h.hypertable_name AND c.is_compressed)     AS compressed_chunks
+FROM timescaledb_information.hypertables h
+ORDER BY hypertable_size(
+  format('%I.%I', h.hypertable_schema, h.hypertable_name)::regclass) DESC;
