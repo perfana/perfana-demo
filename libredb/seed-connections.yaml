@@ -1,0 +1,11 @@
+version: "1"
+connections:
+  - id: "perfana-postgres"
+    name: "Perfana (TimescaleDB)"
+    type: postgres
+    host: "${DB_HOST}"
+    port: 5432
+    database: perfana
+    user: perfana
+    password: "${DB_PASSWORD}"
+    roles: ["admin"]

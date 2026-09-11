@@ -143,6 +143,30 @@ services:
       - perfana
     restart: unless-stopped
 
+  # LibreDB Studio - web SQL IDE, pre-seeded with the Perfana database connection
+  # http://localhost:3005  (admin@perfana.io / Perfana1!)
+  libredb:
+    image: ghcr.io/libredb/libredb-studio:latest
+    container_name: perfana-libredb
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ADMIN_EMAIL: admin@perfana.io
+      ADMIN_PASSWORD: Perfana1!
+      JWT_SECRET: ${LIBREDB_JWT_SECRET:-perfana-demo-libredb-jwt-secret-change-me}
+      SEED_CONFIG_PATH: /app/config/seed-connections.yaml
+      DB_HOST: postgres
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
+    ports:
+      - "${LIBREDB_PORT:-3005}:3000"
+    volumes:
+      - ./libredb/seed-connections.yaml:/app/config/seed-connections.yaml:ro
+      - libredb-data:/app/data
+    networks:
+      - perfana
+    restart: unless-stopped
+
   # Keycloak — authentication / SSO. Uses the shared PostgreSQL instance.
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
@@ -623,6 +647,9 @@ volumes:
   postgres_data:
     driver: local
   keycloak_data:
+    driver: local
+  # LibreDB Studio state (users, saved queries)
+  libredb-data:
     driver: local
   valkey-storage:
     driver: local
