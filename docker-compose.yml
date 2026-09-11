@@ -157,6 +157,7 @@ services:
       JWT_SECRET: ${LIBREDB_JWT_SECRET:-perfana-demo-libredb-jwt-secret-change-me}
       SEED_CONFIG_PATH: /app/config/seed-connections.yaml
       DB_HOST: postgres
+      DB_USER: ${POSTGRES_USER:-perfana}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-perfana}
     ports:
       - "${LIBREDB_PORT:-3005}:3000"

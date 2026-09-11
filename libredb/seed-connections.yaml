@@ -6,6 +6,6 @@ connections:
     host: "${DB_HOST}"
     port: 5432
     database: perfana
-    user: perfana
+    user: "${DB_USER}"
     password: "${DB_PASSWORD}"
     roles: ["admin"]
