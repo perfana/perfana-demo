@@ -1,6 +1,6 @@
 organizationId: __ORG_ID__  # placeholder; rewritten by bootstrap.sh to the real org id
 
-# Generic response-time thresholds for the per-workload performance dashboards.
+# Generic mean response-time thresholds for the per-workload performance dashboards.
 #
 # Perfana creates one dashboard per workload (performance-test-metrics-<workload>),
 # so an exact dashboardUid would need one stanza per workload -- 36 of them in the
@@ -16,12 +16,12 @@ organizationId: __ORG_ID__  # placeholder; rewritten by bootstrap.sh to the real
 #
 # absThreshold is a delta against the control group in the panel's own unit -- these
 # panels report ms -- not a fixed ceiling. ADAPT applies it as
-# control_stat_value + absThreshold, so it suppresses regressions whose absolute
-# movement is below the value even when the percentage change is large. The numbers
-# below are starting points: tune per environment, and note tails need more headroom
-# than the mean.
+# control_stat_value + absThreshold, so a run is only flagged once the mean moves
+# more than 25 ms, however large the percentage change.
+#
+# Mean only, by design: the percentile panels (102/103/104, 202/203/204) are left
+# unconfigured so they keep ADAPT's default behaviour.
 items:
-  # --- Transactions -------------------------------------------------------------
   - dashboardUid: '^performance-test-metrics-'
     regex: true
     panelId: 101
@@ -31,52 +31,8 @@ items:
     absThreshold: 25
   - dashboardUid: '^performance-test-metrics-'
     regex: true
-    panelId: 102
-    panelTitle: Transaction RT P90
-    metricClassification: RED_duration
-    higherIsBetter: false
-    absThreshold: 100
-  - dashboardUid: '^performance-test-metrics-'
-    regex: true
-    panelId: 103
-    panelTitle: Transaction RT P95
-    metricClassification: RED_duration
-    higherIsBetter: false
-    absThreshold: 150
-  - dashboardUid: '^performance-test-metrics-'
-    regex: true
-    panelId: 104
-    panelTitle: Transaction RT P99
-    metricClassification: RED_duration
-    higherIsBetter: false
-    absThreshold: 250
-
-  # --- Requests -----------------------------------------------------------------
-  - dashboardUid: '^performance-test-metrics-'
-    regex: true
     panelId: 201
     panelTitle: Request RT Avg
     metricClassification: RED_duration
     higherIsBetter: false
     absThreshold: 25
-  - dashboardUid: '^performance-test-metrics-'
-    regex: true
-    panelId: 202
-    panelTitle: Request RT P90
-    metricClassification: RED_duration
-    higherIsBetter: false
-    absThreshold: 100
-  - dashboardUid: '^performance-test-metrics-'
-    regex: true
-    panelId: 203
-    panelTitle: Request RT P95
-    metricClassification: RED_duration
-    higherIsBetter: false
-    absThreshold: 150
-  - dashboardUid: '^performance-test-metrics-'
-    regex: true
-    panelId: 204
-    panelTitle: Request RT P99
-    metricClassification: RED_duration
-    higherIsBetter: false
-    absThreshold: 250
