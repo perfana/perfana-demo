@@ -21,6 +21,10 @@ organizationId: __ORG_ID__  # placeholder; rewritten by bootstrap.sh to the real
 #
 # Mean only, by design: the percentile panels (102/103/104, 202/203/204) are left
 # unconfigured so they keep ADAPT's default behaviour.
+#
+# The error-rate panels report % on a 0-100 scale, so absThreshold 1 is one
+# percentage point. Observed means sit near 0.2-0.5%, so this suppresses the
+# small absolute moves that would otherwise trip the 15% percentage threshold.
 items:
   - dashboardUid: '^performance-test-metrics-'
     regex: true
@@ -36,3 +40,17 @@ items:
     metricClassification: RED_duration
     higherIsBetter: false
     absThreshold: 25
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 105
+    panelTitle: Transaction Error Rate
+    metricClassification: RED_errors
+    higherIsBetter: false
+    absThreshold: 1
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 205
+    panelTitle: Request Error Rate
+    metricClassification: RED_errors
+    higherIsBetter: false
+    absThreshold: 1
