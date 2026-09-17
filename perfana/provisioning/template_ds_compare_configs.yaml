@@ -1,4 +1,82 @@
 organizationId: __ORG_ID__  # placeholder; rewritten by bootstrap.sh to the real org id
-# No data-source-compare templates ship for the jmeter profile. Add jmeter
-# dashboard compare configs here if needed.
-items: []
+
+# Generic response-time thresholds for the per-workload performance dashboards.
+#
+# Perfana creates one dashboard per workload (performance-test-metrics-<workload>),
+# so an exact dashboardUid would need one stanza per workload -- 36 of them in the
+# reference deployment, and a new workload silently gets no threshold. These entries
+# use regex matching (perfana >= 0.2.95.35) so one stanza covers every current and
+# future workload dashboard.
+#
+# Why regex and not a wildcard (omitted dashboardUid): panel ids are only stable
+# *within* this dashboard family. Panel 101 is "Transaction RT Avg" here but
+# "Average Pause Durations end of minor GC" on spring-boot-kubernetes-jvm-g1gc-mimir,
+# so a wildcard would classify unrelated panels. Precedence is exact > regex >
+# wildcard, so an exact-uid entry elsewhere in this file still wins.
+#
+# absThreshold is a delta against the control group in the panel's own unit -- these
+# panels report ms -- not a fixed ceiling. ADAPT applies it as
+# control_stat_value + absThreshold, so it suppresses regressions whose absolute
+# movement is below the value even when the percentage change is large. The numbers
+# below are starting points: tune per environment, and note tails need more headroom
+# than the mean.
+items:
+  # --- Transactions -------------------------------------------------------------
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 101
+    panelTitle: Transaction RT Avg
+    metricClassification: RED_duration
+    higherIsBetter: false
+    absThreshold: 50
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 102
+    panelTitle: Transaction RT P90
+    metricClassification: RED_duration
+    higherIsBetter: false
+    absThreshold: 100
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 103
+    panelTitle: Transaction RT P95
+    metricClassification: RED_duration
+    higherIsBetter: false
+    absThreshold: 150
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 104
+    panelTitle: Transaction RT P99
+    metricClassification: RED_duration
+    higherIsBetter: false
+    absThreshold: 250
+
+  # --- Requests -----------------------------------------------------------------
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 201
+    panelTitle: Request RT Avg
+    metricClassification: RED_duration
+    higherIsBetter: false
+    absThreshold: 50
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 202
+    panelTitle: Request RT P90
+    metricClassification: RED_duration
+    higherIsBetter: false
+    absThreshold: 100
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 203
+    panelTitle: Request RT P95
+    metricClassification: RED_duration
+    higherIsBetter: false
+    absThreshold: 150
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 204
+    panelTitle: Request RT P99
+    metricClassification: RED_duration
+    higherIsBetter: false
+    absThreshold: 250
