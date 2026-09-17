@@ -25,6 +25,14 @@ organizationId: __ORG_ID__  # placeholder; rewritten by bootstrap.sh to the real
 # The error-rate panels report % on a 0-100 scale, so absThreshold 1 is one
 # percentage point. Observed means sit near 0.2-0.5%, so this suppresses the
 # small absolute moves that would otherwise trip the 15% percentage threshold.
+#
+# The Dynatrace host entries match on panelTitle (perfana >= 0.2.95.37) rather than
+# panelId. Perfana generates a distinct panel id per host dashboard -- 28 dashboards,
+# 28 different ids for "CPU Usage" -- and those ids differ per deployment and change
+# as hosts are added, so a panelId here would be neither portable nor durable.
+# CPU Usage and Memory Usage carry no unit in ds_adapt_results but are percentages
+# on a 0-100 scale (observed 3.7-100 and 22.9-96.1), so absThreshold 5 is five
+# percentage points.
 items:
   - dashboardUid: '^performance-test-metrics-'
     regex: true
@@ -54,3 +62,17 @@ items:
     metricClassification: RED_errors
     higherIsBetter: false
     absThreshold: 1
+
+  # --- Dynatrace hosts ----------------------------------------------------------
+  - dashboardUid: '^dynatrace-'
+    regex: true
+    panelTitle: CPU Usage
+    metricClassification: USE_utilization
+    higherIsBetter: false
+    absThreshold: 5
+  - dashboardUid: '^dynatrace-'
+    regex: true
+    panelTitle: Memory Usage
+    metricClassification: USE_utilization
+    higherIsBetter: false
+    absThreshold: 5
