@@ -28,7 +28,7 @@ items:
     panelTitle: Transaction RT Avg
     metricClassification: RED_duration
     higherIsBetter: false
-    absThreshold: 50
+    absThreshold: 25
   - dashboardUid: '^performance-test-metrics-'
     regex: true
     panelId: 102
@@ -58,7 +58,7 @@ items:
     panelTitle: Request RT Avg
     metricClassification: RED_duration
     higherIsBetter: false
-    absThreshold: 50
+    absThreshold: 25
   - dashboardUid: '^performance-test-metrics-'
     regex: true
     panelId: 202
