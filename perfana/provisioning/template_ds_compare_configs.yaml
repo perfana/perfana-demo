@@ -63,6 +63,26 @@ items:
     higherIsBetter: false
     absThreshold: 1
 
+  # --- Concurrency --------------------------------------------------------------
+  # Panel 108 is "Transaction Concurrency" only within this dashboard family; it is
+  # "HTTP connection pool route max default" on spring-boot-kubernetes-httpconpool-mimir,
+  # which the uid pattern excludes. Observed means are 0.11 (transactions) and 0.03
+  # (requests), so 0.1 is a coarse floor that will suppress most relative movement.
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 108
+    panelTitle: Transaction Concurrency
+    metricClassification: RED_duration
+    higherIsBetter: false
+    absThreshold: 0.1
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 219
+    panelTitle: Request Concurrency
+    metricClassification: RED_duration
+    higherIsBetter: false
+    absThreshold: 0.1
+
   # --- Dynatrace hosts ----------------------------------------------------------
   - dashboardUid: '^dynatrace-'
     regex: true
