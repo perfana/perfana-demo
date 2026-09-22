@@ -709,6 +709,54 @@ watches. To remove it entirely:
 DROP SCHEMA monitoring CASCADE;
 ```
 
+### 9.10 Expose the Perfana API to other hosts (optional)
+
+Needed when something off the server calls the API directly — `perfana-cli` or
+`perfana-java-client` on a remote load generator, or a CI job posting test-run results.
+Not needed for the UI, which the browser reaches on `4001`.
+
+`docker-compose.yml` already binds `3001` on all interfaces, so only the host side is missing.
+
+> ⚠️ The API authenticates with bearer API keys over plain HTTP. Scope the rule to the hosts
+> that need it; do not open it to the whole network.
+
+**In mirrored mode** (`networkingMode=mirrored` in `.wslconfig`, [step 5](#5-allocate-resources-to-wsl2-wslconfig) —
+what this deployment uses) the container's `0.0.0.0` bind is already on the server's LAN IP, so a
+firewall rule is all it takes. PowerShell, as Administrator:
+
+```powershell
+New-NetFirewallRule -DisplayName "Perfana API 3001" -Direction Inbound `
+  -Protocol TCP -LocalPort 3001 -Action Allow `
+  -RemoteAddress 10.0.0.0/24       # <-- restrict to your load generator / CI subnet
+```
+
+**In NAT mode** (the WSL2 default, if you have not set `networkingMode=mirrored`) the bind lives on
+the WSL VM's private IP and needs a portproxy as well as the firewall rule:
+
+```powershell
+# resolve the WSL VM's current IP, then forward the host's 3001 to it
+$wslIp = (wsl hostname -I).Trim().Split()[0]
+netsh interface portproxy add v4tov4 `
+  listenaddress=0.0.0.0 listenport=3001 `
+  connectaddress=$wslIp connectport=3001
+
+netsh interface portproxy show v4tov4        # verify the rule is present
+```
+
+> The WSL VM's IP changes on every reboot in NAT mode, so this rule breaks each time and has to be
+> deleted and re-added (`netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=3001`).
+> That is exactly why this deployment specifies `networkingMode=mirrored` — prefer fixing `.wslconfig`
+> over scripting the portproxy on boot.
+
+**Verify from another host:**
+
+```powershell
+Test-NetConnection <THIS-SERVER-IP> -Port 3001        # TcpTestSucceeded : True
+curl.exe http://<THIS-SERVER-IP>:3001/api/health      # {"status":"ok",...}
+```
+
+---
+
 ---
 
 ## 10. Access Perfana
