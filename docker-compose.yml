@@ -53,6 +53,26 @@ services:
       # PostgreSQL 14+; the image is pg15.
       - "-c"
       - "client_connection_check_interval=10000"
+      #
+      # Log the blocking PID and its query whenever a statement waits longer than
+      # deadlock_timeout for a lock. On 2026-09-28 an analysis took 247 s, 238.6 s of it
+      # one `DELETE FROM ds_metrics WHERE test_run_id = $1` waiting on a lock: that
+      # statement has no time predicate, so it takes RowExclusive on every chunk of the
+      # hypertable rather than the run's own, and a compress_chunk, the columnstore
+      # policy, drop_chunks or any DDL on any unrelated chunk blocks it. The tell was
+      # duration uncorrelated with row count -- 238,643 ms for 32,698 rows against
+      # 3,255 ms for 228,557 rows an hour earlier, with worker and API both idle.
+      # perfana PR #638 bounds that wait at 30 s and names the statement, but neither it
+      # nor the worker/API logs can identify the HOLDER. This is the only thing that can,
+      # and it costs nothing while nothing waits.
+      - "-c"
+      - "log_lock_waits=on"
+      # Doubles as the threshold before a lock wait is logged, which is the only reason
+      # it is set here -- 1s is already the PostgreSQL default (boot_val 1000 ms), so this
+      # line changes no behaviour today. It is explicit so that raising deadlock_timeout
+      # later, for deadlock-detection reasons, cannot silently coarsen the logging above.
+      - "-c"
+      - "deadlock_timeout=1s"
       - "-c"
       - "shared_buffers=4GB"
       - "-c"
