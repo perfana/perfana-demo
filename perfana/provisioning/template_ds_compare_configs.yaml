@@ -63,6 +63,35 @@ items:
     higherIsBetter: false
     absThreshold: 1
 
+  # --- Throughput ---------------------------------------------------------------
+  # Panels 107/206 are "Transaction/Request Throughput" only within this dashboard
+  # family, same caveat as everywhere else in this file.
+  #
+  # higherIsBetter is TRUE here, unlike every other entry: a throughput DROP is the
+  # regression. ADAPT needs that direction or it would flag a rise and pass a fall.
+  # This matches Perfana's own default for these two panels
+  # (apps/worker/src/constants/performance-metrics.ts: RED_rate, higherIsBetter true).
+  #
+  # absThreshold is in the panel's own unit -- txn/s and req/s. Observed per-metric
+  # means here span 0.02-94.6 (transactions) and 0.02-445.1 (requests) and average
+  # under 1/s, so 1 is a coarse floor: it suppresses relative movement on the many
+  # low-rate transactions while leaving the high-volume ones detectable. Same
+  # reasoning as the 0.1 on the concurrency panels below.
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 107
+    panelTitle: Transaction Throughput
+    metricClassification: RED_rate
+    higherIsBetter: true
+    absThreshold: 1
+  - dashboardUid: '^performance-test-metrics-'
+    regex: true
+    panelId: 206
+    panelTitle: Request Throughput
+    metricClassification: RED_rate
+    higherIsBetter: true
+    absThreshold: 1
+
   # --- Concurrency --------------------------------------------------------------
   # Panel 108 is "Transaction Concurrency" only within this dashboard family; it is
   # "HTTP connection pool route max default" on spring-boot-kubernetes-httpconpool-mimir,
