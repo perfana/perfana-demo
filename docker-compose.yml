@@ -45,8 +45,36 @@ services:
       # runs through them quickly -- monitoring.pg_samples alone carries 172 chunks --
       # and exhausting it fails the statement with "out of shared memory / You might
       # need to increase max_locks_per_transaction". Costs shared memory at startup only.
+      #
+      # This is a POOLED budget, not a per-transaction cap: a single backend may exceed
+      # max_locks_per_transaction while the shared table has room. Measured 2026-10-16 on
+      # pg18.6-ts2.30.2 with this value at 256, a four-table run query (requests_raw +
+      # transactions + requests_error + ds_metrics, filtered on test_run_id only) took
+      # 417 relation locks in one backend and completed without error. So the failure
+      # mode is concurrency x chunks against the pool, not one query crossing 256.
+      #
+      # Measured lock cost: ~11 relation locks per chunk on a single hypertable
+      # (136 locks / 12 chunks), ~9.1 across the four tables above (417 / 46) -- each
+      # chunk brings its compressed twin and the indexes on both. perfana migration 1815
+      # takes transactions and requests_error to 1-day chunks, joining ds_metrics and
+      # requests_raw from 1804, so four hypertables accumulate ~365 chunks a year and no
+      # raw hypertable has a retention policy to bound that. A year out, one four-table
+      # run query is ~13,000 locks; at 256 the 128,000-entry pool allows ~9 of them
+      # concurrently, at 1024 the 512,000-entry pool allows ~39.
+      #
+      # 1024 is headroom past a year against unbounded chunk growth, NOT relief from an
+      # imminent limit: at today's 46 chunks the peak above is 0.3% of the pool. Costs
+      # ~65 MB of shared memory over the ~21 MB that 256 used (at an estimated ~168 B
+      # per entry, unmeasured) -- check the WSL VM's memory= in .wslconfig before
+      # restarting, because Postgres fails to START if it cannot get the segment.
+      # Verify after a restart:
+      #   SELECT current_setting('max_locks_per_transaction')::bigint
+      #          * (current_setting('max_connections')::bigint
+      #             + current_setting('max_prepared_transactions')::bigint);
+      # Expect 512000. The root-cause fix is a time predicate on those queries
+      # (136 -> 21 locks, measured), scoped as perfana issue #674.
       - "-c"
-      - "max_locks_per_transaction=256"
+      - "max_locks_per_transaction=1024"
       # Without this a backend only notices the client is gone when it next writes to
       # the socket, so a long analytical query whose caller has already disconnected
       # runs to completion holding its snapshot. 10 s polling lets it abort instead.
