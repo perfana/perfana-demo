@@ -13,21 +13,26 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# Container runtime. Podman by default; override to run the same scripts under
+# Docker:  CONTAINER_CLI=docker COMPOSE="docker compose" ./start.sh
+CONTAINER_CLI=(${CONTAINER_CLI:-podman})
+COMPOSE=(${COMPOSE:-podman compose})
+
 if [[ ! -f .env ]]; then
   echo "ERROR: .env not found." >&2
   exit 1
 fi
 
 echo "[1/3] Pulling images..."
-docker compose pull
+"${COMPOSE[@]}" pull
 
 echo "[2/3] Running database migrations..."
-docker compose up -d postgres valkey
-if ! docker compose run --rm perfana-migration; then
-  echo "WARNING: migration runner exited non-zero. Check: docker compose logs perfana-migration" >&2
+"${COMPOSE[@]}" up -d postgres valkey
+if ! "${COMPOSE[@]}" run --rm perfana-migration; then
+  echo "WARNING: migration runner exited non-zero. Check: podman compose logs perfana-migration" >&2
 fi
 
 echo "[3/3] Recreating services..."
-docker compose up -d
+"${COMPOSE[@]}" up -d
 
-echo "Done. Verify: docker compose ps"
+echo "Done. Verify: podman compose ps"

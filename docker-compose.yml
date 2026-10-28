@@ -168,7 +168,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/home/postgres/pgdata
-      - ./database/init:/docker-entrypoint-initdb.d/
+      - ./database/init:/docker-entrypoint-initdb.d/:z
     networks:
       - perfana
     healthcheck:
@@ -200,8 +200,8 @@ services:
     ports:
       - "6432:6432"
     volumes:
-      - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
-      - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+      - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro,z
+      - ./pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro,z
     networks:
       - perfana
     restart: unless-stopped
@@ -225,7 +225,7 @@ services:
     ports:
       - "${LIBREDB_PORT:-3005}:3000"
     volumes:
-      - ./libredb/seed-connections.yaml:/app/config/seed-connections.yaml:ro
+      - ./libredb/seed-connections.yaml:/app/config/seed-connections.yaml:ro,z
       - libredb-data:/app/data
     networks:
       - perfana
@@ -260,7 +260,7 @@ services:
       - "8080:8080"
     volumes:
       - keycloak_data:/opt/keycloak/data
-      - ./keycloak/realms:/opt/keycloak/data/import
+      - ./keycloak/realms:/opt/keycloak/data/import:z
     networks:
       - perfana
     depends_on:
@@ -315,7 +315,10 @@ services:
       # Everything else stays at the image default (denied).
       POST: "0"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Podman's Docker-compatible API socket. Rootful by default; for a rootless
+      # install set PODMAN_SOCKET=/run/user/$UID/podman/podman.sock in .env.
+      # Enable it first: systemctl enable --now podman.socket
+      - ${PODMAN_SOCKET:-/run/podman/podman.sock}:/var/run/docker.sock:ro
     networks:
       - perfana
     restart: unless-stopped
@@ -427,7 +430,7 @@ services:
       # Admin SUT export/import (admin-only; exports SUT data to a downloadable file)
       SUT_TRANSFER_ENABLED: "true"
     volumes:
-      - ./perfana/provisioning:/data/provisioning:ro
+      - ./perfana/provisioning:/data/provisioning:ro,z
     depends_on:
       docker-socket-proxy:
         condition: service_started
@@ -503,6 +506,9 @@ services:
   perfana-grafana-sync:
     image: perfana/perfana-grafana-sync:0.2.97.35
     container_name: perfana-grafana-sync
+    # Exists only to talk to Grafana, so it shares Grafana's profile.
+    profiles:
+      - grafana
     networks:
       - perfana
     environment:
@@ -610,6 +616,11 @@ services:
   grafana:
     image: grafana/grafana:12.4
     container_name: perfana-grafana
+    # Optional. Perfana runs without it; you then lose the metric panels, the
+    # dashboard snapshots in reports and everything perfana-grafana-sync does.
+    # Enable with COMPOSE_PROFILES=grafana in .env, or `--profile grafana`.
+    profiles:
+      - grafana
     ports:
       - "${GRAFANA_PORT:-3100}:3000"
     environment:
@@ -641,9 +652,9 @@ services:
       GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: "contains(groups[*], 'perfana-admins') && 'Admin' || contains(groups[*], 'perfana-users') && 'Editor' || 'Viewer'"
     volumes:
       - grafana-storage:/var/lib/grafana
-      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini:z
+      - ./grafana/provisioning:/etc/grafana/provisioning:z
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:z
     networks:
       - perfana
     depends_on:
@@ -671,7 +682,7 @@ services:
       PGDATABASE: perfana
       PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
     volumes:
-      - ./monitoring:/monitoring:ro
+      - ./monitoring:/monitoring:ro,z
     entrypoint: ["bash", "/monitoring/redis-sampler.sh"]
     networks:
       - perfana
@@ -699,7 +710,7 @@ services:
       PGDATABASE: perfana
       PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
     volumes:
-      - ./monitoring:/monitoring:ro
+      - ./monitoring:/monitoring:ro,z
     entrypoint: ["bash", "/monitoring/docker-sampler.sh"]
     networks:
       - perfana

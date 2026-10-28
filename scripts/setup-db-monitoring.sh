@@ -9,14 +9,19 @@
 # has, so no exporter and no Prometheus are involved. Dashboard: "PostgreSQL health".
 set -euo pipefail
 
+# Container runtime. Podman by default; override to run the same scripts under
+# Docker:  CONTAINER_CLI=docker COMPOSE="docker compose" ./start.sh
+CONTAINER_CLI=(${CONTAINER_CLI:-podman})
+COMPOSE=(${COMPOSE:-podman compose})
+
 cd "$(dirname "$0")/.."
 
-if ! docker compose ps postgres --status running --quiet | grep -q .; then
+if ! "${COMPOSE[@]}" ps postgres --status running --quiet | grep -q .; then
   echo "postgres is not running — start the stack first (./start.sh)" >&2
   exit 1
 fi
 
-PSQL=(docker compose exec -T postgres
+PSQL=("${COMPOSE[@]}" exec -T postgres
       psql -U "${POSTGRES_USER:-perfana}" -d "${POSTGRES_DB:-perfana}" -v ON_ERROR_STOP=1)
 
 # Worker budget. TimescaleDB background workers and parallel query workers both come out
@@ -27,7 +32,7 @@ PSQL=(docker compose exec -T postgres
 # would suffer the same fate.
 #
 # docker-compose.yml passes this on the command line, which covers a fresh deployment. An
-# existing container keeps the Cmd it was created with, and `docker compose restart` will
+# existing container keeps the Cmd it was created with, and `podman compose restart` will
 # not change that -- so set it in postgresql.auto.conf as well, where it lives in pgdata
 # and survives any restart method or image upgrade.
 NEEDED=32
@@ -38,7 +43,7 @@ if [ "${CURRENT:-0}" -lt "$NEEDED" ]; then
   "${PSQL[@]}" -c "ALTER SYSTEM SET max_worker_processes = $NEEDED" > /dev/null
   echo
   echo "  !! max_worker_processes only takes effect after a PostgreSQL restart:"
-  echo "         docker compose up -d postgres"
+  echo "         podman compose up -d postgres"
   echo "     Until then, background jobs may still fail to start a worker."
   echo
 else
@@ -46,12 +51,12 @@ else
 fi
 
 echo "Applying monitoring/pg-monitoring.sql ..."
-docker compose exec -T postgres \
+"${COMPOSE[@]}" exec -T postgres \
   psql -U "${POSTGRES_USER:-perfana}" -d "${POSTGRES_DB:-perfana}" -v ON_ERROR_STOP=1 \
   < monitoring/pg-monitoring.sql > /dev/null
 
 echo
-docker compose exec -T postgres \
+"${COMPOSE[@]}" exec -T postgres \
   psql -U "${POSTGRES_USER:-perfana}" -d "${POSTGRES_DB:-perfana}" -c "
     SELECT proc_name AS sampler, schedule_interval, next_start
     FROM timescaledb_information.jobs

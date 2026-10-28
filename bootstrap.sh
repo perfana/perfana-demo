@@ -21,6 +21,15 @@
 set -uo pipefail
 cd "$(dirname "$0")"
 
+# Container runtime. Podman by default; override to run the same scripts under
+# Docker:  CONTAINER_CLI=docker COMPOSE="docker compose" ./start.sh
+CONTAINER_CLI=(${CONTAINER_CLI:-podman})
+COMPOSE=(${COMPOSE:-podman compose})
+
+# Grafana is optional (the "grafana" compose profile). Steps 2, 6 and the
+# Grafana wait below are skipped when it is not deployed.
+grafana_enabled() { [[ ",${COMPOSE_PROFILES:-}," == *,grafana,* ]]; }
+
 [[ -f .env ]] || { echo "ERROR: .env not found." >&2; exit 1; }
 set -a; . ./.env; set +a
 
@@ -43,7 +52,7 @@ export NO_PROXY="$no_proxy"
 KC_LOCAL="http://localhost:8080"
 API_LOCAL="http://localhost:3001"
 GRAFANA_LOCAL="http://localhost:${GRAFANA_PORT}"
-KC_EXEC=(docker exec perfana-keycloak /opt/keycloak/bin/kcadm.sh)
+KC_EXEC=("${CONTAINER_CLI[@]}" exec perfana-keycloak /opt/keycloak/bin/kcadm.sh)
 
 command -v jq >/dev/null || { echo "ERROR: jq is required. Install it (sudo apt-get install -y jq)." >&2; exit 1; }
 
@@ -90,7 +99,8 @@ if [[ -n "$web_uuid" ]]; then
     -s "webOrigins=[\"$SCHEME://$HOST:$WEB_PORT\",\"http://localhost:$WEB_PORT\"]" >/dev/null 2>&1 \
     && echo "        perfana-web client updated" || echo "        WARNING: perfana-web update failed"
 fi
-graf_uuid="$(client_uuid grafana)"
+graf_uuid=""
+if grafana_enabled; then graf_uuid="$(client_uuid grafana)"; fi
 if [[ -n "$graf_uuid" ]]; then
   "${KC_EXEC[@]}" update "clients/$graf_uuid" -r "$REALM" \
     -s "redirectUris=[\"$SCHEME://$HOST:$GRAFANA_PORT/*\",\"http://localhost:$GRAFANA_PORT/*\"]" \
@@ -99,7 +109,11 @@ if [[ -n "$graf_uuid" ]]; then
 fi
 
 # Realm CSP: allow framing Grafana + the web app from the public host
-csp="frame-src 'self' $SCHEME://$HOST:$GRAFANA_PORT $SCHEME://$HOST:$WEB_PORT; frame-ancestors 'self' $SCHEME://$HOST:$GRAFANA_PORT $SCHEME://$HOST:$WEB_PORT; object-src 'none';"
+if grafana_enabled; then
+  csp="frame-src 'self' $SCHEME://$HOST:$GRAFANA_PORT $SCHEME://$HOST:$WEB_PORT; frame-ancestors 'self' $SCHEME://$HOST:$GRAFANA_PORT $SCHEME://$HOST:$WEB_PORT; object-src 'none';"
+else
+  csp="frame-src 'self' $SCHEME://$HOST:$WEB_PORT; frame-ancestors 'self' $SCHEME://$HOST:$WEB_PORT; object-src 'none';"
+fi
 "${KC_EXEC[@]}" update realms/"$REALM" \
   -s "browserSecurityHeaders.contentSecurityPolicy=$csp" >/dev/null 2>&1 \
   && echo "    - Realm CSP updated" || echo "    - WARNING: could not update realm CSP"
@@ -126,7 +140,7 @@ fi
 
 echo "==> Waiting for services"
 wait_for "$API_LOCAL/api/health" "Perfana API" 60
-wait_for "$GRAFANA_LOCAL/api/health" "Grafana" 30
+grafana_enabled && wait_for "$GRAFANA_LOCAL/api/health" "Grafana" 30
 
 get_token() {
   curl -sf "$KC_LOCAL/realms/$REALM/protocol/openid-connect/token" \
@@ -173,49 +187,53 @@ if [[ -n "$ORG_ID" ]]; then
            perfana/provisioning/profile_grafana_dashboards.yaml perfana/provisioning/template_ds_compare_configs.yaml; do
     [[ -f "$f" ]] && sed -i.bak "s|^organizationId:.*|organizationId: ${ORG_ID}|" "$f" && rm -f "$f.bak"
   done
-  docker exec perfana-postgres psql -U perfana -d perfana -v ON_ERROR_STOP=1 -c "
+  "${CONTAINER_CLI[@]}" exec perfana-postgres psql -U perfana -d perfana -v ON_ERROR_STOP=1 -c "
       UPDATE profiles                                SET organization_id='${ORG_ID}'::uuid WHERE organization_id<>'${ORG_ID}'::uuid;
       UPDATE profile_benchmarks                      SET organization_id='${ORG_ID}'::uuid WHERE organization_id<>'${ORG_ID}'::uuid;
       UPDATE profile_grafana_dashboards              SET organization_id='${ORG_ID}'::uuid WHERE organization_id<>'${ORG_ID}'::uuid;
       UPDATE provisioned_template_ds_compare_configs SET organization_id='${ORG_ID}'::uuid WHERE organization_id<>'${ORG_ID}'::uuid;
     " >/dev/null 2>&1 && echo "        provisioned rows reattached"
-  docker compose restart perfana-api >/dev/null 2>&1 || true
+  "${COMPOSE[@]}" restart perfana-api >/dev/null 2>&1 || true
   wait_for "$API_LOCAL/api/health" "Perfana API" 60
   TOKEN="$(get_token)"   # refresh: token now carries org membership
 
-  # 6. Grafana service account + register instance in Perfana
-  echo "    - Creating Grafana service-account token"
-  sa_id="$(curl -s -X POST "$GRAFANA_LOCAL/api/serviceaccounts" \
-    -u "${GRAFANA_ADMIN_USER:-perfana}:${GRAFANA_ADMIN_PASSWORD}" \
-    -H 'Content-Type: application/json' -d '{"name":"perfana","role":"Admin"}' | jq -r '.id // empty')"
-  [[ -z "$sa_id" ]] && sa_id="$(curl -sf "$GRAFANA_LOCAL/api/serviceaccounts/search" \
-    -u "${GRAFANA_ADMIN_USER:-perfana}:${GRAFANA_ADMIN_PASSWORD}" \
-    | jq -r '.serviceAccounts[]? | select(.name=="perfana") | .id' 2>/dev/null | head -1)"
-  GRAFANA_TOKEN=""
-  if [[ -n "$sa_id" ]]; then
-    GRAFANA_TOKEN="$(curl -s -X POST "$GRAFANA_LOCAL/api/serviceaccounts/$sa_id/tokens" \
+  if grafana_enabled; then
+    # 6. Grafana service account + register instance in Perfana
+    echo "    - Creating Grafana service-account token"
+    sa_id="$(curl -s -X POST "$GRAFANA_LOCAL/api/serviceaccounts" \
       -u "${GRAFANA_ADMIN_USER:-perfana}:${GRAFANA_ADMIN_PASSWORD}" \
-      -H 'Content-Type: application/json' -d "{\"name\":\"perfana-$(date +%s 2>/dev/null || echo token)\"}" \
-      | jq -r '.key // empty')"
-  fi
-  [[ -n "$GRAFANA_TOKEN" ]] && echo "        token created" || echo "        WARNING: no Grafana token (registering without key)"
+      -H 'Content-Type: application/json' -d '{"name":"perfana","role":"Admin"}' | jq -r '.id // empty')"
+    [[ -z "$sa_id" ]] && sa_id="$(curl -sf "$GRAFANA_LOCAL/api/serviceaccounts/search" \
+      -u "${GRAFANA_ADMIN_USER:-perfana}:${GRAFANA_ADMIN_PASSWORD}" \
+      | jq -r '.serviceAccounts[]? | select(.name=="perfana") | .id' 2>/dev/null | head -1)"
+    GRAFANA_TOKEN=""
+    if [[ -n "$sa_id" ]]; then
+      GRAFANA_TOKEN="$(curl -s -X POST "$GRAFANA_LOCAL/api/serviceaccounts/$sa_id/tokens" \
+        -u "${GRAFANA_ADMIN_USER:-perfana}:${GRAFANA_ADMIN_PASSWORD}" \
+        -H 'Content-Type: application/json' -d "{\"name\":\"perfana-$(date +%s 2>/dev/null || echo token)\"}" \
+        | jq -r '.key // empty')"
+    fi
+    [[ -n "$GRAFANA_TOKEN" ]] && echo "        token created" || echo "        WARNING: no Grafana token (registering without key)"
 
-  echo "    - Registering Grafana instance in Perfana"
-  existing="$(curl -sf "$API_LOCAL/api/grafana-instances" -H "Authorization: Bearer $TOKEN" | jq -r '.[0].id // empty')"
-  if [[ -z "$existing" ]]; then
-    curl -sf -X POST "$API_LOCAL/api/grafana-instances" -H "Authorization: Bearer $TOKEN" \
-      -H 'Content-Type: application/json' -d "{
-        \"label\":\"Grafana\",
-        \"clientUrl\":\"$SCHEME://$HOST:$GRAFANA_PORT\",
-        \"serverUrl\":\"http://grafana:3000\",
-        \"orgId\":\"1\",
-        \"apiKey\":\"${GRAFANA_TOKEN}\",
-        \"organizationId\":\"$ORG_ID\"
-      }" >/dev/null 2>&1 && echo "        registered" || echo "        WARNING: could not register Grafana"
-  elif [[ -n "$GRAFANA_TOKEN" ]]; then
-    curl -sf -X PATCH "$API_LOCAL/api/grafana-instances/$existing" -H "Authorization: Bearer $TOKEN" \
-      -H 'Content-Type: application/json' -d "{\"apiKey\":\"$GRAFANA_TOKEN\"}" >/dev/null 2>&1 \
-      && echo "        updated existing instance" || echo "        instance exists (key unchanged)"
+    echo "    - Registering Grafana instance in Perfana"
+    existing="$(curl -sf "$API_LOCAL/api/grafana-instances" -H "Authorization: Bearer $TOKEN" | jq -r '.[0].id // empty')"
+    if [[ -z "$existing" ]]; then
+      curl -sf -X POST "$API_LOCAL/api/grafana-instances" -H "Authorization: Bearer $TOKEN" \
+        -H 'Content-Type: application/json' -d "{
+          \"label\":\"Grafana\",
+          \"clientUrl\":\"$SCHEME://$HOST:$GRAFANA_PORT\",
+          \"serverUrl\":\"http://grafana:3000\",
+          \"orgId\":\"1\",
+          \"apiKey\":\"${GRAFANA_TOKEN}\",
+          \"organizationId\":\"$ORG_ID\"
+        }" >/dev/null 2>&1 && echo "        registered" || echo "        WARNING: could not register Grafana"
+    elif [[ -n "$GRAFANA_TOKEN" ]]; then
+      curl -sf -X PATCH "$API_LOCAL/api/grafana-instances/$existing" -H "Authorization: Bearer $TOKEN" \
+        -H 'Content-Type: application/json' -d "{\"apiKey\":\"$GRAFANA_TOKEN\"}" >/dev/null 2>&1 \
+        && echo "        updated existing instance" || echo "        instance exists (key unchanged)"
+    fi
+  else
+    echo "    - Skipping Grafana setup (grafana profile not enabled)"
   fi
 
   # 7. Perfana API key (for load generators submitting results)
@@ -228,7 +246,7 @@ echo
 echo "=================================================================="
 echo " Bootstrap complete."
 echo "   Perfana UI : $SCHEME://$HOST:$WEB_PORT   (login: $PERFANA_USER)"
-echo "   Grafana    : $SCHEME://$HOST:$GRAFANA_PORT"
+grafana_enabled && echo "   Grafana    : $SCHEME://$HOST:$GRAFANA_PORT"
 if [[ -n "${API_KEY:-}" ]]; then
   echo
   echo "   Perfana API key (store securely - shown once):"

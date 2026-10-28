@@ -11,11 +11,16 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# Container runtime. Podman by default; override to run the same scripts under
+# Docker:  CONTAINER_CLI=docker COMPOSE="docker compose" ./start.sh
+CONTAINER_CLI=(${CONTAINER_CLI:-podman})
+COMPOSE=(${COMPOSE:-podman compose})
+
 if [[ "${1:-}" == "--volumes" ]]; then
   echo "WARNING: this deletes ALL Perfana data volumes (postgres, keycloak, grafana, valkey)."
   read -r -p "Type 'DELETE' to confirm: " confirm
   [[ "$confirm" == "DELETE" ]] || { echo "Aborted."; exit 1; }
-  docker compose down --volumes
+  "${COMPOSE[@]}" down --volumes
 else
-  docker compose down
+  "${COMPOSE[@]}" down
 fi
