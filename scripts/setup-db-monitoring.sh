@@ -12,7 +12,7 @@ set -euo pipefail
 # Container runtime. Podman by default; override to run the same scripts under
 # Docker:  CONTAINER_CLI=docker COMPOSE="docker compose" ./start.sh
 CONTAINER_CLI=(${CONTAINER_CLI:-podman})
-COMPOSE=(${COMPOSE:-podman-compose})
+COMPOSE=(${COMPOSE:-podman compose})
 
 cd "$(dirname "$0")/.."
 
@@ -32,7 +32,7 @@ PSQL=("${COMPOSE[@]}" exec -T postgres
 # would suffer the same fate.
 #
 # docker-compose.yml passes this on the command line, which covers a fresh deployment. An
-# existing container keeps the Cmd it was created with, and `podman-compose restart` will
+# existing container keeps the Cmd it was created with, and `podman compose restart` will
 # not change that -- so set it in postgresql.auto.conf as well, where it lives in pgdata
 # and survives any restart method or image upgrade.
 NEEDED=32
@@ -43,7 +43,7 @@ if [ "${CURRENT:-0}" -lt "$NEEDED" ]; then
   "${PSQL[@]}" -c "ALTER SYSTEM SET max_worker_processes = $NEEDED" > /dev/null
   echo
   echo "  !! max_worker_processes only takes effect after a PostgreSQL restart:"
-  echo "         podman-compose up -d postgres"
+  echo "         podman compose up -d postgres"
   echo "     Until then, background jobs may still fail to start a worker."
   echo
 else

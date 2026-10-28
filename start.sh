@@ -17,18 +17,18 @@ cd "$(dirname "$0")"
 # Container runtime. Podman by default; override to run the same scripts under
 # Docker:  CONTAINER_CLI=docker COMPOSE="docker compose" ./start.sh
 CONTAINER_CLI=(${CONTAINER_CLI:-podman})
-COMPOSE=(${COMPOSE:-podman-compose})
+COMPOSE=(${COMPOSE:-podman compose})
 
 # Grafana is optional (see docker-compose.yml). It is in the "grafana" compose
 # profile, switched on with COMPOSE_PROFILES=grafana in .env.
 grafana_enabled() { [[ ",${COMPOSE_PROFILES:-}," == *,grafana,* ]]; }
 
-# Wait for a container's healthcheck to pass. Ordering is enforced HERE, not by
-# `depends_on: condition: service_healthy` in the compose file: podman-compose
-# does not implement compose's healthcheck conditions the way Compose v2 does,
-# and the migration runner must not start against a PostgreSQL that is still
-# initialising. The depends_on blocks stay in docker-compose.yml for runtimes
-# that do honour them, but nothing here relies on that.
+# Wait for a container's healthcheck to pass. Ordering is enforced HERE rather
+# than left to `depends_on: condition: service_healthy`: Compose v2 honours that
+# condition, but podman-compose does not, and the migration runner must never
+# start against a PostgreSQL that is still initialising. The depends_on blocks
+# stay in docker-compose.yml, so this is belt-and-braces on v2 and load-bearing
+# on anything else.
 wait_healthy() { # container label tries
   local name="$1" label="$2" tries="${3:-40}" state
   echo "       Waiting for $label..."
@@ -45,20 +45,20 @@ if [[ ! -f .env ]]; then
   echo "ERROR: .env not found. Copy .env.example to .env and fill it in first." >&2
   exit 1
 fi
-# Load .env for the messages below (podman-compose reads .env on its own).
+# Load .env for the messages below (the compose provider reads .env on its own).
 set -a; . ./.env; set +a
 
 echo "[1/4] Starting database and queue..."
 "${COMPOSE[@]}" up -d postgres valkey
 wait_healthy perfana-postgres "PostgreSQL" 40 || {
   echo "ERROR: PostgreSQL did not become healthy; refusing to run migrations." >&2
-  echo "       Check: podman-compose logs postgres" >&2
+  echo "       Check: podman compose logs postgres" >&2
   exit 1
 }
 
 echo "[2/4] Running database migrations..."
 if ! "${COMPOSE[@]}" run --rm perfana-migration; then
-  echo "WARNING: migration runner exited non-zero. Check: podman-compose logs perfana-migration" >&2
+  echo "WARNING: migration runner exited non-zero. Check: podman compose logs perfana-migration" >&2
 fi
 
 echo "[3/4] Starting Keycloak (waiting until healthy)..."
@@ -84,8 +84,8 @@ Perfana is starting. Endpoints (browser-facing):
   Perfana API:  ${scheme}://${host}:3001/api/health
   Keycloak   :  ${scheme}://${host}:8080
 
-Status : podman-compose ps
-Logs   : podman-compose logs -f <service>
+Status : podman compose ps
+Logs   : podman compose logs -f <service>
 First-run integration setup: ./bootstrap.sh
 EOF
 

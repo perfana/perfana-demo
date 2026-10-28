@@ -16,7 +16,7 @@ cd "$(dirname "$0")"
 # Container runtime. Podman by default; override to run the same scripts under
 # Docker:  CONTAINER_CLI=docker COMPOSE="docker compose" ./start.sh
 CONTAINER_CLI=(${CONTAINER_CLI:-podman})
-COMPOSE=(${COMPOSE:-podman-compose})
+COMPOSE=(${COMPOSE:-podman compose})
 
 # Grafana is optional (the "grafana" compose profile in docker-compose.yml).
 grafana_enabled() { [[ ",${COMPOSE_PROFILES:-}," == *,grafana,* ]]; }
@@ -38,7 +38,7 @@ for ((i = 1; i <= 40; i++)); do
   sleep 8
 done
 if ! "${COMPOSE[@]}" run --rm perfana-migration; then
-  echo "WARNING: migration runner exited non-zero. Check: podman-compose logs perfana-migration" >&2
+  echo "WARNING: migration runner exited non-zero. Check: podman compose logs perfana-migration" >&2
 fi
 
 echo "[3/3] Recreating services..."
@@ -52,4 +52,4 @@ if grafana_enabled; then
   "${COMPOSE[@]}" --profile grafana up -d grafana perfana-grafana-sync
 fi
 
-echo "Done. Verify: podman-compose ps"
+echo "Done. Verify: podman compose ps"
