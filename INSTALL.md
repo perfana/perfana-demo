@@ -8,7 +8,7 @@ requirements and runs ADAPT regression analysis without it. Turn it on when you 
 panels, dashboard snapshots in reports, and dashboard sync.
 
 The deployment is accessed on the server itself over `http://localhost`. Exposing it to the
-network and adding TLS are out of scope; see [11. Access Perfana](#11-access-perfana).
+network and adding TLS are out of scope; see [12. Access Perfana](#12-access-perfana).
 
 ## Table of contents
 
@@ -22,12 +22,13 @@ network and adding TLS are out of scope; see [11. Access Perfana](#11-access-per
 8. [Enable Grafana (optional)](#8-enable-grafana-optional)
 9. [Expose PostgreSQL and PgBouncer (optional)](#9-expose-postgresql-and-pgbouncer-optional)
 10. [Database monitoring (recommended)](#10-database-monitoring-recommended)
-11. [Access Perfana](#11-access-perfana)
-12. [Start automatically on boot](#12-start-automatically-on-boot)
-13. [Backups](#13-backups)
-14. [Upgrades](#14-upgrades)
-15. [Troubleshooting](#15-troubleshooting)
-16. [Load images offline (air-gapped)](#16-load-images-offline-air-gapped)
+11. [Install perfana-cli on the load generators](#11-install-perfana-cli-on-the-load-generators)
+12. [Access Perfana](#12-access-perfana)
+13. [Start automatically on boot](#13-start-automatically-on-boot)
+14. [Backups](#14-backups)
+15. [Upgrades](#15-upgrades)
+16. [Troubleshooting](#16-troubleshooting)
+17. [Load images offline (air-gapped)](#17-load-images-offline-air-gapped)
 
 ---
 
@@ -82,7 +83,7 @@ the profile later without reinstalling — see [step 8](#8-enable-grafana-option
   that carries `podman` and `podman-compose`/`docker-compose`.
 - `sudo` rights.
 - Outbound access to `quay.io`, `docker.io` and (if you enable Grafana) the Grafana plugin CDN —
-  or an internal mirror, or the offline bundle from [step 16](#16-load-images-offline-air-gapped).
+  or an internal mirror, or the offline bundle from [step 17](#17-load-images-offline-air-gapped).
 
 **Recommended resources:**
 
@@ -296,7 +297,7 @@ Edit `.env` and set **every** value. The important ones:
 ### 7.3 Start the stack
 
 > **Air-gapped?** Load the images first — see
-> [16. Load images offline](#16-load-images-offline-air-gapped) — then continue here.
+> [17. Load images offline](#17-load-images-offline-air-gapped) — then continue here.
 
 ```bash
 ./start.sh
@@ -404,7 +405,87 @@ socket from [step 4](#4-enable-the-podman-api-socket).
 
 ---
 
-## 11. Access Perfana
+## 11. Install perfana-cli on the load generators
+
+`perfana-cli` orchestrates a test run: it opens the run in Perfana, starts the load generator,
+sends keep-alives while it runs, and closes the run so the analysis pipeline picks it up. It
+does **not** belong on the Perfana server — install it wherever the load generator runs
+(JMeter, k6, Gatling).
+
+Source and releases: <https://github.com/perfana/perfana-cli>
+
+### Install from the GitHub release
+
+Binaries are published per platform as `perfana-cli_<version>_<os>_<arch>.tar.gz`. Pick a
+version rather than `latest` so a rebuilt generator gets the same binary:
+
+```bash
+PERFANA_CLI_VERSION=0.7.4
+ARCH=$([ "$(uname -m)" = "aarch64" ] && echo arm64 || echo amd64)
+
+curl -fsSL -o /tmp/perfana-cli.tar.gz \
+  "https://github.com/perfana/perfana-cli/releases/download/v${PERFANA_CLI_VERSION}/perfana-cli_${PERFANA_CLI_VERSION}_linux_${ARCH}.tar.gz"
+
+sudo tar -xzf /tmp/perfana-cli.tar.gz -C /usr/local/bin perfana-cli
+rm /tmp/perfana-cli.tar.gz
+
+perfana-cli --version
+```
+
+Verify the download against the release's `checksums.txt` if your policy requires it:
+
+```bash
+curl -fsSL -O "https://github.com/perfana/perfana-cli/releases/download/v${PERFANA_CLI_VERSION}/checksums.txt"
+sha256sum -c checksums.txt --ignore-missing
+```
+
+Air-gapped: fetch the tarball and `checksums.txt` on a connected machine, copy both across, and
+run the same `tar -xzf`. The binary is static — no runtime dependencies beyond glibc.
+
+### Configure it
+
+`perfana-cli` reads a YAML config, by default `$HOME/.perfana-cli/perfana.yaml`, overridable
+with `--config`. The two things it needs from this deployment:
+
+| Setting | Value |
+|---|---|
+| `perfana.apiUrl` | `http://<perfana-host>:3001` — the API, reachable from the generator. |
+| `perfana.apiKey` | The key `bootstrap.sh` printed in [step 7.4](#74-run-first-run-bootstrap-once). |
+
+A minimal config:
+
+```yaml
+perfana:
+  apiKey: "<the key bootstrap.sh printed>"
+  apiUrl: "http://perfana.internal:3001"
+  appUrl: "http://perfana.internal:4001"
+test:
+  systemUnderTest: "MyApp"
+  environment: "acc"
+  workload: "loadTest"
+  version: "1.0.0"
+```
+
+The API key is shown once, at bootstrap. Lost it? Create a new one in the Perfana UI under
+**Settings → API keys**.
+
+Reaching port 3001 from another host needs a firewall rule, the same as
+[step 9](#9-expose-postgresql-and-pgbouncer-optional):
+
+```bash
+sudo firewall-cmd --permanent --add-port=3001/tcp
+sudo firewall-cmd --reload
+```
+
+Run a test with:
+
+```bash
+perfana-cli run start --config ./perfana.yaml --version 1.0.0
+```
+
+---
+
+## 12. Access Perfana
 
 Accessed over plain HTTP at `http://localhost`, from the server itself (console or SSH port
 forward):
@@ -429,7 +510,7 @@ ssh -L 4001:localhost:4001 -L 3001:localhost:3001 -L 8080:localhost:8080 user@se
 
 ---
 
-## 12. Start automatically on boot
+## 13. Start automatically on boot
 
 Two pieces: the compose `restart: unless-stopped` policy brings containers back once Podman is
 running, and a systemd unit brings the stack up after a reboot.
@@ -470,7 +551,7 @@ make sure `loginctl enable-linger "$USER"` is set — otherwise the stack stops 
 
 ---
 
-## 13. Backups
+## 14. Backups
 
 The database is the only thing you cannot recreate.
 
@@ -489,7 +570,7 @@ Schedule it from cron or a systemd timer, writing to a mounted network share. Al
 
 ---
 
-## 14. Upgrades
+## 15. Upgrades
 
 1. Back up the database (above).
 2. Edit `docker-compose.yml` and bump the pinned `perfana/*` image tags. Keep
@@ -506,7 +587,7 @@ Schedule it from cron or a systemd timer, writing to a mounted network share. Al
 
 ---
 
-## 15. Troubleshooting
+## 16. Troubleshooting
 
 | Symptom | Check |
 |---|---|
@@ -537,7 +618,7 @@ podman stats                          # live CPU/RAM per container
 
 ---
 
-## 16. Load images offline (air-gapped)
+## 17. Load images offline (air-gapped)
 
 If the server has no registry access, load pre-saved image archives before `./start.sh`:
 
