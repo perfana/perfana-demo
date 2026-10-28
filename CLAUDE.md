@@ -4,7 +4,8 @@ Guidance for Claude Code when working in this repository.
 
 ## What this repository is
 
-A **production deployment** of Perfana for **RHEL 9**, running on **Podman** with Compose v2.
+A **production deployment** of Perfana for **RHEL 9**, running on **Podman** with
+`podman-compose`. Docker Compose v2 is deliberately not used.
 It is configuration only — there is no application source code here; the Perfana services run
 from pinned `perfana/*` images.
 
@@ -46,8 +47,10 @@ through `COMPOSE_PROFILES` in `.env`.
 
 ## Working conventions
 
-- Keep `docker-compose.yml` parseable: `podman compose config -q` (with required env set) must
+- Keep `docker-compose.yml` parseable: `podman-compose config` (with required env set) must
   pass.
+- Never rely on `depends_on: condition: service_healthy` for correctness — `podman-compose`
+  does not implement it. `start.sh` / `update.sh` poll `podman inspect` for health instead.
 - Scripts call the runtime through the `CONTAINER_CLI` / `COMPOSE` arrays defined at the top of
   each one, never `docker`/`podman` literally, so the same scripts run under either runtime.
 - A new service that needs Grafana goes in the `grafana` profile, and any script step touching

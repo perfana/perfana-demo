@@ -1,8 +1,8 @@
 # Perfana on RHEL 9 with Podman
 
 A **production** Perfana deployment for **Red Hat Enterprise Linux 9**, running on **Podman**
-with Compose. It deploys the core Perfana platform; **Grafana is optional** and sits behind a
-compose profile.
+with `podman-compose` — Docker Compose v2 is deliberately not used. It deploys the core Perfana
+platform; **Grafana is optional** and sits behind a compose profile.
 
 > **Full instructions: [INSTALL.md](INSTALL.md).** This README is the short version.
 
@@ -26,7 +26,7 @@ from a Grafana data source, or embed dashboard snapshots in a report.
 
 ## Quick start
 
-Assuming Podman, Compose v2 and the Podman socket are set up per [INSTALL.md](INSTALL.md):
+Assuming Podman, `podman-compose` and the Podman socket are set up per [INSTALL.md](INSTALL.md):
 
 ```bash
 cp .env.example .env       # then edit: set the secrets, PODMAN_SOCKET, COMPOSE_PROFILES
@@ -35,6 +35,10 @@ cp .env.example .env       # then edit: set the secrets, PODMAN_SOCKET, COMPOSE_
 ```
 
 Browse to `http://localhost:4001` (`PERFANA_WEB_PORT`) on the server.
+
+> Always bring the stack up with `./start.sh`, not a bare `podman-compose up -d`: the script
+> waits for PostgreSQL to report healthy before running migrations, which `podman-compose`
+> does not do on its own.
 
 To add Grafana later, set `COMPOSE_PROFILES=grafana` in `.env` and re-run `./start.sh` and
 `./bootstrap.sh`. Nothing needs reinstalling.
@@ -83,7 +87,7 @@ distributed JMeter generators does not exhaust `max_connections`.
 
 ```bash
 ./scripts/mint-pgbouncer-userlist.sh          # once, and after any password change
-podman compose --profile pgbouncer up -d pgbouncer
+podman-compose --profile pgbouncer up -d pgbouncer
 ```
 
 It listens on `6432` and needs its own firewall rule. Full steps in [INSTALL.md](INSTALL.md)
@@ -113,5 +117,5 @@ way, so the history is already there when you enable it.
 - Keycloak — `http://localhost:8080`
 - Grafana — `http://localhost:3100` (only with the `grafana` profile)
 
-See [INSTALL.md](INSTALL.md) for prerequisites, Podman and Compose installation, the Podman API
+See [INSTALL.md](INSTALL.md) for prerequisites, Podman and `podman-compose` installation, the Podman API
 socket, SELinux, systemd auto-start, backups, upgrades, air-gapped installs and troubleshooting.

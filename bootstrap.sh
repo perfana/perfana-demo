@@ -24,7 +24,7 @@ cd "$(dirname "$0")"
 # Container runtime. Podman by default; override to run the same scripts under
 # Docker:  CONTAINER_CLI=docker COMPOSE="docker compose" ./start.sh
 CONTAINER_CLI=(${CONTAINER_CLI:-podman})
-COMPOSE=(${COMPOSE:-podman compose})
+COMPOSE=(${COMPOSE:-podman-compose})
 
 # Grafana is optional (the "grafana" compose profile). Steps 2, 6 and the
 # Grafana wait below are skipped when it is not deployed.

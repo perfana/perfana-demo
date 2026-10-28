@@ -14,7 +14,7 @@ cd "$(dirname "$0")"
 # Container runtime. Podman by default; override to run the same scripts under
 # Docker:  CONTAINER_CLI=docker COMPOSE="docker compose" ./start.sh
 CONTAINER_CLI=(${CONTAINER_CLI:-podman})
-COMPOSE=(${COMPOSE:-podman compose})
+COMPOSE=(${COMPOSE:-podman-compose})
 
 if [[ "${1:-}" == "--volumes" ]]; then
   echo "WARNING: this deletes ALL Perfana data volumes (postgres, keycloak, grafana, valkey)."

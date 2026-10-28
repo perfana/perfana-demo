@@ -103,31 +103,38 @@ above 1024, so a rootless install can publish them.
 ## 3. Install Podman and Compose
 
 ```bash
-sudo dnf -y install podman podman-docker
+sudo dnf -y install podman podman-compose
 ```
 
-`podman-docker` provides a `docker` shim. It is not required — the scripts in this repository
-call `podman` directly — but it keeps third-party tooling working.
-
-For Compose, prefer the **real `docker-compose` v2 binary** driven by `podman compose`. The
-Python `podman-compose` also works, but its handling of `depends_on: condition: service_healthy`
-has historically been unreliable, and this stack depends on it in fourteen places (the migration
-runner must not start before PostgreSQL is healthy).
+If `podman-compose` is not in your enabled repositories, it lives in EPEL:
 
 ```bash
-# docker-compose v2, as a Podman-driven provider
-sudo dnf -y install docker-compose-plugin 2>/dev/null || {
-  ARCH=$(uname -m)
-  sudo curl -fsSL -o /usr/local/bin/docker-compose \
-    "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-${ARCH}"
-  sudo chmod +x /usr/local/bin/docker-compose
-}
-
-podman compose version     # must report a Compose v2 version
+sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+sudo dnf -y install podman-compose
 ```
 
-> If `podman compose` reports that it is using `podman-compose`, install the v2 binary above —
-> Podman prefers it once it is on `PATH`.
+Optionally add `podman-docker`, which provides a `docker` shim. Nothing here needs it — the
+scripts call `podman` directly — but it keeps third-party tooling working.
+
+```bash
+podman --version
+podman-compose --version
+```
+
+> **Docker Compose v2 is deliberately not used.** `podman-compose` is the supported Compose
+> implementation on RHEL and avoids pulling a Docker-distributed binary into the estate.
+
+### Startup ordering
+
+`podman-compose` does not implement compose's `depends_on: condition: service_healthy`
+semantics the way Docker Compose v2 does. That matters in exactly one place — the migration
+runner must not start against a PostgreSQL that is still initialising — so **`start.sh` and
+`update.sh` wait for health themselves**, by polling `podman inspect`, before running
+migrations. The `depends_on` blocks stay in `docker-compose.yml` for runtimes that honour them,
+but correctness does not depend on that.
+
+The practical consequence: bring the stack up with `./start.sh`, not with a bare
+`podman-compose up -d`.
 
 ---
 
@@ -268,8 +275,8 @@ This starts PostgreSQL and Valkey, runs migrations, waits for Keycloak to become
 imported), then starts the Perfana services — and Grafana only if its profile is active.
 
 ```bash
-podman compose ps
-podman compose logs -f perfana-api
+podman-compose ps
+podman-compose logs -f perfana-api
 ```
 
 ### 7.4 Run first-run bootstrap (once)
@@ -287,7 +294,7 @@ API key** for load generators — stored nowhere else, so copy it out.
 
 ```bash
 curl -fsS http://localhost:3001/api/health && echo OK    # API
-podman compose ps                                        # all services Up/healthy
+podman-compose ps                                        # all services Up/healthy
 ```
 
 Then browse to `http://localhost:4001` and log in as `PERFANA_ADMIN_USER`.
@@ -324,7 +331,7 @@ Only Perfana's own TimescaleDB data source is provisioned. Add Prometheus, Loki,
 the rest from the Grafana UI; they must be reachable from inside the container network.
 
 To remove Grafana again, clear `COMPOSE_PROFILES` and run
-`podman compose --profile grafana down grafana perfana-grafana-sync`. The `grafana-storage`
+`podman-compose --profile grafana down grafana perfana-grafana-sync`. The `grafana-storage`
 volume survives, so re-enabling keeps your dashboards.
 
 ---
@@ -345,7 +352,7 @@ pointing them at PostgreSQL directly:
 ```bash
 ./scripts/mint-pgbouncer-userlist.sh      # writes pgbouncer/userlist.txt from .env
 # add pgbouncer to COMPOSE_PROFILES in .env, then:
-podman compose --profile pgbouncer up -d pgbouncer
+podman-compose --profile pgbouncer up -d pgbouncer
 sudo firewall-cmd --permanent --add-port=6432/tcp && sudo firewall-cmd --reload
 ```
 
@@ -475,8 +482,8 @@ Schedule it from cron or a systemd timer, writing to a mounted network share. Al
 | `start.sh`: "POSTGRES_PASSWORD must be set" | `.env` missing or value empty. Every `${VAR:?}` variable is required. |
 | Container cannot read a config file; `Permission denied` | SELinux. Confirm the mount carries `:z` in `docker-compose.yml` and check `sudo ausearch -m avc -ts recent`. |
 | Admin log viewer empty / API logs "fetch failed" to docker-socket-proxy | Podman socket not enabled or wrong `PODMAN_SOCKET`. See [step 4](#4-enable-the-podman-api-socket). |
-| Migrations run before PostgreSQL is ready | `podman compose version` reports `podman-compose` instead of Compose v2. Install the v2 binary ([step 3](#3-install-podman-and-compose)). |
-| Keycloak never becomes healthy | `podman compose logs keycloak`. Usually the DB isn't ready, or the realm failed to import. |
+| Migrations fail against a database that is still starting | You brought the stack up with a bare `podman-compose up -d` instead of `./start.sh`. Only the scripts wait for PostgreSQL to report healthy ([step 3](#3-install-podman-and-compose)). |
+| Keycloak never becomes healthy | `podman-compose logs keycloak`. Usually the DB isn't ready, or the realm failed to import. |
 | Login redirects fail / "invalid redirect URI" | Browse via `http://localhost`, not the machine name. If you changed `PERFANA_HOST`, run `./stop.sh && ./start.sh && ./bootstrap.sh`. |
 | API rejects tokens ("issuer not accepted") | Reach Keycloak on `http://localhost:8080`. The API accepts `keycloak:8080`, `localhost:8080` and `<PERFANA_HOST>:8080`. |
 | Grafana panels empty / "datasource not found" | Only `postgres-timescaledb` is provisioned. Add the others from the Grafana UI. |
@@ -488,9 +495,9 @@ Schedule it from cron or a systemd timer, writing to a mounted network share. Al
 Useful commands:
 
 ```bash
-podman compose ps                     # status of all services
-podman compose logs -f <service>      # follow a service's logs
-podman compose restart <service>      # restart one service
+podman-compose ps                     # status of all services
+podman-compose logs -f <service>      # follow a service's logs
+podman-compose restart <service>      # restart one service
 podman stats                          # live CPU/RAM per container
 ./stop.sh                             # stop (keep data)
 ./stop.sh --volumes                   # stop and DELETE all data (destructive)
