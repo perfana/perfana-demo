@@ -483,6 +483,103 @@ Run a test with:
 perfana-cli run start --config ./perfana.yaml --version 1.0.0
 ```
 
+### Example: a k6 run with the customised image
+
+The k6 image built from perfana-demo's `k6/Dockerfile` carries the pieces a run needs: the
+`perfana-timescaledb` output, the Kafka and IBM MQ extensions, and `perfana-cli` itself. So the
+generator does not need a local k6 or CLI install — everything happens inside the container.
+
+Lay out a directory on the generator:
+
+```
+/srv/loadtest/
+├── perfana.yaml
+├── run-k6.sh
+└── src/test/k6/my-test.js
+```
+
+`perfana.yaml` — the CLI config *and* the run definition. `events.onStartTest` is what actually
+launches k6; `onKeepAlive` tells Perfana the run is still alive; `onAbort` kills it on Ctrl-C or
+a failed keep-alive:
+
+```yaml
+perfana:
+  apiKey: "<the key bootstrap.sh printed>"
+  apiUrl: "http://perfana.internal:3001"
+  appUrl: "http://perfana.internal:4001"
+
+test:
+  systemUnderTest: "MyApp"
+  environment: "acc"
+  workload: "loadTest"
+  version: "${SUT_VERSION}"
+  # Trim ramp-up and ramp-down out of the analysis window.
+  analysisStartOffset: "PT1M"
+  analysisEndOffset: "PT30S"
+  constantLoadTime: "PT5M"
+  tags:
+    - "k6"
+
+scheduler:
+  enabled: true
+  failOnError: true
+  keepAliveIntervalSeconds: 30
+
+events:
+  - name: "k6-load"
+    type: command
+    continueOnKeepAliveParticipant: true
+    commands:
+      onStartTest: "/tests/run-k6.sh __testRunId__"
+      onKeepAlive: "pgrep -f 'k6 run' >/dev/null || exit 1"
+      onAbort: "pkill -f 'k6 run'"
+```
+
+`run-k6.sh` — `__testRunId__` is substituted by the CLI and has to reach both the output and the
+script, so the rows can be tied to the run:
+
+```bash
+#!/bin/sh
+TEST_RUN_ID="$1"
+
+: "${TIMESCALE_URL:=postgres://perfana:CHANGEME@perfana.internal:5432/perfana?sslmode=prefer}"
+
+# Fork-only, and off by default: fills requests_error with request/response
+# headers and bodies, and keeps the real URL of a request that sets a name tag.
+export K6_HTTP_ERROR_DATA=true
+export K6_HTTP_REQUEST_URL=true
+
+k6 run /tests/src/test/k6/my-test.js \
+  -e TEST_RUN_ID="$TEST_RUN_ID" \
+  --tag testRunId="$TEST_RUN_ID" \
+  --out "perfana-timescaledb=url=${TIMESCALE_URL},runId=${TEST_RUN_ID},systemUnderTest=MyApp,testEnvironment=acc,scenarioName=MyScenario,location=generator-1,nodeName=$(hostname)"
+```
+
+Start the run — the CLI is the container's entrypoint command, and the directory is mounted at
+`/tests`:
+
+```bash
+podman run --rm \
+  -v /srv/loadtest:/tests:ro,z \
+  -e SUT_VERSION=1.0.0 \
+  <registry>/perfana-k6:<tag> \
+    perfana-cli run start --config /tests/perfana.yaml --version 1.0.0
+```
+
+The CLI opens the run in Perfana, runs `run-k6.sh`, keeps the run alive, closes it, waits for
+the analysis, and prints the verdict plus a link to the test run. It exits non-zero when an SLO
+or the ADAPT comparison fails, which is what makes it usable as a pipeline gate.
+
+Two things specific to this image:
+
+- It is **linux/amd64 only** (the IBM MQ client, see [step 1](#1-what-gets-deployed)). Add
+  `--platform linux/amd64` on an arm64 generator.
+- The `:z` on the mount is the SELinux relabel, the same reason as everywhere else here.
+
+Writing straight to port 5432 is fine for one generator. For a fleet opening many short-lived
+connections, point `TIMESCALE_URL` at PgBouncer on 6432 instead — see
+[step 9](#9-expose-postgresql-and-pgbouncer-optional).
+
 ---
 
 ## 12. Access Perfana
