@@ -38,7 +38,7 @@ network and adding TLS are out of scope; see [12. Access Perfana](#12-access-per
 
 | Service | Image | Purpose | Browser port |
 |---|---|---|---|
-| `postgres` | timescale/timescaledb-ha:pg18 | Perfana + Keycloak databases | 5432 (LAN, opt-in) |
+| `postgres` | timescale/timescaledb-ha:pg18.6-ts2.30.2 | Perfana + Keycloak databases | 5432 (LAN, opt-in) |
 | `valkey` | valkey/valkey:8-alpine | Job queue (Redis-compatible) | 6379 (loopback) |
 | `keycloak` | quay.io/keycloak/keycloak:24.0 | Authentication / SSO | 8080 |
 | `perfana-migration` | perfana/perfana-migration | One-shot DB migrations | — |
@@ -47,7 +47,7 @@ network and adding TLS are out of scope; see [12. Access Perfana](#12-access-per
 | `perfana-worker` | perfana/perfana-worker | Analysis pipeline | — |
 | `perfana-report` | perfana/perfana-report | PDF reports | — |
 | `docker-socket-proxy` | tecnativa/docker-socket-proxy | Read-only API gateway for the admin log viewer | — |
-| `valkey-monitor`, `docker-monitor` | timescale/timescaledb-ha:pg18 | Samplers for the health dashboards | — |
+| `valkey-monitor`, `docker-monitor` | timescale/timescaledb-ha:pg18.6-ts2.30.2 | Samplers for the health dashboards | — |
 
 **Optional** — activated through `COMPOSE_PROFILES` in `.env`:
 
@@ -685,7 +685,7 @@ Schedule it from cron or a systemd timer, writing to a mounted network share. Al
 ### Upgrading PostgreSQL itself
 
 `update.sh` does **not** cover a PostgreSQL major-version change, and this
-deployment just had one: the image moved from `timescaledb-ha:pg15` to `pg18`.
+deployment just had one: the image moved from `timescaledb-ha:pg15` to `pg18.6-ts2.30.2`.
 PostgreSQL cannot read a data directory written by a different major version —
 an existing volume meets the new image with:
 
