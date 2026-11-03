@@ -7,7 +7,7 @@ services:
   # PostgreSQL with the TimescaleDB extension. Holds the Perfana, Keycloak and
   # Grafana databases (the latter two created by ./database/init on first boot).
   postgres:
-    image: timescale/timescaledb-ha:pg15
+    image: timescale/timescaledb-ha:pg18
     container_name: perfana-postgres
     environment:
       POSTGRES_DB: perfana
@@ -78,7 +78,7 @@ services:
       # Without this a backend only notices the client is gone when it next writes to
       # the socket, so a long analytical query whose caller has already disconnected
       # runs to completion holding its snapshot. 10 s polling lets it abort instead.
-      # PostgreSQL 14+; the image is pg15.
+      # PostgreSQL 14+; the image is pg18.
       - "-c"
       - "client_connection_check_interval=10000"
       #
@@ -667,7 +667,7 @@ services:
   # that is already pulled — it carries python3 and psql, so this needs no extra image and
   # no package install. Needs the monitoring schema: scripts/setup-db-monitoring.sh.
   valkey-monitor:
-    image: timescale/timescaledb-ha:pg15
+    image: timescale/timescaledb-ha:pg18
     container_name: perfana-valkey-monitor
     depends_on:
       postgres:
@@ -695,7 +695,7 @@ services:
   # in it. Needs the monitoring schema: scripts/setup-db-monitoring.sh.
   # Dashboard: "Docker resources".
   docker-monitor:
-    image: timescale/timescaledb-ha:pg15
+    image: timescale/timescaledb-ha:pg18
     container_name: perfana-docker-monitor
     depends_on:
       postgres:

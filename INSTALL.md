@@ -38,7 +38,7 @@ network and adding TLS are out of scope; see [12. Access Perfana](#12-access-per
 
 | Service | Image | Purpose | Browser port |
 |---|---|---|---|
-| `postgres` | timescale/timescaledb-ha:pg15 | Perfana + Keycloak databases | 5432 (LAN, opt-in) |
+| `postgres` | timescale/timescaledb-ha:pg18 | Perfana + Keycloak databases | 5432 (LAN, opt-in) |
 | `valkey` | valkey/valkey:8-alpine | Job queue (Redis-compatible) | 6379 (loopback) |
 | `keycloak` | quay.io/keycloak/keycloak:24.0 | Authentication / SSO | 8080 |
 | `perfana-migration` | perfana/perfana-migration | One-shot DB migrations | — |
@@ -47,7 +47,7 @@ network and adding TLS are out of scope; see [12. Access Perfana](#12-access-per
 | `perfana-worker` | perfana/perfana-worker | Analysis pipeline | — |
 | `perfana-report` | perfana/perfana-report | PDF reports | — |
 | `docker-socket-proxy` | tecnativa/docker-socket-proxy | Read-only API gateway for the admin log viewer | — |
-| `valkey-monitor`, `docker-monitor` | timescale/timescaledb-ha:pg15 | Samplers for the health dashboards | — |
+| `valkey-monitor`, `docker-monitor` | timescale/timescaledb-ha:pg18 | Samplers for the health dashboards | — |
 
 **Optional** — activated through `COMPOSE_PROFILES` in `.env`:
 
@@ -681,6 +681,41 @@ Schedule it from cron or a systemd timer, writing to a mounted network share. Al
    Pulls images, re-runs migrations, recreates changed services. The `ENCRYPTION_KEY` and all
    named volumes are preserved.
 4. Verify health as in [step 7.5](#75-verify).
+
+### Upgrading PostgreSQL itself
+
+`update.sh` does **not** cover a PostgreSQL major-version change, and this
+deployment just had one: the image moved from `timescaledb-ha:pg15` to `pg18`.
+PostgreSQL cannot read a data directory written by a different major version —
+an existing volume meets the new image with:
+
+```
+FATAL: database files are incompatible with server
+DETAIL: The data directory was initialized by PostgreSQL version 15,
+        which is not compatible with this version 18.
+```
+
+A fresh install is unaffected: the volume is empty and initialises on 18.
+
+For an existing deployment, dump and restore across the change:
+
+```bash
+# on the old image, before touching docker-compose.yml
+podman exec perfana-postgres pg_dumpall -U perfana > /mnt/backup/perfana-pg15.sql
+
+./stop.sh
+podman volume rm perfana          # destroys the pg15 data directory
+# bump the image in docker-compose.yml, then
+./start.sh
+
+cat /mnt/backup/perfana-pg15.sql | podman exec -i perfana-postgres psql -U perfana -d postgres
+```
+
+Use `pg_dumpall`, not the per-database `pg_dump -Fc` from
+[step 14](#14-backups): roles and the Keycloak database have to come across too.
+Verify the restore before deleting the dump — `./start.sh` will have run the
+Perfana migrations against an empty database, and the restore puts the real data
+back over that.
 
 ---
 
