@@ -3,6 +3,6 @@ items:
   - _id: jmeter-timescaledb-aggregate-dashboard
     profile: jmeter
     grafana: Grafana
-    dashboardName: JMeter TimescaleDB Aggregate Dashboard
+    dashboardName: TimescaleDB performance overview aggregate
     dashboardUid: jmeter-timescaledb-aggregate-dashboard
     readOnly: true

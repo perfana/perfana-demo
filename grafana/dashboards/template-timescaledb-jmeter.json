@@ -1128,7 +1128,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(bytes_in) as \"Bytes In\",\n  sum(bytes_out) as \"Bytes Out\",\n (sum(bytes_in) + sum(bytes_out)) / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) as \"Total Traffic\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  sum(bytes_in) as \"Bytes In\",\n  sum(bytes_out) as \"Bytes Out\",\n (sum(bytes_in) + sum(bytes_out)) / EXTRACT(EPOCH FROM '${cagg_suffix}'::INTERVAL) as \"Total Traffic\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
           "refId": "B",
           "sql": {
             "columns": [
@@ -1269,7 +1269,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) as \"Requests per second\",\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as \"Response times\",\n  sum(avg_connect * n) / NULLIF(sum(n), 0) as \"TCP Connect\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  sum(n)::float / EXTRACT(EPOCH FROM '${cagg_suffix}'::INTERVAL) as \"Requests per second\",\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as \"Response times\",\n  sum(avg_connect * n) / NULLIF(sum(n), 0) as \"TCP Connect\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
           "refId": "B",
           "sql": {
             "columns": [
@@ -1392,7 +1392,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  sum(n) as \"count\"\nFROM requests_error_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  sampler_name,\n  sum(n) as \"count\"\nFROM requests_error_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1571,7 +1571,7 @@
           "policy": "default",
           "query": "SELECT mean(\"responseTime\") FROM \"transactions\" WHERE (\"success\" = 'true' AND \"transactionName\"::tag =~ /^$Transactions$/) AND $timeFilter GROUP BY time(${granularity}s), \"transactionName\" fill(none)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  transaction_name,\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as avg_rt\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND \n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  transaction_name,\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as avg_rt\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND \n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1765,7 +1765,7 @@
           "policy": "default",
           "query": "SELECT (count(\"responseTime\")  / $granularity) as value FROM \"transactions\" WHERE (\"success\" = 'true') AND ( \"transactionName\"::tag =~ /^$Transactions$/) AND $timeFilter GROUP BY time(${granularity}s) fill(none)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  transaction_name,\n  sum(n)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) as count\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND \n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  transaction_name,\n  sum(n)::float / EXTRACT(EPOCH FROM '${cagg_suffix}'::INTERVAL) as count\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND \n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1958,7 +1958,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n_ok) AS \"Passed\",\n  sum(n_err) AS \"Failed\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  sum(n_ok) AS \"Passed\",\n  sum(n_err) AS \"Failed\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -2084,7 +2084,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  transaction_name,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS \"Error (%)\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1, 2\nORDER BY 1, 2;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  transaction_name,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS \"Error (%)\"\nFROM transactions_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1, 2\nORDER BY 1, 2;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -2775,7 +2775,7 @@
           "orderByTime": "ASC",
           "policy": "default",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as \"Response times\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  sampler_name,\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as \"Response times\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -2964,7 +2964,7 @@
           "policy": "default",
           "query": "SELECT (count(\"count\")  / $granularity) as value FROM \"requestsRaw\" WHERE (\"success\" = 'true') AND $timeFilter GROUP BY time(${granularity}s), \"samplerName\" fill(null)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  sum(n)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) as count\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  sampler_name,\n  sum(n)::float / EXTRACT(EPOCH FROM '${cagg_suffix}'::INTERVAL) as count\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -3157,7 +3157,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n_ok) AS \"Passed\",\n  sum(n_err) AS \"Failed\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  sum(n_ok) AS \"Passed\",\n  sum(n_err) AS \"Failed\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -3283,7 +3283,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS \"Error (%)\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1, 2\nORDER BY 1, 2;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  sampler_name,\n  ROUND(\n    sum(n_err)::numeric / NULLIF(sum(n), 0),\n    4\n  ) AS \"Error (%)\"\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND $__timeFilter(bucket)\nGROUP BY 1, 2\nORDER BY 1, 2;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -4293,7 +4293,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  location,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) as avg_rt\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND \n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  location,\n  ROUND(sum(avg_rt * n) / NULLIF(sum(n), 0)) as avg_rt\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND \n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -4454,7 +4454,7 @@
           "policy": "default",
           "query": "SELECT (count(\"count\")  / $granularity) as value FROM \"requestsRaw\" WHERE (\"success\" = 'true') AND $timeFilter GROUP BY time(${granularity}s), \"samplerName\" fill(null)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  location,\n  sum(n)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) as count\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND \n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  location,\n  sum(n)::float / EXTRACT(EPOCH FROM '${cagg_suffix}'::INTERVAL) as count\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND \n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -4640,7 +4640,7 @@
           "policy": "default",
           "query": "SELECT (count(\"count\")  / $granularity) as value FROM \"requestsRaw\" WHERE (\"success\" = 'true') AND $timeFilter GROUP BY time(${granularity}s), \"samplerName\" fill(null)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  node_name,\n  sum(n)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) as count\nFROM requests_error_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND \n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  node_name,\n  sum(n)::float / EXTRACT(EPOCH FROM '${cagg_suffix}'::INTERVAL) as count\nFROM requests_error_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' AND test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND \n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -4807,7 +4807,7 @@
     "nowDelay": "1s"
   },
   "timezone": "browser",
-  "title": "JMeter TimescaleDB Dashboard",
+  "title": "TimescaleDB performance overview",
   "uid": "jmeter-timescaledb-dashboard",
   "version": 3,
   "weekStart": ""

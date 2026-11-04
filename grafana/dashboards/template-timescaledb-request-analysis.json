@@ -1033,7 +1033,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\ntime_bucket('$__interval', bucket) AS time,\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as avg\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment'\n  AND sampler_name = '$sampler_name'\n  AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\ntime_bucket('${cagg_suffix}', bucket) AS time,\n  sum(avg_rt * n) / NULLIF(sum(n), 0) as avg\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment'\n  AND sampler_name = '$sampler_name'\n  AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
           "refId": "B",
           "sql": {
             "columns": [
@@ -1204,7 +1204,7 @@
           "policy": "default",
           "query": "SELECT (count(\"responseCode\")  / $granularity) as value FROM \"requestsRaw\" WHERE (\"success\" = 'true') AND \"samplerName\" =~ /${URL}/ AND $timeFilter GROUP BY time(${granularity}s), \"samplerName\" fill(none)",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sum(n)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) as total,\n  sum(n_err)::float / EXTRACT(EPOCH FROM '$__interval'::INTERVAL) AS Error\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND sampler_name = '$sampler_name'\n  AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  sum(n)::float / EXTRACT(EPOCH FROM '${cagg_suffix}'::INTERVAL) as total,\n  sum(n_err)::float / EXTRACT(EPOCH FROM '${cagg_suffix}'::INTERVAL) AS Error\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) \n  AND sampler_name = '$sampler_name'\n  AND $__timeFilter(bucket)\nGROUP BY 1\nORDER BY 1;",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1526,7 +1526,7 @@
           "orderByTime": "ASC",
           "policy": "default",
           "rawQuery": true,
-          "rawSql": "SELECT\n  time_bucket('$__interval', bucket) AS time,\n  sampler_name,\n  ROUND(sum(avg_response_size * n) / NULLIF(sum(n), 0))\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      sampler_name='$sampler_name' AND\n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
+          "rawSql": "SELECT\n  time_bucket('${cagg_suffix}', bucket) AS time,\n  sampler_name,\n  ROUND(sum(avg_response_size * n) / NULLIF(sum(n), 0))\nFROM requests_raw_${cagg_suffix}\nWHERE system_under_test = '$system_under_test' and test_environment = '$test_environment' AND scenario_name IN ($scenario_name) AND\n      sampler_name='$sampler_name' AND\n      $__timeFilter(bucket)\nGROUP BY 1,2\nORDER BY 1,2;",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -2096,7 +2096,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Request analysis TimescaleDB",
+  "title": "TimescaleDB request analysis",
   "uid": "request-analysis-timescaledb",
   "version": 12
 }
