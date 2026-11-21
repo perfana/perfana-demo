@@ -332,6 +332,32 @@ When investigation data is available, recommendations should be concrete:
 
 ---
 
+{{if commentsAvailable}}
+## Team comments & investigations
+
+{{if published or human-authored stories}}
+| Investigation | Status | Author | Link |
+|---|---|---|---|
+{{for each story}}
+| {{title}} | {{published by X / AI draft · not reviewed}} | {{author}} | [open]({{link}}) |
+{{end}}
+{{end}}
+
+{{for each human root comment with a tag, grouped by tag}}
+- **{{tag}}** ({{author}}, {{card}}{{ / item}}): {{body, truncated ~200 chars}} — {{agrees with / contradicted by / not covered by}} this analysis
+{{end}}
+
+{{if writeBack succeeded}}
+### Perfana investigation
+
+[{{storyTitle}}]({{storyLink}}): AI draft, not reviewed. {{commentCount}} tagged comments posted. Review and publish it in Perfana.
+{{end}}
+
+{{if nothing}} _No comments or investigations on this run_ {{end}}
+{{end}}
+
+---
+
 ## Run trend (last {{recentRunCount}} runs)
 
 | Run | Date | Release | Result | Adapt |
