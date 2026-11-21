@@ -41,6 +41,12 @@ Use these as human context:
 
 1. **Post tagged, anchored root comments** for the analysis chain, in this order:
    `symptom` → `evidence` (one per independent source) → `ruled-out` (optional) → `root-cause` → `action`.
+   The `symptom` is the Adapt verdict (anchor `anomaly`), plus a transaction comment only if one transaction stands out.
+   Post one `evidence` comment for **every** source the report's evidence chain marks "Yes ✅":
+   config diff, Adapt, **Tempo traces** (anchor `tracing`: the trace ID, the span that
+   dominates and its share of the trace, baseline vs current), Pyroscope, Loki, infra/JVM dashboards.
+   Never fold traces into a transaction or symptom comment: the trace evidence must be its own step,
+   so the investigation opens the Distributed tracing card.
    Keep each body short (≤ ~800 chars, plain text, no markdown) and specific (numbers, trace IDs, method names).
 
    ```
@@ -57,10 +63,42 @@ Use these as human context:
    |---|---|---|
    | `{type:"transaction", name, scenario?}` | regressed transaction symptoms | `get_transaction_stats`, `get_performance_rankings` |
    | `{type:"slo", checkResultId}` | failed SLO checks | `get_check_results` |
+   | `{type:"adapt", applicationDashboardId, panelId, metricName}` | one Adapt regression (opens Anomaly detection scrolled to that row; Perfana ≥ 0.2.97.93) | the regression entry in `get_adapt_results` |
+   | `{type:"tracing", serviceName, scenario?, transaction?, sampler?}` | trace evidence (opens that service's Distributed tracing tab with the request filters set; Perfana ≥ 0.2.97.93) | the service and filters you passed to `get_slow_traces` / `get_error_traces` |
+   | `{type:"pyroscope", application, profiler, view:"single"\|"diff"}` | profiling evidence (opens that application's Pyroscope tab; `diff` = baseline vs current, needs an earlier completed run of the same workload; Perfana ≥ 0.2.97.93) | `list_connected_sources` → `pyroscope.configurations`, exactly as listed |
    | `{type:"config", key, comparedToTestRunId?}` | config-change root causes | `get_config_diff`, `get_test_run_configs` |
    | `{type:"dashboard", applicationDashboardId}` | infra/JVM/pool evidence | `get_available_metrics` |
    | `{type:"marker", time, series:[{dashboardLabel, panelId, metricName, applicationDashboardId?}], range?}` | a point/range on a metric graph | `get_available_metrics` |
-   | `{type:"card", card}` | card-level remarks (`graphs`, `performance`, `config`, `slo`) | n/a |
+   | `{type:"card", card}` | a finding from a source that has its own card (see below) | n/a |
+
+   **Anchor each comment to where its evidence lives.** In an investigation each step opens its
+   anchor as the context view, so the reader must land on the data the comment cites. A comment
+   that cites Adapt but opens Performance analysis, or one that cites Pyroscope but opens Test run
+   details, reads as broken. So:
+   - **One source per comment.** Don't combine Pyroscope + container CPU + Loki in one body; post
+     one comment per source, each with its own anchor.
+   - **Pick the anchor from the source the comment cites**, using this table:
+
+   | Comment cites | Anchor |
+   |---|---|
+   | One specific Adapt regression (a metric that regressed) | `{type:"adapt", applicationDashboardId, panelId, metricName}`, one comment per regression |
+   | The Adapt verdict, or several regressions summarised together | `{type:"card", card:"anomaly"}` (Anomaly detection) |
+   | Pyroscope / flamegraph / hotspots | `{type:"pyroscope", application, profiler, view}`: `diff` when the comment compares against baseline, else `single` |
+   | Tempo / slow traces / trace drill-down | `{type:"tracing", serviceName, scenario?, transaction?, sampler?}` with the same filters as the trace query the comment cites |
+   | Dynatrace problems | `{type:"card", card:"dynatrace"}` |
+   | Deep links | `{type:"card", card:"deep-links"}` |
+   | One transaction's RT / p95 / p99 / Apdex (`get_transaction_stats`, `compare_runs`) | `{type:"transaction", name, scenario?}` |
+   | A config or commit change, incl. a root cause in the code diff it brings in | `{type:"config", key, comparedToTestRunId}` |
+   | An SLO result, or an action to add/tighten an SLO | `{type:"slo", checkResultId}` (or `{type:"card", card:"slo"}`) |
+   | Container CPU, JVM/GC, connection pool metrics | `{type:"dashboard", applicationDashboardId}`, or a `marker` on the series at the moment it shows |
+   | Trend across runs | `{type:"card", card:"trends"}` |
+   | Loki logs, or anything without its own card | omit the anchor (Test run details) |
+
+   All valid card keys: `details, config, dashboards, anomaly, performance, slo, deep-links, events,
+   dynatrace, distributed-tracing, pyroscope, splunk, awr, report, trends, compare, graphs`.
+   Use `performance` or a transaction anchor only when the comment is about transaction stats, never
+   for Adapt findings. Before posting, check that each body's first sentence names the same source
+   its anchor opens.
 
    A `dashboardLabel` shared by two dashboards returns a 400 listing both IDs. Retry with
    `applicationDashboardId` in the series entry. On any other anchor 400, fall back to no anchor rather than failing.
@@ -108,7 +146,9 @@ Agent comments are never announced to chat tools. A published investigation is a
 |---|---|
 | Comment tools not found in preflight | Skip read and write; note "Perfana comments/investigations unavailable (requires ≥ 0.2.97.92)" |
 | 403 missing `comments:write` | Stop write-back; tell the user to enable "Allow writing comments" on the key; the report is still valid |
-| 400 anchor not found | Retry without anchor |
+| 400 on an `adapt` anchor (older Perfana, or regression not found) | Retry with `{type:"card", card:"anomaly"}` |
+| 400 on a `tracing` / `pyroscope` anchor | Retry with `{type:"card", card:"distributed-tracing"}` / `{type:"card", card:"pyroscope"}`; for `pyroscope` `diff` with no earlier run, retry with `view:"single"` first |
+| 400 anchor not found | Try the next-best anchor from the source table (e.g. `pyroscope` card → `dashboards` card), then fall back to no anchor |
 | 400 ambiguous `dashboardLabel` | Retry with `applicationDashboardId` |
 | Per-run limit reached | Stop posting; note in report |
 | Investigation link points to the wrong host | `PERFANA_WEB_URL` not set on the MCP (locally: `http://localhost:4000`) |
