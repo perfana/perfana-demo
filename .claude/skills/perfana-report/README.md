@@ -56,6 +56,14 @@ In `.claude/settings.local.json`:
 
 This grants blanket permission to all `mcp__perfana__*` tools (get_test_run, get_adapt_results, get_transaction_stats, etc.) so the skill can run without interruption.
 
+#### Comments & investigations (optional, Perfana ≥ 0.2.97.92)
+
+With a Perfana MCP that has the comment tools, the skill reads the run's comments and investigations as context.
+If you opt in, it also posts its findings as tagged comments plus an **AI draft investigation** for a human to review and publish.
+Writing needs an API key with "Allow writing comments (for an AI agent)" ticked, which adds the `comments:write` role.
+Give the key a clear description (e.g. `perfana-report agent`): that becomes the author name in the UI.
+Set `PERFANA_WEB_URL=http://localhost:4000` on the MCP so investigation links are correct.
+
 ### 2. Obsidian with Local REST API plugin (optional)
 
 Only needed if you want to write reports directly into an Obsidian vault. If you choose "local file" when running the skill, you can skip this entirely.
@@ -135,6 +143,7 @@ Each report includes:
     investigation-playbook.md           # Maps hypotheses to MCP tool calls
     report-template.md                  # Markdown report template
     obsidian-api.md                     # Obsidian Local REST API reference
+    comments-and-investigations.md      # Perfana test run comments + AI draft investigations
 ```
 
 ## Customisation
