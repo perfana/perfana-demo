@@ -699,6 +699,36 @@ services:
     networks:
       - perfana
 
+
+  # Confluence Data Center mock — what Perfana's "Publish to Confluence" talks to: space lookup,
+  # page create/update (storage format) and chart attachments. Browse what was published at
+  # http://localhost:8091/confluence/ (pages are kept in memory until the container restarts).
+  # In Perfana: Integrations -> Confluence, Deployment "Data Center / Server",
+  # URL http://host.docker.internal:8091/confluence (resolves from the API container AND your
+  # browser, so the stored page link opens), personal access token mock-token, space key PERF.
+  # Port 8091, not Confluence's usual 8090: afterburner-fe publishes 8090.
+  confluence-mock:
+    image: python:3.13-alpine
+    container_name: perfana-confluence-mock
+    environment:
+      PORT: "8091"
+      CONFLUENCE_TOKEN: mock-token
+      SPACES: PERF
+    ports:
+      - "8091:8091"
+    volumes:
+      - ./monitoring/confluence-mock.py:/app/confluence-mock.py:ro
+    command: ["python3", "/app/confluence-mock.py"]
+    networks:
+      - perfana
+    restart: unless-stopped
+    healthcheck:
+      # 127.0.0.1, not localhost: busybox wget tries ::1 first and the mock listens on IPv4 only.
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8091/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
 #######################################################################################################################
 networks:
   perfana:
